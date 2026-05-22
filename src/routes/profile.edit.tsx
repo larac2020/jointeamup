@@ -191,6 +191,40 @@ function EditProfile() {
             </div>
           </div>
 
+          <Group label={`Photo gallery (${photos.length}/4 extra)`}>
+            <div className="flex flex-wrap gap-2">
+              {photos.map((url, i) => (
+                <div key={url} className="relative h-24 w-24 overflow-hidden rounded-xl border border-border bg-muted">
+                  <img src={url} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+                  <button type="button" onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-background/80 text-foreground shadow hover:bg-destructive hover:text-destructive-foreground">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+              {photos.length < 4 && (
+                <>
+                  <input
+                    ref={photoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); e.target.value = ""; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => photoRef.current?.click()}
+                    disabled={uploadingPhoto}
+                    className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-background text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-accent disabled:opacity-50"
+                  >
+                    {uploadingPhoto ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
+                    Add
+                  </button>
+                </>
+              )}
+            </div>
+            <p className="mt-2 text-[10px] text-muted-foreground">Up to 4 extra photos appear in your scrollable gallery alongside your main photo.</p>
+          </Group>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="First name *" value={firstName} onChange={setFirstName} />
             <Field label="Nickname" value={nickname} onChange={setNickname} placeholder="Sledgehammer" />
@@ -200,6 +234,48 @@ function EditProfile() {
             <Field label="Superpower" value={superpower} onChange={setSuperpower} placeholder="Sled push" />
             <Field label="Kryptonite" value={kryptonite} onChange={setKryptonite} placeholder="Wall balls" />
           </div>
+
+          <Group label={`Bio (${bio.length}/600)`}>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value.slice(0, 600))}
+              rows={4}
+              placeholder="A couple sentences about you, your training, your goals…"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
+            />
+          </Group>
+
+          <Group label="Experience level">
+            <div className="flex flex-wrap gap-2">
+              {experienceLevels.map((lvl) => {
+                const on = experience === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setExperience(on ? "" : lvl)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
+                      on ? "bg-cool text-primary-foreground shadow-sm" : "border border-border bg-background text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {lvl}
+                  </button>
+                );
+              })}
+            </div>
+          </Group>
+
+          <Group label={`Looking for (${lookingFor.length}/280)`}>
+            <textarea
+              value={lookingFor}
+              onChange={(e) => setLookingFor(e.target.value.slice(0, 280))}
+              rows={2}
+              placeholder="Doubles partner for HYROX Berlin, mixed team, weekend training crew…"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
+            />
+          </Group>
+
+
 
 
           <Group label="Sports *">
