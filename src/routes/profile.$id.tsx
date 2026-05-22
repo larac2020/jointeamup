@@ -116,10 +116,24 @@ function Profile() {
               </div>
             )}
 
+            {a.bio && (
+              <p className="mt-6 max-w-2xl whitespace-pre-line text-sm leading-relaxed text-foreground/80">{a.bio}</p>
+            )}
+
+            {a.looking_for && (
+              <div className="mt-6 rounded-2xl border border-magenta/30 bg-magenta/5 p-4">
+                <p className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-magenta">
+                  <Target className="h-3.5 w-3.5" /> Looking for
+                </p>
+                <p className="mt-1 text-sm">{a.looking_for}</p>
+              </div>
+            )}
+
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <Card icon={Sparkles} tint="text-primary" title="Superpower" body={a.superpower ?? "—"} />
               <Card icon={Skull} tint="text-secondary" title="Kryptonite" body={a.kryptonite ?? "—"} />
             </div>
+
 
             {a.prs.length > 0 && (
               <Section title="Personal bests" icon={Trophy}>
