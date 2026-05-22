@@ -68,6 +68,9 @@ function Profile() {
               <div className="flex gap-2 pb-2">
                 {isMe ? (
                   <>
+                    <Link to="/profile/edit" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95">
+                      <Settings className="h-4 w-4" /> Edit profile
+                    </Link>
                     <Link to="/settings" className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-accent">
                       <Settings className="h-4 w-4" /> Settings
                     </Link>
