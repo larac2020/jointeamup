@@ -44,27 +44,46 @@ function Profile() {
 
   const avatar = a.avatar_url ?? fallbackAvatar(a.id);
   const myListings = myListingsQ.data ?? [];
+  const gallery = [avatar, ...(a.photos ?? [])].slice(0, 5);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="mx-auto max-w-4xl px-4 py-8">
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
-          <div className="relative h-44 bg-primary" />
-          <div className="-mt-16 px-6 pb-6 md:px-8">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div className="flex items-end gap-4">
-                <img src={avatar} alt={a.first_name} className="h-28 w-28 rounded-3xl border-4 border-card bg-muted" />
-                <div className="pb-2">
-                  <h1 className="font-display text-5xl leading-none tracking-wide">
-                    {a.first_name} {a.age ? <span className="text-muted-foreground">· {a.age}</span> : null}
-                  </h1>
-                  {a.nickname && <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-primary">"{a.nickname}"</p>}
-                  <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" /> From {a.from_location ?? "—"} · Lives in {a.lives_in ?? "—"}
-                  </p>
+          {/* Scrollable photo gallery — main + up to 4 extras */}
+          <div className="relative">
+            <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto p-2 scroll-smooth">
+              {gallery.map((url, i) => (
+                <div key={`${url}-${i}`} className="relative aspect-[4/5] w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl bg-muted sm:w-[48%] md:w-[38%]">
+                  <img src={url} alt={`${a.first_name} photo ${i + 1}`} className="h-full w-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
                 </div>
+              ))}
+            </div>
+            {gallery.length > 1 && (
+              <p className="pointer-events-none absolute right-3 top-3 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground backdrop-blur">
+                Swipe · {gallery.length} photos
+              </p>
+            )}
+          </div>
+
+          <div className="px-6 pb-6 pt-4 md:px-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h1 className="font-display text-5xl leading-none tracking-wide">
+                  {a.first_name} {a.age ? <span className="text-muted-foreground">· {a.age}</span> : null}
+                </h1>
+                {a.nickname && <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-primary">"{a.nickname}"</p>}
+                <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" /> From {a.from_location ?? "—"} · Lives in {a.lives_in ?? "—"}
+                </p>
+                {a.experience && (
+                  <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-cool/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cool">
+                    <Zap className="h-3.5 w-3.5" /> {a.experience}
+                  </p>
+                )}
               </div>
+
               <div className="flex gap-2 pb-2">
                 {isMe ? (
                   <>
