@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { updateProfile } from "@/lib/profiles.functions";
 import { experienceLevels, prPresets } from "@/lib/types";
+import { ImageCropperModal } from "@/components/ImageCropperModal";
+import { fileToDataUrl } from "@/lib/image-utils";
 
 export const Route = createFileRoute("/profile/edit")({
   head: () => ({ meta: [{ title: "Edit profile — TeamUp" }] }),
