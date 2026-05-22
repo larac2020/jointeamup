@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { updateProfile } from "@/lib/profiles.functions";
 import { experienceLevels, prPresets } from "@/lib/types";
+import { ImageCropperModal } from "@/components/ImageCropperModal";
+import { fileToDataUrl } from "@/lib/image-utils";
 
 export const Route = createFileRoute("/profile/edit")({
   head: () => ({ meta: [{ title: "Edit profile — TeamUp" }] }),
@@ -42,49 +44,44 @@ function EditProfile() {
   const fileRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
 
+  // Cropper state — when an image is picked we open the modal first.
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"avatar" | "photo" | null>(null);
+
   const [bio, setBio] = useState("");
   const [experience, setExperience] = useState("");
   const [lookingFor, setLookingFor] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
 
-  const handleAvatarUpload = async (file: File) => {
-    if (!session) return;
+  const pickFile = async (file: File, target: "avatar" | "photo") => {
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
-    setUploading(true);
+    if (file.size > 15 * 1024 * 1024) { toast.error("Max 15MB"); return; }
+    if (target === "photo" && photos.length >= 4) { toast.error("Up to 4 extra photos (5 total)"); return; }
+    const src = await fileToDataUrl(file);
+    setCropSrc(src);
+    setCropTarget(target);
+  };
+
+  const uploadBlob = async (blob: Blob, kind: "avatar" | "photo") => {
+    if (!session) return;
+    const setBusy = kind === "avatar" ? setUploading : setUploadingPhoto;
+    setBusy(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${session.user.id}/avatar-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+      const path = `${session.user.id}/${kind}-${Date.now()}.jpg`;
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
       if (error) throw error;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      setAvatarUrl(data.publicUrl);
+      if (kind === "avatar") setAvatarUrl(data.publicUrl);
+      else setPhotos((cur) => [...cur, data.publicUrl]);
       toast.success("Photo uploaded — don't forget to save");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
-      setUploading(false);
-    }
-  };
-
-  const handlePhotoUpload = async (file: File) => {
-    if (!session) return;
-    if (photos.length >= 4) { toast.error("Up to 4 extra photos (5 total)"); return; }
-    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
-    setUploadingPhoto(true);
-    try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${session.user.id}/photo-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
-      if (error) throw error;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      setPhotos([...photos, data.publicUrl]);
-      toast.success("Photo added — don't forget to save");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploadingPhoto(false);
+      setBusy(false);
+      setCropSrc(null);
+      setCropTarget(null);
     }
   };
 
@@ -177,7 +174,7 @@ function EditProfile() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f, "avatar"); e.target.value = ""; }}
               />
               <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-accent disabled:opacity-50">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
@@ -208,7 +205,7 @@ function EditProfile() {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); e.target.value = ""; }}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f, "photo"); e.target.value = ""; }}
                   />
                   <button
                     type="button"
@@ -372,6 +369,17 @@ function EditProfile() {
           </button>
         </form>
       </main>
+
+      {cropSrc && cropTarget && (
+        <ImageCropperModal
+          imageSrc={cropSrc}
+          aspect={cropTarget === "avatar" ? 1 : 4 / 5}
+          title={cropTarget === "avatar" ? "Adjust your profile photo" : "Adjust gallery photo"}
+          maxSize={cropTarget === "avatar" ? 1024 : 1600}
+          onCancel={() => { setCropSrc(null); setCropTarget(null); }}
+          onConfirm={(blob) => uploadBlob(blob, cropTarget)}
+        />
+      )}
     </div>
   );
 }
