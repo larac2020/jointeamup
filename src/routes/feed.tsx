@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Plus, Search as SearchIcon, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search as SearchIcon, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { listListings } from "@/lib/listings.functions";
@@ -61,9 +61,6 @@ function Feed() {
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-primary">Browse</p>
             <h1 className="mt-1 font-display text-5xl tracking-wide">What's open</h1>
           </div>
-          <Link to="/listings/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95">
-            <Plus className="h-4 w-4" /> Post
-          </Link>
         </div>
 
         {/* Shortcut pills */}
@@ -167,10 +164,7 @@ function EmptyState() {
   return (
     <div className="rounded-2xl border border-dashed border-border p-10 text-center">
       <p className="font-display text-2xl">Nothing matches</p>
-      <p className="mt-1 text-sm text-muted-foreground">Try adjusting your filters or post the first listing.</p>
-      <Link to="/listings/new" className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
-        <Plus className="h-4 w-4" /> Post a listing
-      </Link>
+      <p className="mt-1 text-sm text-muted-foreground">Try adjusting your filters.</p>
     </div>
   );
 }
