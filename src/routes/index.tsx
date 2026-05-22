@@ -86,12 +86,7 @@ function Landing() {
               Join the community
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </Link>
-            <Link to="/feed" className="rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-sm font-bold uppercase tracking-wider text-white backdrop-blur hover:bg-white/20">
-              Browse listings
-            </Link>
-            <Link to="/listings/new" className="rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-sm font-bold uppercase tracking-wider text-white backdrop-blur hover:bg-white/20">
-              Post a listing
-            </Link>
+          
           </div>
 
           <dl className="mt-14 grid max-w-md grid-cols-3 gap-6">
