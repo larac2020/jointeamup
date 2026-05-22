@@ -60,7 +60,8 @@ function Landing() {
             <span className="text-blaze">a race day.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg font-medium text-white/85">
-            TeamUp is the community marketplace where competition athletes resell tickets and teams find last-minute replacements. HYROX, Turf Games, DEKA, CrossFit — all in one place.
+            Can’t make your competition anymore? Need a last-minute teammate who fits your team vibe?<br />
+            TeamUp helps you connect with athletes to buy, resell, and replace teammates in sports competitions, like HYROX, TurfGames, DEKA, and more.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
