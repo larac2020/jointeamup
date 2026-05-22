@@ -29,6 +29,16 @@ export function Header() {
     queryFn: () => unreadNotifFn(),
     enabled: !!user,
   });
+  const profileQ = useQuery({
+    queryKey: ["header-profile", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("avatar_url, first_name").eq("id", user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  });
 
   useEffect(() => {
     if (!user) return;
