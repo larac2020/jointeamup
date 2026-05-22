@@ -113,12 +113,16 @@ function Onboarding() {
       sports,
       superpower,
       kryptonite,
+      bio,
+      experience,
+      gym,
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
     setSaving(true);
+    const gymTrim = gym.trim();
     const { error } = await supabase.from("profiles").update({
       first_name: firstName.trim(),
       nickname: nickname.trim() || null,
@@ -127,6 +131,9 @@ function Onboarding() {
       sports,
       superpower: superpower.trim() || null,
       kryptonite: kryptonite.trim() || null,
+      bio: bio.trim() || null,
+      experience: experience.trim() || null,
+      gyms: gymTrim ? [gymTrim] : [],
       onboarded: true,
     }).eq("id", session.user.id);
     setSaving(false);
