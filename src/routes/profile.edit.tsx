@@ -38,7 +38,14 @@ function EditProfile() {
   const [prName, setPrName] = useState("");
   const [prValue, setPrValue] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
+
+  const [bio, setBio] = useState("");
+  const [experience, setExperience] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const handleAvatarUpload = async (file: File) => {
     if (!session) return;
