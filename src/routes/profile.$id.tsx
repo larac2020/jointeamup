@@ -69,19 +69,27 @@ function Profile() {
 
           <div className="px-6 pb-6 pt-4 md:px-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="font-display text-5xl leading-none tracking-wide">
-                  {a.first_name} {a.age ? <span className="text-muted-foreground">· {a.age}</span> : null}
-                </h1>
-                {a.nickname && <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-primary">"{a.nickname}"</p>}
-                <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" /> From {a.from_location ?? "—"} · Lives in {a.lives_in ?? "—"}
-                </p>
-                {a.experience && (
-                  <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-cool/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cool">
-                    <Zap className="h-3.5 w-3.5" /> {a.experience}
+              <div className="flex items-start gap-4 md:gap-5">
+                {/* Always-visible account avatar */}
+                <img
+                  src={avatar}
+                  alt={`${a.first_name} avatar`}
+                  className="-mt-16 h-24 w-24 shrink-0 rounded-full object-cover ring-4 ring-background shadow-card md:mt-0 md:h-28 md:w-28"
+                />
+                <div>
+                  <h1 className="font-display text-5xl leading-none tracking-wide">
+                    {a.first_name} {a.age ? <span className="text-muted-foreground">· {a.age}</span> : null}
+                  </h1>
+                  {a.nickname && <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-primary">"{a.nickname}"</p>}
+                  <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5" /> From {a.from_location ?? "—"} · Lives in {a.lives_in ?? "—"}
                   </p>
-                )}
+                  {a.experience && (
+                    <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-cool/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cool">
+                      <Zap className="h-3.5 w-3.5" /> {a.experience}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-2">
