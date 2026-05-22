@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Plus, Search as SearchIcon, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search as SearchIcon, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { listListings } from "@/lib/listings.functions";
