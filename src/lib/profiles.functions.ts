@@ -54,10 +54,14 @@ const updateSchema = z.object({
   sports: z.array(z.string().min(1).max(40)).max(20),
   gyms: z.array(z.string().min(1).max(80)).max(20),
   competitions: z.array(z.string().min(1).max(120)).max(40),
-  prs: z.array(prSchema).max(20),
+  prs: z.array(prSchema).max(30),
   superpower: z.string().trim().max(80).nullable().optional(),
   kryptonite: z.string().trim().max(80).nullable().optional(),
   avatar_url: z.string().url().max(500).nullable().optional(),
+  bio: z.string().trim().max(600).nullable().optional(),
+  experience: z.string().trim().max(40).nullable().optional(),
+  looking_for: z.string().trim().max(280).nullable().optional(),
+  photos: z.array(z.string().url().max(500)).max(4),
   onboarded: z.boolean().optional(),
 });
 
@@ -80,6 +84,10 @@ export const updateProfile = createServerFn({ method: "POST" })
         superpower: data.superpower ?? null,
         kryptonite: data.kryptonite ?? null,
         avatar_url: data.avatar_url ?? null,
+        bio: data.bio ?? null,
+        experience: data.experience ?? null,
+        looking_for: data.looking_for ?? null,
+        photos: data.photos,
         ...(data.onboarded !== undefined ? { onboarded: data.onboarded } : {}),
       })
       .eq("id", context.userId);
