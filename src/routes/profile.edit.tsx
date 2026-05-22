@@ -330,7 +330,22 @@ function EditProfile() {
                 </div>
               ))}
             </div>
-            <div className="mt-2 flex gap-2">
+            <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Quick add — pick a movement, then enter your result</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {prPresets.filter((preset) => !prs.some((p) => p.name === preset)).map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setPrName(preset)}
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider transition ${
+                    prName === preset ? "bg-warm text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex gap-2">
               <input value={prName} onChange={(e) => setPrName(e.target.value)} placeholder="Lift / distance" className="flex-1 rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40" />
               <input value={prValue} onChange={(e) => setPrValue(e.target.value)} placeholder="Result" className="w-32 rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40" />
               <button
