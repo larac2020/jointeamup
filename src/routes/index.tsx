@@ -50,7 +50,7 @@ function Landing() {
           height={1080}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/55 to-background" />
+        <div className="absolute inset-0 bg-secondary/80" />
         <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-40 md:pb-32 md:pt-48">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" /> Built by athletes, for athletes
@@ -111,8 +111,7 @@ function Landing() {
 
       {/* CTA strip */}
       <section className="mx-auto max-w-6xl px-4 pb-24">
-        <div className="relative overflow-hidden rounded-3xl bg-blaze p-10 md:p-16 shadow-blaze">
-          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/15 blur-3xl" />
+        <div className="relative overflow-hidden rounded-3xl bg-primary p-10 md:p-16 shadow-blaze">
           <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
             <div>
               <h2 className="font-display text-5xl leading-none tracking-wide text-primary-foreground md:text-6xl">
