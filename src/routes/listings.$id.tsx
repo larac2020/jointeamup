@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Shield, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Shield, Users, Loader2, Pencil, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
-import { getListing } from "@/lib/listings.functions";
+import { getListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
 import { startConversationFromListing } from "@/lib/messages.functions";
 import { listingTypeMeta, fallbackAvatar } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
