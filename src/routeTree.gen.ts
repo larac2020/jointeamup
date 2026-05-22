@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -27,11 +26,6 @@ import { Route as ListingsIdEditRouteImport } from './routes/listings.$id.edit'
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -103,7 +97,6 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
   '/listings/new': typeof ListingsNewRoute
@@ -119,7 +112,6 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
   '/listings/new': typeof ListingsNewRoute
@@ -136,7 +128,6 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
   '/listings/new': typeof ListingsNewRoute
@@ -154,7 +145,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/onboarding'
     | '/reset-password'
-    | '/search'
     | '/settings'
     | '/listings/$id'
     | '/listings/new'
@@ -170,7 +160,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/onboarding'
     | '/reset-password'
-    | '/search'
     | '/settings'
     | '/listings/$id'
     | '/listings/new'
@@ -186,7 +175,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/onboarding'
     | '/reset-password'
-    | '/search'
     | '/settings'
     | '/listings/$id'
     | '/listings/new'
@@ -203,7 +191,6 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   ListingsIdRoute: typeof ListingsIdRouteWithChildren
   ListingsNewRoute: typeof ListingsNewRoute
@@ -218,13 +205,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -334,7 +314,6 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   ListingsIdRoute: ListingsIdRouteWithChildren,
   ListingsNewRoute: ListingsNewRoute,
@@ -344,3 +323,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

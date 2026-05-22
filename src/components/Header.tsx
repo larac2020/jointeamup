@@ -2,16 +2,16 @@ import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, MessageSquare, Plus, Search, User, Zap } from "lucide-react";
+import { Bell, MessageSquare, Plus, User, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { unreadMessageCount } from "@/lib/messages.functions";
 import { unreadNotificationCount } from "@/lib/notifications.functions";
 
 const navItems = [
-  { to: "/feed", label: "Feed" },
-  { to: "/search", label: "Search" },
+  { to: "/feed", label: "Browse" },
 ] as const;
+
 
 export function Header() {
   const { user } = useAuth();
