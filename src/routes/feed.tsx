@@ -61,9 +61,6 @@ function Feed() {
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-primary">Browse</p>
             <h1 className="mt-1 font-display text-5xl tracking-wide">What's open</h1>
           </div>
-          <Link to="/listings/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95">
-            <Plus className="h-4 w-4" /> Post
-          </Link>
         </div>
 
         {/* Shortcut pills */}
