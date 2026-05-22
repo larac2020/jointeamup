@@ -2,11 +2,12 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Loader2, Plus, X, Upload } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, X, Upload, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { updateProfile } from "@/lib/profiles.functions";
+import { experienceLevels, prPresets } from "@/lib/types";
 
 export const Route = createFileRoute("/profile/edit")({
   head: () => ({ meta: [{ title: "Edit profile — TeamUp" }] }),
@@ -37,7 +38,14 @@ function EditProfile() {
   const [prName, setPrName] = useState("");
   const [prValue, setPrValue] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
+
+  const [bio, setBio] = useState("");
+  const [experience, setExperience] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const handleAvatarUpload = async (file: File) => {
     if (!session) return;
@@ -59,6 +67,27 @@ function EditProfile() {
     }
   };
 
+  const handlePhotoUpload = async (file: File) => {
+    if (!session) return;
+    if (photos.length >= 4) { toast.error("Up to 4 extra photos (5 total)"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
+    setUploadingPhoto(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${session.user.id}/photo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setPhotos([...photos, data.publicUrl]);
+      toast.success("Photo added — don't forget to save");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/login" });
   }, [loading, session, navigate]);
@@ -77,6 +106,10 @@ function EditProfile() {
     setGyms(profile.gyms ?? []);
     setComps(profile.competitions ?? []);
     setPrs(profile.prs ?? []);
+    setBio(profile.bio ?? "");
+    setExperience(profile.experience ?? "");
+    setLookingFor(profile.looking_for ?? "");
+    setPhotos(profile.photos ?? []);
   }, [profile]);
 
   const mutation = useMutation({
@@ -95,6 +128,10 @@ function EditProfile() {
           gyms,
           competitions: comps,
           prs,
+          bio: bio.trim() || null,
+          experience: experience.trim() || null,
+          looking_for: lookingFor.trim() || null,
+          photos,
           onboarded: true,
         },
       }),
@@ -154,6 +191,40 @@ function EditProfile() {
             </div>
           </div>
 
+          <Group label={`Photo gallery (${photos.length}/4 extra)`}>
+            <div className="flex flex-wrap gap-2">
+              {photos.map((url, i) => (
+                <div key={url} className="relative h-24 w-24 overflow-hidden rounded-xl border border-border bg-muted">
+                  <img src={url} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+                  <button type="button" onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-background/80 text-foreground shadow hover:bg-destructive hover:text-destructive-foreground">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+              {photos.length < 4 && (
+                <>
+                  <input
+                    ref={photoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); e.target.value = ""; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => photoRef.current?.click()}
+                    disabled={uploadingPhoto}
+                    className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-background text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-accent disabled:opacity-50"
+                  >
+                    {uploadingPhoto ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
+                    Add
+                  </button>
+                </>
+              )}
+            </div>
+            <p className="mt-2 text-[10px] text-muted-foreground">Up to 4 extra photos appear in your scrollable gallery alongside your main photo.</p>
+          </Group>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="First name *" value={firstName} onChange={setFirstName} />
             <Field label="Nickname" value={nickname} onChange={setNickname} placeholder="Sledgehammer" />
@@ -163,6 +234,48 @@ function EditProfile() {
             <Field label="Superpower" value={superpower} onChange={setSuperpower} placeholder="Sled push" />
             <Field label="Kryptonite" value={kryptonite} onChange={setKryptonite} placeholder="Wall balls" />
           </div>
+
+          <Group label={`Bio (${bio.length}/600)`}>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value.slice(0, 600))}
+              rows={4}
+              placeholder="A couple sentences about you, your training, your goals…"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
+            />
+          </Group>
+
+          <Group label="Experience level">
+            <div className="flex flex-wrap gap-2">
+              {experienceLevels.map((lvl) => {
+                const on = experience === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setExperience(on ? "" : lvl)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
+                      on ? "bg-cool text-primary-foreground shadow-sm" : "border border-border bg-background text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {lvl}
+                  </button>
+                );
+              })}
+            </div>
+          </Group>
+
+          <Group label={`Looking for (${lookingFor.length}/280)`}>
+            <textarea
+              value={lookingFor}
+              onChange={(e) => setLookingFor(e.target.value.slice(0, 280))}
+              rows={2}
+              placeholder="Doubles partner for HYROX Berlin, mixed team, weekend training crew…"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
+            />
+          </Group>
+
+
 
 
           <Group label="Sports *">
@@ -217,7 +330,22 @@ function EditProfile() {
                 </div>
               ))}
             </div>
-            <div className="mt-2 flex gap-2">
+            <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Quick add — pick a movement, then enter your result</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {prPresets.filter((preset) => !prs.some((p) => p.name === preset)).map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setPrName(preset)}
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider transition ${
+                    prName === preset ? "bg-warm text-primary-foreground" : "border border-border bg-background text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex gap-2">
               <input value={prName} onChange={(e) => setPrName(e.target.value)} placeholder="Lift / distance" className="flex-1 rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40" />
               <input value={prValue} onChange={(e) => setPrValue(e.target.value)} placeholder="Result" className="w-32 rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40" />
               <button

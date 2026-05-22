@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ProfilePublic } from "@/lib/types";
 
 const COLS =
-  "id, first_name, nickname, avatar_url, lives_in, sports, age, from_location, gyms, competitions, prs, superpower, kryptonite";
+  "id, first_name, nickname, avatar_url, lives_in, sports, age, from_location, gyms, competitions, prs, superpower, kryptonite, bio, experience, looking_for, photos";
 
 export const getProfile = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
@@ -54,10 +54,14 @@ const updateSchema = z.object({
   sports: z.array(z.string().min(1).max(40)).max(20),
   gyms: z.array(z.string().min(1).max(80)).max(20),
   competitions: z.array(z.string().min(1).max(120)).max(40),
-  prs: z.array(prSchema).max(20),
+  prs: z.array(prSchema).max(30),
   superpower: z.string().trim().max(80).nullable().optional(),
   kryptonite: z.string().trim().max(80).nullable().optional(),
   avatar_url: z.string().url().max(500).nullable().optional(),
+  bio: z.string().trim().max(600).nullable().optional(),
+  experience: z.string().trim().max(40).nullable().optional(),
+  looking_for: z.string().trim().max(280).nullable().optional(),
+  photos: z.array(z.string().url().max(500)).max(4),
   onboarded: z.boolean().optional(),
 });
 
@@ -80,6 +84,10 @@ export const updateProfile = createServerFn({ method: "POST" })
         superpower: data.superpower ?? null,
         kryptonite: data.kryptonite ?? null,
         avatar_url: data.avatar_url ?? null,
+        bio: data.bio ?? null,
+        experience: data.experience ?? null,
+        looking_for: data.looking_for ?? null,
+        photos: data.photos,
         ...(data.onboarded !== undefined ? { onboarded: data.onboarded } : {}),
       })
       .eq("id", context.userId);

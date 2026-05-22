@@ -219,16 +219,20 @@ export type Database = {
         Row: {
           age: number | null
           avatar_url: string | null
+          bio: string | null
           competitions: string[]
           created_at: string
+          experience: string | null
           first_name: string
           from_location: string | null
           gyms: string[]
           id: string
           kryptonite: string | null
           lives_in: string | null
+          looking_for: string | null
           nickname: string | null
           onboarded: boolean
+          photos: string[]
           prs: Json
           sports: string[]
           superpower: string | null
@@ -237,16 +241,20 @@ export type Database = {
         Insert: {
           age?: number | null
           avatar_url?: string | null
+          bio?: string | null
           competitions?: string[]
           created_at?: string
+          experience?: string | null
           first_name: string
           from_location?: string | null
           gyms?: string[]
           id: string
           kryptonite?: string | null
           lives_in?: string | null
+          looking_for?: string | null
           nickname?: string | null
           onboarded?: boolean
+          photos?: string[]
           prs?: Json
           sports?: string[]
           superpower?: string | null
@@ -255,16 +263,20 @@ export type Database = {
         Update: {
           age?: number | null
           avatar_url?: string | null
+          bio?: string | null
           competitions?: string[]
           created_at?: string
+          experience?: string | null
           first_name?: string
           from_location?: string | null
           gyms?: string[]
           id?: string
           kryptonite?: string | null
           lives_in?: string | null
+          looking_for?: string | null
           nickname?: string | null
           onboarded?: boolean
+          photos?: string[]
           prs?: Json
           sports?: string[]
           superpower?: string | null
