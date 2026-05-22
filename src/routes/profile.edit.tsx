@@ -369,6 +369,17 @@ function EditProfile() {
           </button>
         </form>
       </main>
+
+      {cropSrc && cropTarget && (
+        <ImageCropperModal
+          imageSrc={cropSrc}
+          aspect={cropTarget === "avatar" ? 1 : 4 / 5}
+          title={cropTarget === "avatar" ? "Adjust your profile photo" : "Adjust gallery photo"}
+          maxSize={cropTarget === "avatar" ? 1024 : 1600}
+          onCancel={() => { setCropSrc(null); setCropTarget(null); }}
+          onConfirm={(blob) => uploadBlob(blob, cropTarget)}
+        />
+      )}
     </div>
   );
 }
