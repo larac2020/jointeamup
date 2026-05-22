@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, X, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { updateProfile } from "@/lib/profiles.functions";
 
 export const Route = createFileRoute("/profile/edit")({
@@ -35,6 +36,28 @@ function EditProfile() {
   const [compInput, setCompInput] = useState("");
   const [prName, setPrName] = useState("");
   const [prValue, setPrValue] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!session) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${session.user.id}/avatar-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setAvatarUrl(data.publicUrl);
+      toast.success("Photo uploaded — don't forget to save");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/login" });
@@ -103,16 +126,44 @@ function EditProfile() {
           }}
           className="mt-6 space-y-6 rounded-3xl border border-border bg-card p-6 shadow-card md:p-8"
         >
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xs font-bold uppercase tracking-wider text-muted-foreground">No photo</div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }}
+              />
+              <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-accent disabled:opacity-50">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {avatarUrl ? "Change photo" : "Upload photo"}
+              </button>
+              {avatarUrl && (
+                <button type="button" onClick={() => setAvatarUrl("")} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-destructive">
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="First name *" value={firstName} onChange={setFirstName} />
             <Field label="Nickname" value={nickname} onChange={setNickname} placeholder="Sledgehammer" />
             <Field label="Age" value={age} onChange={setAge} type="number" />
             <Field label="From" value={fromLoc} onChange={setFromLoc} placeholder="Paris, FR" />
             <Field label="Lives in" value={livesIn} onChange={setLivesIn} placeholder="Berlin, DE" />
-            <Field label="Avatar URL" value={avatarUrl} onChange={setAvatarUrl} placeholder="https://…" />
             <Field label="Superpower" value={superpower} onChange={setSuperpower} placeholder="Sled push" />
             <Field label="Kryptonite" value={kryptonite} onChange={setKryptonite} placeholder="Wall balls" />
           </div>
+
 
           <Group label="Sports *">
             <div className="flex flex-wrap gap-2">
