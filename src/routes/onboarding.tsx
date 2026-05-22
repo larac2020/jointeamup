@@ -18,10 +18,14 @@ const profileSchema = z.object({
   lives_in: z.string().trim().max(80).optional().or(z.literal("")),
   superpower: z.string().trim().max(60).optional().or(z.literal("")),
   kryptonite: z.string().trim().max(60).optional().or(z.literal("")),
+  bio: z.string().trim().max(600).optional().or(z.literal("")),
+  experience: z.string().trim().max(40).optional().or(z.literal("")),
+  gym: z.string().trim().max(80).optional().or(z.literal("")),
   sports: z.array(z.string()).min(1, "Pick at least one sport"),
 });
 
 const SPORTS = ["HYROX", "HYROX Doubles", "Turf Games", "CrossFit", "DEKA", "Spartan", "Running", "Rowing", "Triathlon"];
+const EXPERIENCE = ["Beginner", "Intermediate", "Advanced", "Elite", "Pro"];
 
 function Onboarding() {
   const { session, profile, consents, refresh, loading } = useAuth();
