@@ -4,9 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Plus, Search as SearchIcon, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
-import { AthleteCard } from "@/components/AthleteCard";
 import { listListings } from "@/lib/listings.functions";
-import { listProfiles } from "@/lib/profiles.functions";
 import { competitionTypes, formats, skillLevels } from "@/lib/types";
 
 export const Route = createFileRoute("/feed")({
@@ -19,7 +17,6 @@ const shortcuts = [
   { id: "selling-ticket", label: "Tickets" },
   { id: "need-teammate", label: "Need teammate" },
   { id: "join-team", label: "Join a team" },
-  { id: "athletes", label: "Athletes" },
 ] as const;
 
 type Shortcut = (typeof shortcuts)[number]["id"];
@@ -33,8 +30,7 @@ function Feed() {
   const [location, setLocation] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const mode: "listings" | "athletes" = shortcut === "athletes" ? "athletes" : "listings";
-  const typeFilter = shortcut === "all" || shortcut === "athletes" ? undefined : shortcut;
+  const typeFilter = shortcut === "all" ? undefined : shortcut;
 
   const listingFilters = useMemo(
     () => ({
@@ -51,16 +47,9 @@ function Feed() {
   const listingsQ = useQuery({
     queryKey: ["listings", "feed", listingFilters],
     queryFn: () => listListings({ data: listingFilters }),
-    enabled: mode === "listings",
-  });
-  const athletesQ = useQuery({
-    queryKey: ["profiles", "feed", { query, sport: comp, location }],
-    queryFn: () => listProfiles({ data: { query: query || undefined, sport: comp || undefined, location: location || undefined } }),
-    enabled: mode === "athletes",
   });
 
   const listings = listingsQ.data ?? [];
-  const athletes = athletesQ.data ?? [];
   const activeFilters = [comp, format, level, location, query].filter(Boolean).length;
 
   return (
@@ -115,18 +104,14 @@ function Feed() {
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={mode === "listings" ? "HYROX, Berlin…" : "Name, sport"}
+                    placeholder="HYROX, Berlin…"
                     maxLength={120}
                     className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
                   />
                 </div>
-                <Select label={mode === "athletes" ? "Sport" : "Competition"} value={comp} onChange={setComp} options={[...competitionTypes]} />
-                {mode === "listings" && (
-                  <>
-                    <Select label="Format" value={format} onChange={setFormat} options={[...formats]} />
-                    <Select label="Skill level" value={level} onChange={setLevel} options={[...skillLevels]} />
-                  </>
-                )}
+                <Select label="Competition" value={comp} onChange={setComp} options={[...competitionTypes]} />
+                <Select label="Format" value={format} onChange={setFormat} options={[...formats]} />
+                <Select label="Skill level" value={level} onChange={setLevel} options={[...skillLevels]} />
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Location</label>
                   <input
@@ -165,23 +150,12 @@ function Feed() {
           {/* Results */}
           <section>
             <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              {mode === "listings"
-                ? listingsQ.isLoading ? "Loading…" : `${listings.length} results`
-                : athletesQ.isLoading ? "Loading…" : `${athletes.length} results`}
+              {listingsQ.isLoading ? "Loading…" : `${listings.length} results`}
             </p>
-            {mode === "listings" ? (
-              <div className="space-y-4">
-                {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
-                {listings.length === 0 && !listingsQ.isLoading && (
-                  <EmptyState />
-                )}
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {athletes.map((a) => <AthleteCard key={a.id} athlete={a} />)}
-                {athletes.length === 0 && !athletesQ.isLoading && <EmptyState />}
-              </div>
-            )}
+            <div className="space-y-4">
+              {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
+              {listings.length === 0 && !listingsQ.isLoading && <EmptyState />}
+            </div>
           </section>
         </div>
       </main>
