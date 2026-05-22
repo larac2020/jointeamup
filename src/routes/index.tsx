@@ -96,7 +96,7 @@ function Landing() {
             <h2 className="mt-2 font-display text-5xl tracking-wide md:text-6xl">Three plays.<br />One community.</h2>
           </div>
           <p className="max-w-md text-base text-muted-foreground">
-            We connect supply and demand. No payment processing, no middleman fees — just athletes helping athletes show up on race day.
+            &ZeroWidthSpace;
           </p>
         </div>
 
