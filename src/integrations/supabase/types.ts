@@ -14,16 +14,322 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          listing_id: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          listing_id?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          listing_id?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listings: {
+        Row: {
+          author_id: string
+          competition: string
+          competition_type: string
+          created_at: string
+          description: string
+          event_date: string
+          format: Database["public"]["Enums"]["format_type"]
+          gender: Database["public"]["Enums"]["gender_cat"] | null
+          id: string
+          is_active: boolean
+          location: string
+          skill_level: Database["public"]["Enums"]["skill_level"]
+          spots: number
+          type: Database["public"]["Enums"]["listing_type"]
+        }
+        Insert: {
+          author_id: string
+          competition: string
+          competition_type: string
+          created_at?: string
+          description: string
+          event_date: string
+          format: Database["public"]["Enums"]["format_type"]
+          gender?: Database["public"]["Enums"]["gender_cat"] | null
+          id?: string
+          is_active?: boolean
+          location: string
+          skill_level: Database["public"]["Enums"]["skill_level"]
+          spots?: number
+          type: Database["public"]["Enums"]["listing_type"]
+        }
+        Update: {
+          author_id?: string
+          competition?: string
+          competition_type?: string
+          created_at?: string
+          description?: string
+          event_date?: string
+          format?: Database["public"]["Enums"]["format_type"]
+          gender?: Database["public"]["Enums"]["gender_cat"] | null
+          id?: string
+          is_active?: boolean
+          location?: string
+          skill_level?: Database["public"]["Enums"]["skill_level"]
+          spots?: number
+          type?: Database["public"]["Enums"]["listing_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          avatar_url: string | null
+          competitions: string[]
+          created_at: string
+          first_name: string
+          from_location: string | null
+          gyms: string[]
+          id: string
+          kryptonite: string | null
+          lives_in: string | null
+          nickname: string | null
+          onboarded: boolean
+          prs: Json
+          sports: string[]
+          superpower: string | null
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          avatar_url?: string | null
+          competitions?: string[]
+          created_at?: string
+          first_name: string
+          from_location?: string | null
+          gyms?: string[]
+          id: string
+          kryptonite?: string | null
+          lives_in?: string | null
+          nickname?: string | null
+          onboarded?: boolean
+          prs?: Json
+          sports?: string[]
+          superpower?: string | null
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          avatar_url?: string | null
+          competitions?: string[]
+          created_at?: string
+          first_name?: string
+          from_location?: string | null
+          gyms?: string[]
+          id?: string
+          kryptonite?: string | null
+          lives_in?: string | null
+          nickname?: string | null
+          onboarded?: boolean
+          prs?: Json
+          sports?: string[]
+          superpower?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_consents: {
+        Row: {
+          contactable_by_athletes: boolean
+          contactable_consent_at: string | null
+          data_processing_version: string
+          notifications_consent_at: string | null
+          notifications_listings: boolean
+          notifications_marketing: boolean
+          notifications_messages: boolean
+          privacy_accepted_at: string | null
+          terms_accepted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contactable_by_athletes?: boolean
+          contactable_consent_at?: string | null
+          data_processing_version?: string
+          notifications_consent_at?: string | null
+          notifications_listings?: boolean
+          notifications_marketing?: boolean
+          notifications_messages?: boolean
+          privacy_accepted_at?: string | null
+          terms_accepted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contactable_by_athletes?: boolean
+          contactable_consent_at?: string | null
+          data_processing_version?: string
+          notifications_consent_at?: string | null
+          notifications_listings?: boolean
+          notifications_marketing?: boolean
+          notifications_messages?: boolean
+          privacy_accepted_at?: string | null
+          terms_accepted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_user_contactable: { Args: { _user_id: string }; Returns: boolean }
+      wants_notification: {
+        Args: { _kind: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      format_type: "Individual" | "Doubles" | "Team"
+      gender_cat: "Men" | "Women" | "Mixed" | "Open"
+      listing_type: "selling-ticket" | "need-teammate" | "join-team"
+      skill_level: "Beginner" | "Intermediate" | "Advanced" | "Elite"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +456,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      format_type: ["Individual", "Doubles", "Team"],
+      gender_cat: ["Men", "Women", "Mixed", "Open"],
+      listing_type: ["selling-ticket", "need-teammate", "join-team"],
+      skill_level: ["Beginner", "Intermediate", "Advanced", "Elite"],
+    },
   },
 } as const
