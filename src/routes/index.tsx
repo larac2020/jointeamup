@@ -167,7 +167,7 @@ function Landing() {
       <footer className="border-t border-border/70 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 text-xs text-muted-foreground md:flex-row">
           <p>© 2026 TeamUp. Built by athletes, for athletes.</p>
-          <p>HYROX · Turf Games · DEKA · CrossFit · Spartan</p>
+          <p>​</p>
         </div>
       </footer>
     </div>
