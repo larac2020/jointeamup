@@ -23,15 +23,27 @@ export const Route = createFileRoute("/listings/$id")({
 function ListingDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, user } = useAuth();
+  const qc = useQueryClient();
   const { data: listing } = useSuspenseQuery(detailQO(id));
   const startFn = useServerFn(startConversationFromListing);
+  const deactivateFn = useServerFn(deactivateListing);
+  const reactivateFn = useServerFn(reactivateListing);
   const startMut = useMutation({
     mutationFn: () => startFn({ data: { listing_id: id } }),
     onSuccess: ({ conversation_id }) => {
       navigate({ to: "/messages", search: { c: conversation_id } });
     },
     onError: (e: any) => toast.error("Couldn't start conversation", { description: e?.message }),
+  });
+  const toggleMut = useMutation({
+    mutationFn: (active: boolean) =>
+      active ? reactivateFn({ data: { id } }) : deactivateFn({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["listings"] });
+      toast.success("Listing updated");
+    },
+    onError: (e: any) => toast.error("Update failed", { description: e?.message }),
   });
 
   if (!listing) {
@@ -47,6 +59,7 @@ function ListingDetail() {
   }
   const author = listing.author;
   const meta = listingTypeMeta[listing.type];
+  const isMine = user?.id === listing.author_id;
 
   const onMessage = () => {
     if (!session) {
