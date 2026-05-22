@@ -75,9 +75,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Link to="/search" className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground md:hidden">
-            <Search className="h-5 w-5" />
-          </Link>
+
           {user && (
             <>
               {/* Desktop: full Post button */}
