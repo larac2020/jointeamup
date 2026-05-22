@@ -245,9 +245,19 @@ function Onboarding() {
               </div>
             </div>
 
-            <div className="mt-8 flex gap-2">
+            <div className="mt-8 flex flex-wrap gap-2">
               <button onClick={() => setStep(0)} className="rounded-2xl border border-border bg-card px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
                 Back
+              </button>
+              <button
+                onClick={async () => {
+                  await supabase.from("profiles").update({ onboarded: true }).eq("id", session.user.id);
+                  await refresh();
+                  navigate({ to: "/feed" });
+                }}
+                className="rounded-2xl border border-border bg-card px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              >
+                Skip for now
               </button>
               <button
                 onClick={saveProfile}

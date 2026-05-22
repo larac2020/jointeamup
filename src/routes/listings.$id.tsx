@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Shield, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Shield, Users, Loader2, Pencil, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
-import { getListing } from "@/lib/listings.functions";
+import { getListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
 import { startConversationFromListing } from "@/lib/messages.functions";
 import { listingTypeMeta, fallbackAvatar } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
@@ -23,15 +23,27 @@ export const Route = createFileRoute("/listings/$id")({
 function ListingDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, user } = useAuth();
+  const qc = useQueryClient();
   const { data: listing } = useSuspenseQuery(detailQO(id));
   const startFn = useServerFn(startConversationFromListing);
+  const deactivateFn = useServerFn(deactivateListing);
+  const reactivateFn = useServerFn(reactivateListing);
   const startMut = useMutation({
     mutationFn: () => startFn({ data: { listing_id: id } }),
     onSuccess: ({ conversation_id }) => {
       navigate({ to: "/messages", search: { c: conversation_id } });
     },
     onError: (e: any) => toast.error("Couldn't start conversation", { description: e?.message }),
+  });
+  const toggleMut = useMutation({
+    mutationFn: (active: boolean) =>
+      active ? reactivateFn({ data: { id } }) : deactivateFn({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["listings"] });
+      toast.success("Listing updated");
+    },
+    onError: (e: any) => toast.error("Update failed", { description: e?.message }),
   });
 
   if (!listing) {
@@ -47,6 +59,7 @@ function ListingDetail() {
   }
   const author = listing.author;
   const meta = listingTypeMeta[listing.type];
+  const isMine = user?.id === listing.author_id;
 
   const onMessage = () => {
     if (!session) {
@@ -102,7 +115,30 @@ function ListingDetail() {
             </div>
           )}
         </div>
-        {author && (
+        {!listing.is_active && (
+          <div className="mt-6 rounded-2xl border border-warm/40 bg-warm/10 px-4 py-3 text-sm font-semibold text-foreground">
+            This listing is deactivated — only you can see it.
+          </div>
+        )}
+        {isMine ? (
+          <div className="sticky bottom-4 mt-6 flex flex-col gap-2 sm:flex-row">
+            <Link
+              to="/listings/$id/edit"
+              params={{ id }}
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95"
+            >
+              <Pencil className="h-4 w-4" /> Edit listing
+            </Link>
+            <button
+              onClick={() => toggleMut.mutate(!listing.is_active)}
+              disabled={toggleMut.isPending}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card px-6 py-4 text-sm font-bold uppercase tracking-wider hover:bg-accent disabled:opacity-60"
+            >
+              {toggleMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : listing.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {listing.is_active ? "Deactivate" : "Reactivate"}
+            </button>
+          </div>
+        ) : author && (
           <div className="sticky bottom-4 mt-6">
             <button
               onClick={onMessage}
