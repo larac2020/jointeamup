@@ -78,6 +78,25 @@ export function Header() {
           <Link to="/search" className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground md:hidden">
             <Search className="h-5 w-5" />
           </Link>
+          {user && (
+            <>
+              {/* Desktop: full Post button */}
+              <Link
+                to="/listings/new"
+                className="ml-1 hidden items-center gap-1.5 rounded-full bg-warm px-4 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-blaze hover:opacity-95 md:inline-flex"
+              >
+                <Plus className="h-4 w-4" strokeWidth={3} /> Post
+              </Link>
+              {/* Mobile: compact + */}
+              <Link
+                to="/listings/new"
+                aria-label="Post a listing"
+                className="grid h-10 w-10 place-items-center rounded-full bg-warm text-primary-foreground shadow-blaze hover:opacity-95 md:hidden"
+              >
+                <Plus className="h-5 w-5" strokeWidth={3} />
+              </Link>
+            </>
+          )}
           {user ? (
             <>
               <Link to="/notifications" className="relative grid h-10 w-10 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground">
