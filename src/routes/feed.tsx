@@ -32,8 +32,8 @@ function Feed() {
   const [location, setLocation] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const mode: "listings" | "athletes" = shortcut === "athletes" ? "athletes" : "listings";
-  const typeFilter = shortcut === "all" || shortcut === "athletes" ? undefined : shortcut;
+  const mode: "listings" = "listings";
+  const typeFilter = shortcut === "all" ? undefined : shortcut;
 
   const listingFilters = useMemo(
     () => ({
