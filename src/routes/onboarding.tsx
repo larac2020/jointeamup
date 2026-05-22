@@ -237,8 +237,43 @@ function Onboarding() {
               <Field label="Nickname" value={nickname} onChange={setNickname} placeholder="Sledgehammer" />
               <Field label="Age" value={age} onChange={setAge} placeholder="28" type="number" />
               <Field label="Lives in" value={livesIn} onChange={setLivesIn} placeholder="Berlin, DE" />
+              <Field label="Home gym" value={gym} onChange={setGym} placeholder="CrossFit Mitte" />
               <Field label="Superpower" value={superpower} onChange={setSuperpower} placeholder="Sled push" />
               <Field label="Kryptonite" value={kryptonite} onChange={setKryptonite} placeholder="Wall balls" />
+            </div>
+
+            <div className="mt-5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Bio</label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows={3}
+                maxLength={600}
+                placeholder="A couple sentences about you, your training, your goals…"
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
+              />
+              <p className="mt-1 text-[10px] text-muted-foreground">{bio.length}/600</p>
+            </div>
+
+            <div className="mt-5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Experience level</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {EXPERIENCE.map((lvl) => {
+                  const on = experience === lvl;
+                  return (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => setExperience(on ? "" : lvl)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
+                        on ? "bg-cool text-primary-foreground shadow-sm" : "border border-border bg-background text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {lvl}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="mt-5">
@@ -261,6 +296,7 @@ function Onboarding() {
                 })}
               </div>
             </div>
+
 
             <div className="mt-8 flex flex-wrap gap-2">
               <button onClick={() => setStep(0)} className="rounded-2xl border border-border bg-card px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
