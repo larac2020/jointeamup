@@ -94,7 +94,7 @@ function ListingDetail() {
               <Stat label="Category" value={listing.gender ?? "Open"} />
             </div>
             <h2 className="mt-8 font-display text-2xl tracking-wide">Details</h2>
-            <p className="mt-2 text-sm leading-relaxed text-foreground/85">{listing.description}</p>
+            {listing.description && <p className="mt-2 text-sm leading-relaxed text-foreground/85">{listing.description}</p>}
             <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
               <Shield className="h-3.5 w-3.5 text-primary" />
               TeamUp connects athletes — payments happen directly between you and the seller.

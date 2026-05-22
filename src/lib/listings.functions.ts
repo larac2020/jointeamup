@@ -92,7 +92,7 @@ const createSchema = z.object({
   skill_level: z.string().min(1).max(40),
   gender: z.enum(["Men", "Women", "Mixed", "Open"]).optional().nullable(),
   spots: z.number().int().min(1).max(20),
-  description: z.string().min(10).max(2000),
+  description: z.string().max(2000).optional().default(""),
 });
 
 export const createListing = createServerFn({ method: "POST" })

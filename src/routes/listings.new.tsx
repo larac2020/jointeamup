@@ -138,8 +138,8 @@ function NewListing() {
             </Field>
           </div>
 
-          <Field label="Description">
-            <textarea required minLength={10} maxLength={2000} rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="A few honest details — level, transfer logistics, what you're looking for." className={inputCls} />
+          <Field label="Description (optional)">
+            <textarea maxLength={2000} rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="A few honest details — level, transfer logistics, what you're looking for." className={inputCls} />
           </Field>
 
           <button
