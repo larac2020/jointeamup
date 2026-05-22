@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Ticket, Users, MessagesSquare, Zap, Sparkles } from "lucide-react";
+import { ArrowRight, Ticket, Users, Search, HandHeart, Zap, Sparkles } from "lucide-react";
 import heroImg from "@/assets/hero.jpg";
 
 export const Route = createFileRoute("/")({
@@ -12,9 +12,27 @@ const stats = [
   { k: "28", v: "Cities" },
 ];
 
-const features = [
-  { icon: Ticket, title: "Resell your bib", body: "Missing a teammate before race day? Find another athlete based on level, location, and sport.", tone: "bg-warm" },
-  { icon: Users, title: "Find a teammate", body: "Lost a partner before race day? Match with athletes by level, location and sport.", tone: "bg-cool" },
+const sides = [
+  {
+    tag: "Got a spot",
+    title: "Pass it on.",
+    accent: "bg-warm",
+    accentText: "text-warm",
+    items: [
+      { icon: Ticket, title: "Resell your bib", body: "Injured, travelling, or out of shape? List your spot and pass it to an athlete who's ready." },
+      { icon: Users, title: "Replace a teammate", body: "Lost a partner before race day? Find a stand-in by sport, level, and location." },
+    ],
+  },
+  {
+    tag: "Need a spot",
+    title: "Get on the start line.",
+    accent: "bg-cool",
+    accentText: "text-cool",
+    items: [
+      { icon: Search, title: "Find a bib", body: "Race sold out? Browse last-minute bibs from athletes who can't make it." },
+      { icon: HandHeart, title: "Join a team", body: "Solo and looking? Match with teams hunting for a teammate at your level." },
+    ],
+  },
 ];
 
 function Landing() {
@@ -87,30 +105,45 @@ function Landing() {
         </div>
       </section>
 
+
       {/* How it works */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:py-28">
         <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-magenta">How it works</p>
-            <h2 className="mt-2 font-display text-5xl tracking-wide md:text-6xl">Two plays.<br />One community.</h2>
+            <h2 className="mt-2 font-display text-5xl tracking-wide md:text-6xl">Two sides.<br />One start line.</h2>
           </div>
           <p className="max-w-md text-base text-muted-foreground">
-            &ZeroWidthSpace;
+            Whether you've got a spot you can't use or you're hunting for one, TeamUp matches both sides of race day.
           </p>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          {features.map((f) => (
-            <div key={f.title} className="group rounded-3xl border border-border bg-card p-7 shadow-card transition hover:-translate-y-1 hover:shadow-blaze">
-              <div className={`grid h-12 w-12 place-items-center rounded-2xl ${f.tone} text-primary-foreground shadow-md`}>
-                <f.icon className="h-6 w-6" strokeWidth={2.2} />
+          {sides.map((side) => (
+            <div key={side.tag} className="rounded-3xl border border-border bg-card p-7 shadow-card">
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex h-2.5 w-2.5 rounded-full ${side.accent}`} />
+                <p className={`text-xs font-bold uppercase tracking-[0.25em] ${side.accentText}`}>{side.tag}</p>
               </div>
-              <h3 className="mt-5 font-display text-3xl tracking-wide">{f.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{f.body}</p>
+              <h3 className="mt-3 font-display text-4xl tracking-wide">{side.title}</h3>
+              <div className="mt-6 space-y-4">
+                {side.items.map((it) => (
+                  <div key={it.title} className="group flex gap-4 rounded-2xl border border-border/70 bg-background p-4 transition hover:-translate-y-0.5 hover:shadow-blaze">
+                    <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${side.accent} text-primary-foreground shadow-md`}>
+                      <it.icon className="h-5 w-5" strokeWidth={2.2} />
+                    </div>
+                    <div>
+                      <h4 className="font-display text-xl tracking-wide">{it.title}</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">{it.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       </section>
+
 
       {/* CTA strip */}
       <section className="mx-auto max-w-6xl px-4 pb-24">
