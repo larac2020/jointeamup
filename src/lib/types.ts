@@ -39,7 +39,21 @@ export type ProfilePublic = AuthorBrief & {
   prs: { name: string; value: string }[];
   superpower: string | null;
   kryptonite: string | null;
+  bio: string | null;
+  experience: string | null;
+  looking_for: string | null;
+  photos: string[];
 };
+
+export const experienceLevels = ["Beginner", "Intermediate", "Advanced", "Elite", "Pro"] as const;
+
+export const prPresets = [
+  "Back Squat", "Front Squat", "Deadlift", "Bench Press", "Strict Press",
+  "Snatch", "Clean & Jerk", "Pull-ups (max)", "Burpees (1 min)",
+  "Wall Balls (1 min)", "Sled Push", "Sled Pull", "Farmer's Carry",
+  "500m Row", "1k Row", "2k Row", "1k Ski-erg",
+  "5k Run", "10k Run", "Half Marathon", "Marathon", "HYROX time",
+] as const;
 
 export type ConversationListItem = {
   id: string;
