@@ -29,6 +29,16 @@ export function Header() {
     queryFn: () => unreadNotifFn(),
     enabled: !!user,
   });
+  const profileQ = useQuery({
+    queryKey: ["header-profile", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("avatar_url, first_name").eq("id", user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+
 
   useEffect(() => {
     if (!user) return;
@@ -112,10 +122,15 @@ export function Header() {
               <Link
                 to="/profile/$id"
                 params={{ id: user.id }}
-                className="ml-1 grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground hover:opacity-90"
+                className="ml-1 grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-primary text-primary-foreground hover:opacity-90"
               >
-                <User className="h-5 w-5" />
+                {profileQ.data?.avatar_url ? (
+                  <img src={profileQ.data.avatar_url} alt={profileQ.data.first_name ?? "Profile"} className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
               </Link>
+
             </>
           ) : (
             <Link to="/login" className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95">
