@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Shield, Users } from "lucide-react";
+import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { getAthlete, getListing, listingTypeMeta } from "@/lib/mock-data";
 
@@ -32,12 +33,9 @@ function ListingDetail() {
         <Link to="/feed" className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to feed
         </Link>
-
         <div className="mt-4 overflow-hidden rounded-3xl border border-border bg-card shadow-card">
           <div className="bg-blaze p-8 text-primary-foreground">
-            <span className={`inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur`}>
-              {meta.label}
-            </span>
+            <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur">{meta.label}</span>
             <h1 className="mt-4 font-display text-6xl leading-none tracking-wide">{listing.competition}</h1>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
               <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {listing.date}</span>
@@ -45,7 +43,6 @@ function ListingDetail() {
               <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {listing.format}</span>
             </div>
           </div>
-
           <div className="p-8">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Stat label="Type" value={listing.competitionType} />
@@ -53,17 +50,13 @@ function ListingDetail() {
               <Stat label="Spots" value={String(listing.spots)} />
               <Stat label="Category" value={listing.gender ?? "Open"} />
             </div>
-
             <h2 className="mt-8 font-display text-2xl tracking-wide">Details</h2>
             <p className="mt-2 text-sm leading-relaxed text-foreground/85">{listing.description}</p>
-
             <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
               <Shield className="h-3.5 w-3.5 text-primary" />
               TeamUp connects athletes — payments happen directly between you and the seller.
             </div>
           </div>
-
-          {/* Author */}
           <div className="flex items-center justify-between gap-4 border-t border-border bg-muted/30 p-6">
             <Link to="/profile/$id" params={{ id: author.id }} className="flex items-center gap-3 group">
               <img src={author.avatar} alt={author.firstName} className="h-14 w-14 rounded-xl bg-muted" />
@@ -77,10 +70,9 @@ function ListingDetail() {
             </button>
           </div>
         </div>
-
         <div className="sticky bottom-4 mt-6">
           <button
-            onClick={() => navigate({ to: "/messages" })}
+            onClick={() => { toast.success("Opening conversation…"); navigate({ to: "/messages" }); }}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-warm px-6 py-4 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-blaze hover:opacity-95"
           >
             <MessageSquare className="h-4 w-4" /> Message {author.firstName}

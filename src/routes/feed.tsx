@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Filter, Plus, Search } from "lucide-react";
+import { Filter, Plus } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { listings, listingTypeMeta } from "@/lib/mock-data";
@@ -20,7 +20,6 @@ const tabs = [
 function Feed() {
   const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("all");
   const filtered = tab === "all" ? listings : listings.filter((l) => l.type === tab);
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -34,19 +33,12 @@ function Feed() {
             <Plus className="h-4 w-4" /> Post
           </button>
         </div>
-
         <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2">
           {tabs.map((t) => {
             const count = t.id === "all" ? listings.length : listings.filter((l) => l.type === t.id).length;
             const active = tab === t.id;
             return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
-                  active ? "bg-foreground text-background" : "border border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
+              <button key={t.id} onClick={() => setTab(t.id)} className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${active ? "bg-foreground text-background" : "border border-border bg-card text-muted-foreground hover:text-foreground"}`}>
                 {t.label} <span className="ml-1 opacity-60">{count}</span>
               </button>
             );
@@ -55,7 +47,6 @@ function Feed() {
             <Filter className="h-3.5 w-3.5" /> Filters
           </Link>
         </div>
-
         <div className="mt-6 space-y-4">
           {filtered.map((l) => <ListingCard key={l.id} listing={l} />)}
           {filtered.length === 0 && (
