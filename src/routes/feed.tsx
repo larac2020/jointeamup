@@ -152,23 +152,12 @@ function Feed() {
           {/* Results */}
           <section>
             <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              {mode === "listings"
-                ? listingsQ.isLoading ? "Loading…" : `${listings.length} results`
-                : athletesQ.isLoading ? "Loading…" : `${athletes.length} results`}
+              {listingsQ.isLoading ? "Loading…" : `${listings.length} results`}
             </p>
-            {mode === "listings" ? (
-              <div className="space-y-4">
-                {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
-                {listings.length === 0 && !listingsQ.isLoading && (
-                  <EmptyState />
-                )}
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {athletes.map((a) => <AthleteCard key={a.id} athlete={a} />)}
-                {athletes.length === 0 && !athletesQ.isLoading && <EmptyState />}
-              </div>
-            )}
+            <div className="space-y-4">
+              {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
+              {listings.length === 0 && !listingsQ.isLoading && <EmptyState />}
+            </div>
           </section>
         </div>
       </main>
