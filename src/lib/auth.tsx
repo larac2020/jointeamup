@@ -28,6 +28,10 @@ export type Profile = {
   superpower: string | null;
   kryptonite: string | null;
   avatar_url: string | null;
+  bio: string | null;
+  experience: string | null;
+  looking_for: string | null;
+  photos: string[];
   onboarded: boolean;
 };
 
