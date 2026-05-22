@@ -105,17 +105,6 @@ function Landing() {
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="mx-auto max-w-6xl px-4 py-20 md:py-28">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-magenta">How it works</p>
-            <h2 className="mt-2 font-display text-5xl tracking-wide md:text-6xl">Two plays.<br />One community.</h2>
-          </div>
-          <p className="max-w-md text-base text-muted-foreground">
-            &ZeroWidthSpace;
-          </p>
-        </div>
 
       {/* How it works */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:py-28">
