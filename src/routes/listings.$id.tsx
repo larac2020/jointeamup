@@ -115,7 +115,30 @@ function ListingDetail() {
             </div>
           )}
         </div>
-        {author && (
+        {!listing.is_active && (
+          <div className="mt-6 rounded-2xl border border-warm/40 bg-warm/10 px-4 py-3 text-sm font-semibold text-foreground">
+            This listing is deactivated — only you can see it.
+          </div>
+        )}
+        {isMine ? (
+          <div className="sticky bottom-4 mt-6 flex flex-col gap-2 sm:flex-row">
+            <Link
+              to="/listings/$id/edit"
+              params={{ id }}
+              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95"
+            >
+              <Pencil className="h-4 w-4" /> Edit listing
+            </Link>
+            <button
+              onClick={() => toggleMut.mutate(!listing.is_active)}
+              disabled={toggleMut.isPending}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card px-6 py-4 text-sm font-bold uppercase tracking-wider hover:bg-accent disabled:opacity-60"
+            >
+              {toggleMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : listing.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {listing.is_active ? "Deactivate" : "Reactivate"}
+            </button>
+          </div>
+        ) : author && (
           <div className="sticky bottom-4 mt-6">
             <button
               onClick={onMessage}
