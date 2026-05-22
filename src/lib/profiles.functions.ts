@@ -42,3 +42,58 @@ export const listProfiles = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return (rows ?? []) as ProfilePublic[];
   });
+
+const prSchema = z.object({ name: z.string().min(1).max(60), value: z.string().min(1).max(60) });
+
+const updateSchema = z.object({
+  first_name: z.string().trim().min(1).max(60),
+  nickname: z.string().trim().max(40).nullable().optional(),
+  age: z.number().int().min(13).max(120).nullable().optional(),
+  from_location: z.string().trim().max(80).nullable().optional(),
+  lives_in: z.string().trim().max(80).nullable().optional(),
+  sports: z.array(z.string().min(1).max(40)).max(20),
+  gyms: z.array(z.string().min(1).max(80)).max(20),
+  competitions: z.array(z.string().min(1).max(120)).max(40),
+  prs: z.array(prSchema).max(20),
+  superpower: z.string().trim().max(80).nullable().optional(),
+  kryptonite: z.string().trim().max(80).nullable().optional(),
+  avatar_url: z.string().url().max(500).nullable().optional(),
+  onboarded: z.boolean().optional(),
+});
+
+export const updateProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => updateSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({
+        first_name: data.first_name,
+        nickname: data.nickname ?? null,
+        age: data.age ?? null,
+        from_location: data.from_location ?? null,
+        lives_in: data.lives_in ?? null,
+        sports: data.sports,
+        gyms: data.gyms,
+        competitions: data.competitions,
+        prs: data.prs,
+        superpower: data.superpower ?? null,
+        kryptonite: data.kryptonite ?? null,
+        avatar_url: data.avatar_url ?? null,
+        ...(data.onboarded !== undefined ? { onboarded: data.onboarded } : {}),
+      })
+      .eq("id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const markOnboarded = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ onboarded: true })
+      .eq("id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
