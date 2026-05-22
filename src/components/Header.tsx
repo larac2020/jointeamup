@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, MessageSquare, Search, User, Zap } from "lucide-react";
+import { Bell, MessageSquare, Plus, Search, User, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { unreadMessageCount } from "@/lib/messages.functions";
