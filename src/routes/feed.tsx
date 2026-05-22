@@ -32,7 +32,6 @@ function Feed() {
   const [location, setLocation] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const mode: "listings" = "listings";
   const typeFilter = shortcut === "all" ? undefined : shortcut;
 
   const listingFilters = useMemo(
@@ -50,16 +49,9 @@ function Feed() {
   const listingsQ = useQuery({
     queryKey: ["listings", "feed", listingFilters],
     queryFn: () => listListings({ data: listingFilters }),
-    enabled: mode === "listings",
-  });
-  const athletesQ = useQuery({
-    queryKey: ["profiles", "feed", { query, sport: comp, location }],
-    queryFn: () => listProfiles({ data: { query: query || undefined, sport: comp || undefined, location: location || undefined } }),
-    enabled: mode === "athletes",
   });
 
   const listings = listingsQ.data ?? [];
-  const athletes = athletesQ.data ?? [];
   const activeFilters = [comp, format, level, location, query].filter(Boolean).length;
 
   return (
