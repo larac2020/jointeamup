@@ -174,7 +174,7 @@ function EditProfile() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f, "avatar"); e.target.value = ""; }}
               />
               <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-accent disabled:opacity-50">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
@@ -205,7 +205,7 @@ function EditProfile() {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); e.target.value = ""; }}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f, "photo"); e.target.value = ""; }}
                   />
                   <button
                     type="button"
