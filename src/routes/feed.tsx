@@ -19,7 +19,6 @@ const shortcuts = [
   { id: "selling-ticket", label: "Tickets" },
   { id: "need-teammate", label: "Need teammate" },
   { id: "join-team", label: "Join a team" },
-  { id: "athletes", label: "Athletes" },
 ] as const;
 
 type Shortcut = (typeof shortcuts)[number]["id"];
