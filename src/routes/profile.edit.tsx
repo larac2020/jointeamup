@@ -44,49 +44,44 @@ function EditProfile() {
   const fileRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
 
+  // Cropper state — when an image is picked we open the modal first.
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<"avatar" | "photo" | null>(null);
+
   const [bio, setBio] = useState("");
   const [experience, setExperience] = useState("");
   const [lookingFor, setLookingFor] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
 
-  const handleAvatarUpload = async (file: File) => {
-    if (!session) return;
+  const pickFile = async (file: File, target: "avatar" | "photo") => {
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
-    setUploading(true);
+    if (file.size > 15 * 1024 * 1024) { toast.error("Max 15MB"); return; }
+    if (target === "photo" && photos.length >= 4) { toast.error("Up to 4 extra photos (5 total)"); return; }
+    const src = await fileToDataUrl(file);
+    setCropSrc(src);
+    setCropTarget(target);
+  };
+
+  const uploadBlob = async (blob: Blob, kind: "avatar" | "photo") => {
+    if (!session) return;
+    const setBusy = kind === "avatar" ? setUploading : setUploadingPhoto;
+    setBusy(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${session.user.id}/avatar-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+      const path = `${session.user.id}/${kind}-${Date.now()}.jpg`;
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
       if (error) throw error;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      setAvatarUrl(data.publicUrl);
+      if (kind === "avatar") setAvatarUrl(data.publicUrl);
+      else setPhotos((cur) => [...cur, data.publicUrl]);
       toast.success("Photo uploaded — don't forget to save");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
-      setUploading(false);
-    }
-  };
-
-  const handlePhotoUpload = async (file: File) => {
-    if (!session) return;
-    if (photos.length >= 4) { toast.error("Up to 4 extra photos (5 total)"); return; }
-    if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
-    setUploadingPhoto(true);
-    try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${session.user.id}/photo-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
-      if (error) throw error;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      setPhotos([...photos, data.publicUrl]);
-      toast.success("Photo added — don't forget to save");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploadingPhoto(false);
+      setBusy(false);
+      setCropSrc(null);
+      setCropTarget(null);
     }
   };
 
