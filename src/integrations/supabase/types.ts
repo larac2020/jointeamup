@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      competition_sources: {
+        Row: {
+          competition_type: string
+          last_error: string | null
+          last_scraped_at: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          competition_type: string
+          last_error?: string | null
+          last_scraped_at?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          competition_type?: string
+          last_error?: string | null
+          last_scraped_at?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      competition_suggestions: {
+        Row: {
+          competition_type: string
+          created_at: string
+          id: string
+          name: string
+          submitted_by: string
+        }
+        Insert: {
+          competition_type: string
+          created_at?: string
+          id?: string
+          name: string
+          submitted_by: string
+        }
+        Update: {
+          competition_type?: string
+          created_at?: string
+          id?: string
+          name?: string
+          submitted_by?: string
+        }
+        Relationships: []
+      }
+      competitions: {
+        Row: {
+          competition_type: string
+          created_at: string
+          event_date: string | null
+          id: string
+          location: string | null
+          name: string
+          source_url: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          competition_type: string
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          source_url?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          competition_type?: string
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          source_url?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string

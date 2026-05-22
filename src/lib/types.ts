@@ -89,7 +89,7 @@ export const listingTypeMeta: Record<ListingType, { label: string; tone: string 
   "join-team": { label: "Looking for team", tone: "bg-secondary text-secondary-foreground" },
 };
 
-export const competitionTypes = ["HYROX", "Turf Games", "DEKA", "CrossFit", "Spartan"] as const;
+export const competitionTypes = ["HYROX", "Turf Games", "DEKA", "CrossFit", "Spartan", "Other"] as const;
 export const formats: Format[] = ["Individual", "Doubles", "Team"];
 export const skillLevels: SkillLevel[] = ["Beginner", "Intermediate", "Advanced", "Elite"];
 export const genders: Gender[] = ["Men", "Women", "Mixed", "Open"];

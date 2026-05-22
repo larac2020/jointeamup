@@ -22,6 +22,7 @@ import { Route as ProfileIdRouteImport } from './routes/profile.$id'
 import { Route as ListingsNewRouteImport } from './routes/listings.new'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
 import { Route as ListingsIdEditRouteImport } from './routes/listings.$id.edit'
+import { Route as ApiPublicHooksRefreshCompetitionsRouteImport } from './routes/api/public/hooks/refresh-competitions'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -88,6 +89,12 @@ const ListingsIdEditRoute = ListingsIdEditRouteImport.update({
   path: '/edit',
   getParentRoute: () => ListingsIdRoute,
 } as any)
+const ApiPublicHooksRefreshCompetitionsRoute =
+  ApiPublicHooksRefreshCompetitionsRouteImport.update({
+    id: '/api/public/hooks/refresh-competitions',
+    path: '/api/public/hooks/refresh-competitions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/profile/$id': typeof ProfileIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/listings/$id/edit': typeof ListingsIdEditRoute
+  '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +126,7 @@ export interface FileRoutesByTo {
   '/profile/$id': typeof ProfileIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/listings/$id/edit': typeof ListingsIdEditRoute
+  '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +143,7 @@ export interface FileRoutesById {
   '/profile/$id': typeof ProfileIdRoute
   '/profile/edit': typeof ProfileEditRoute
   '/listings/$id/edit': typeof ListingsIdEditRoute
+  '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/profile/$id'
     | '/profile/edit'
     | '/listings/$id/edit'
+    | '/api/public/hooks/refresh-competitions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/profile/$id'
     | '/profile/edit'
     | '/listings/$id/edit'
+    | '/api/public/hooks/refresh-competitions'
   id:
     | '__root__'
     | '/'
@@ -181,6 +193,7 @@ export interface FileRouteTypes {
     | '/profile/$id'
     | '/profile/edit'
     | '/listings/$id/edit'
+    | '/api/public/hooks/refresh-competitions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -196,6 +209,7 @@ export interface RootRouteChildren {
   ListingsNewRoute: typeof ListingsNewRoute
   ProfileIdRoute: typeof ProfileIdRoute
   ProfileEditRoute: typeof ProfileEditRoute
+  ApiPublicHooksRefreshCompetitionsRoute: typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -291,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsIdEditRouteImport
       parentRoute: typeof ListingsIdRoute
     }
+    '/api/public/hooks/refresh-competitions': {
+      id: '/api/public/hooks/refresh-competitions'
+      path: '/api/public/hooks/refresh-competitions'
+      fullPath: '/api/public/hooks/refresh-competitions'
+      preLoaderRoute: typeof ApiPublicHooksRefreshCompetitionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -319,6 +340,8 @@ const rootRouteChildren: RootRouteChildren = {
   ListingsNewRoute: ListingsNewRoute,
   ProfileIdRoute: ProfileIdRoute,
   ProfileEditRoute: ProfileEditRoute,
+  ApiPublicHooksRefreshCompetitionsRoute:
+    ApiPublicHooksRefreshCompetitionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
