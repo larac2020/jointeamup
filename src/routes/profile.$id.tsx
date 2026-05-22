@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { Dumbbell, LogOut, MapPin, MessageSquare, Settings, Share2, Skull, Sparkles, Trophy } from "lucide-react";
+import { Dumbbell, LogOut, MapPin, MessageSquare, Settings, Share2, Skull, Sparkles, Target, Trophy, Zap } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { useAuth } from "@/lib/auth";
