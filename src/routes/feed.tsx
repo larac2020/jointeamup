@@ -4,9 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Plus, Search as SearchIcon, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
-import { AthleteCard } from "@/components/AthleteCard";
 import { listListings } from "@/lib/listings.functions";
-import { listProfiles } from "@/lib/profiles.functions";
 import { competitionTypes, formats, skillLevels } from "@/lib/types";
 
 export const Route = createFileRoute("/feed")({
