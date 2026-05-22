@@ -84,7 +84,7 @@ function Profile() {
                 )}
               </div>
 
-              <div className="flex gap-2 pb-2">
+              <div className="flex gap-2">
                 {isMe ? (
                   <>
                     <Link to="/profile/edit" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95">
