@@ -2,16 +2,16 @@ import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, MessageSquare, Plus, Search, User, Zap } from "lucide-react";
+import { Bell, MessageSquare, Plus, User, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { unreadMessageCount } from "@/lib/messages.functions";
 import { unreadNotificationCount } from "@/lib/notifications.functions";
 
 const navItems = [
-  { to: "/feed", label: "Feed" },
-  { to: "/search", label: "Search" },
+  { to: "/feed", label: "Browse" },
 ] as const;
+
 
 export function Header() {
   const { user } = useAuth();
@@ -75,9 +75,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Link to="/search" className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground md:hidden">
-            <Search className="h-5 w-5" />
-          </Link>
+
           {user && (
             <>
               {/* Desktop: full Post button */}
