@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ProfilePublic } from "@/lib/types";
 
 const COLS =
-  "id, first_name, nickname, avatar_url, lives_in, sports, age, from_location, gyms, competitions, prs, superpower, kryptonite";
+  "id, first_name, nickname, avatar_url, lives_in, sports, age, from_location, gyms, competitions, prs, superpower, kryptonite, bio, experience, looking_for, photos";
 
 export const getProfile = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
