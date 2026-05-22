@@ -1,7 +1,7 @@
 export type ListingType = "selling-ticket" | "need-teammate" | "join-team";
 export type Format = "Individual" | "Doubles" | "Team";
 export type Gender = "Men" | "Women" | "Mixed" | "Open";
-export type SkillLevel = "Beginner" | "Intermediate" | "Advanced" | "Elite";
+export type SkillLevel = string;
 
 export type AuthorBrief = {
   id: string;
@@ -91,7 +91,24 @@ export const listingTypeMeta: Record<ListingType, { label: string; tone: string 
 
 export const competitionTypes = ["HYROX", "Turf Games", "DEKA", "CrossFit", "Spartan", "Other"] as const;
 export const formats: Format[] = ["Individual", "Doubles", "Team"];
-export const skillLevels: SkillLevel[] = ["Beginner", "Intermediate", "Advanced", "Elite"];
+export const skillLevelsByType: Record<string, string[]> = {
+  HYROX: ["Open", "Pro"],
+  CrossFit: ["Scaled", "RX", "Elite"],
+  DEKA: ["Fit", "Strong", "Elite"],
+  "Turf Games": ["Open", "Elite"],
+  Spartan: ["Open", "Age Group", "Elite"],
+  Other: ["Open"],
+};
+
+const defaultSkillLevels = ["Open"];
+
+export function getSkillLevels(competitionType: string | undefined | null): string[] {
+  if (!competitionType) return defaultSkillLevels;
+  return skillLevelsByType[competitionType] ?? defaultSkillLevels;
+}
+
+/** @deprecated use getSkillLevels(competition_type) */
+export const skillLevels: string[] = ["Open", "Pro", "Scaled", "RX", "Elite", "Fit", "Strong", "Age Group"];
 export const genders: Gender[] = ["Men", "Women", "Mixed", "Open"];
 
 export const fallbackAvatar = (seed: string) =>

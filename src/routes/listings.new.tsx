@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/lib/auth";
 import { createListing } from "@/lib/listings.functions";
-import { competitionTypes, formats, genders, skillLevels } from "@/lib/types";
+import { competitionTypes, formats, genders, getSkillLevels } from "@/lib/types";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 
 export const Route = createFileRoute("/listings/new")({
@@ -32,7 +32,7 @@ function NewListing() {
     event_date: "",
     location: "",
     format: "Individual" as (typeof formats)[number],
-    skill_level: "Intermediate" as (typeof skillLevels)[number],
+    skill_level: "Open" as string,
     gender: "Open" as (typeof genders)[number],
     spots: 1,
     description: "",
@@ -90,7 +90,11 @@ function NewListing() {
             <Field label="Competition type">
               <select
                 value={form.competition_type}
-                onChange={(e) => setForm({ ...form, competition_type: e.target.value, competition: "" })}
+                onChange={(e) => {
+                  const ct = e.target.value;
+                  const levels = getSkillLevels(ct);
+                  setForm((f) => ({ ...f, competition_type: ct, competition: "", skill_level: levels.includes(f.skill_level) ? f.skill_level : levels[0] }));
+                }}
                 className={inputCls}
               >
                 {competitionTypes.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -120,8 +124,8 @@ function NewListing() {
               </select>
             </Field>
             <Field label="Skill level">
-              <select value={form.skill_level} onChange={(e) => setForm({ ...form, skill_level: e.target.value as any })} className={inputCls}>
-                {skillLevels.map((s) => <option key={s} value={s}>{s}</option>)}
+              <select value={form.skill_level} onChange={(e) => setForm({ ...form, skill_level: e.target.value })} className={inputCls}>
+                {getSkillLevels(form.competition_type).map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </Field>
             <Field label="Category">

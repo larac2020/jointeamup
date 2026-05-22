@@ -1,56 +1,40 @@
-# Competition picker with web-sourced names
-
 ## Goal
-On the post-listing form (and edit form), upgrade the two competition fields:
-1. **Competition type** (HYROX, DEKA, …) — add an `Other` option.
-2. **Competition name** — replace the free-text input with a searchable dropdown of real 2026 events for the chosen type, scraped from each brand's official calendar, with an "Other / not listed" fallback that records the user's typed name for review.
 
-## How it works
+Make the skill-level options depend on the competition type, since each brand uses different category names (HYROX = Open/Pro, CrossFit = RX/Scaled, etc.) instead of the generic Beginner→Elite scale used everywhere today.
 
-### Data model (new tables)
-- `competitions` — cached scraped events
-  - `competition_type` (text, e.g. HYROX, DEKA…)
-  - `name` (text, e.g. "HYROX Berlin")
-  - `event_date` (date, nullable)
-  - `location` (text, nullable)
-  - `source_url` (text)
-  - `year` (int)
-  - unique on (competition_type, name, year)
-- `competition_sources` — one row per type with the calendar URL + `last_scraped_at`
-- `competition_suggestions` — user-submitted "Other" entries pending review
-  - `competition_type`, `name`, `submitted_by`, `created_at`
+## Proposed per-type levels
 
-RLS:
-- `competitions`, `competition_sources` — readable by authenticated users; writes via admin server fn only.
-- `competition_suggestions` — users insert their own; only owner can read theirs.
+- **HYROX**: Open, Pro
+- **CrossFit**: Scaled, RX, Elite
+- **DEKA**: Fit, Strong, Elite
+- **Turf Games**: Open, Elite
+- **Spartan**: Open, Age Group, Elite
+- **Other**: Open (single neutral default)
 
-### Scraping (Firecrawl connector)
-- Server function `refreshCompetitions(type)` calls Firecrawl `scrape` with JSON extraction on the brand's calendar page (HYROX, Turf Games, DEKA, CrossFit, Spartan). Each type has a known source URL stored in `competition_sources`.
-- `listCompetitions(type)` server fn returns cached rows; if `last_scraped_at` for that type is older than 7 days, it triggers a background refresh and still returns current cache.
-- A `pg_cron` weekly job calls `/api/public/hooks/refresh-competitions` to refresh all types.
+(Easy to tweak — tell me if you want different labels.)
 
-### Form UX changes (`/listings/new` and `/listings/$id/edit`)
-- Competition type select gains `Other`.
-- Competition name becomes a combobox (search input + dropdown of scraped names for the chosen type). Last item: "+ Other competition not listed".
-- When `Other` (type) or "not listed" (name) is chosen, a free text input appears and on submit the entry is also stored in `competition_suggestions`.
+## Changes
 
-## Technical notes
-- Firecrawl is not yet linked — I'll prompt to connect it before writing scraping code.
-- Source URLs (initial seed):
-  - HYROX → `hyrox.com/find-my-race/`
-  - DEKA → `dekafit.com/events`
-  - Turf Games → `turfgames.com/events`
-  - CrossFit (Semifinals/Open events) → `games.crossfit.com/schedule`
-  - Spartan → `spartan.com/en/race/find-race`
-- Scraper uses Firecrawl JSON extraction (`{ events: [{ name, date, location }] }`) so the schema stays consistent across sources.
-- Search/filter in the dropdown is client-side over the cached list (typically <500 rows per type).
-- Server fns: `listCompetitions`, `refreshCompetitions` (admin), `suggestCompetition`.
-- Add `"Other"` to `competitionTypes` in `src/lib/types.ts`.
+### 1. Database
+- Drop the restrictive `skill_level` Postgres enum and change `listings.skill_level` to plain `text` (validation moves to the app). This keeps history intact (`Beginner/Intermediate/...` rows stay readable) and lets us add new brand-specific values without future migrations.
 
-## Files touched
-- New: migration for 3 tables + RLS, `src/lib/competitions.functions.ts`, `src/lib/competitions.server.ts`, `src/components/CompetitionPicker.tsx`, `src/routes/api/public/hooks/refresh-competitions.ts`.
-- Edited: `src/lib/types.ts`, `src/routes/listings.new.tsx`, `src/routes/listings.$id.edit.tsx`.
-- Cron job inserted via insert tool.
+### 2. Shared config (`src/lib/types.ts`)
+- Replace the single `skillLevels` array with a `skillLevelsByType: Record<CompetitionType, string[]>` map plus a helper `getSkillLevels(type)` that falls back to a default list for unknown types.
+- `SkillLevel` becomes `string` (validated against the map at the form layer).
 
-## Open dependency
-Firecrawl connector must be linked first — I'll trigger the connect flow at the start of implementation.
+### 3. Forms — `listings.new.tsx` and `listings.$id.edit.tsx`
+- The skill-level `<select>` is driven by `getSkillLevels(form.competition_type)`.
+- When the user changes competition type, reset `skill_level` to the first option of the new list (prevents invalid combos like HYROX + Intermediate).
+- Server validators in `listings.functions.ts` switch from `z.enum([...])` to `z.string().min(1)` (per-type whitelist enforced in the handler against the same map).
+
+### 4. Browse filters — `feed.tsx`
+- Skill-level filter becomes context-aware: shown only when a competition type filter is active, listing that type's levels. When no type is selected, hide the skill-level filter (or show "All levels" only) to avoid meaningless cross-brand options.
+
+### 5. Display
+- `ListingCard` and `/listings/:id` already render `skill_level` as a string — no change beyond the DB type widening.
+
+## Out of scope
+- Migrating existing rows to new labels (e.g. rewriting "Intermediate" HYROX listings to "Open"). Existing rows keep their current label until the owner edits the listing.
+- Changing the profile experience field (still uses the generic scale).
+
+Confirm the per-type label lists above and I'll implement.

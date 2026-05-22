@@ -160,7 +160,7 @@ export type Database = {
           id: string
           is_active: boolean
           location: string
-          skill_level: Database["public"]["Enums"]["skill_level"]
+          skill_level: string
           spots: number
           type: Database["public"]["Enums"]["listing_type"]
         }
@@ -176,7 +176,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           location: string
-          skill_level: Database["public"]["Enums"]["skill_level"]
+          skill_level: string
           spots?: number
           type: Database["public"]["Enums"]["listing_type"]
         }
@@ -192,7 +192,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           location?: string
-          skill_level?: Database["public"]["Enums"]["skill_level"]
+          skill_level?: string
           spots?: number
           type?: Database["public"]["Enums"]["listing_type"]
         }
@@ -425,7 +425,6 @@ export type Database = {
       format_type: "Individual" | "Doubles" | "Team"
       gender_cat: "Men" | "Women" | "Mixed" | "Open"
       listing_type: "selling-ticket" | "need-teammate" | "join-team"
-      skill_level: "Beginner" | "Intermediate" | "Advanced" | "Elite"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -556,7 +555,6 @@ export const Constants = {
       format_type: ["Individual", "Doubles", "Team"],
       gender_cat: ["Men", "Women", "Mixed", "Open"],
       listing_type: ["selling-ticket", "need-teammate", "join-team"],
-      skill_level: ["Beginner", "Intermediate", "Advanced", "Elite"],
     },
   },
 } as const

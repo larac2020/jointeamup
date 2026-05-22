@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Plus, Search as SearchIcon, X } from "lucide
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { listListings } from "@/lib/listings.functions";
-import { competitionTypes, formats, skillLevels } from "@/lib/types";
+import { competitionTypes, formats, getSkillLevels } from "@/lib/types";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Browse — TeamUp" }] }),
@@ -109,9 +109,9 @@ function Feed() {
                     className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
                   />
                 </div>
-                <Select label="Competition" value={comp} onChange={setComp} options={[...competitionTypes]} />
+                <Select label="Competition" value={comp} onChange={(v) => { setComp(v); setLevel(""); }} options={[...competitionTypes]} />
                 <Select label="Format" value={format} onChange={setFormat} options={[...formats]} />
-                <Select label="Skill level" value={level} onChange={setLevel} options={[...skillLevels]} />
+                {comp && <Select label="Skill level" value={level} onChange={setLevel} options={getSkillLevels(comp)} />}
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Location</label>
                   <input
