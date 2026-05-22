@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Plus, Search as SearchIcon, X } from "lucide
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { listListings } from "@/lib/listings.functions";
-import { competitionTypes, formats, skillLevels } from "@/lib/types";
+import { competitionTypes, formats, getSkillLevels } from "@/lib/types";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Browse — TeamUp" }] }),
