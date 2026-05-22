@@ -32,7 +32,7 @@ function NewListing() {
     event_date: "",
     location: "",
     format: "Individual" as (typeof formats)[number],
-    skill_level: "Intermediate" as (typeof skillLevels)[number],
+    skill_level: "Open" as string,
     gender: "Open" as (typeof genders)[number],
     spots: 1,
     description: "",
