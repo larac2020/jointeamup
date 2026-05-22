@@ -109,7 +109,11 @@ function EditListing() {
             <Field label="Competition type">
               <select
                 value={form.competition_type}
-                onChange={(e) => setForm({ ...form, competition_type: e.target.value, competition: "" })}
+                onChange={(e) => {
+                  const ct = e.target.value;
+                  const levels = getSkillLevels(ct);
+                  setForm((f) => ({ ...f, competition_type: ct, competition: "", skill_level: levels.includes(f.skill_level) ? f.skill_level : levels[0] }));
+                }}
                 className={inputCls}
               >
                 {competitionTypes.map((c) => <option key={c} value={c}>{c}</option>)}
