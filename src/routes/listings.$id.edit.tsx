@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/lib/auth";
 import { getListing, updateListing } from "@/lib/listings.functions";
 import { competitionTypes, formats, genders, skillLevels } from "@/lib/types";
+import { CompetitionPicker } from "@/components/CompetitionPicker";
 
 export const Route = createFileRoute("/listings/$id/edit")({
   head: () => ({ meta: [{ title: "Edit listing — TeamUp" }] }),
