@@ -48,6 +48,9 @@ function Onboarding() {
   const [sports, setSports] = useState<string[]>([]);
   const [superpower, setSuperpower] = useState("");
   const [kryptonite, setKryptonite] = useState("");
+  const [bio, setBio] = useState("");
+  const [experience, setExperience] = useState("");
+  const [gym, setGym] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
