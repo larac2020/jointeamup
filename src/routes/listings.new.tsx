@@ -124,8 +124,8 @@ function NewListing() {
               </select>
             </Field>
             <Field label="Skill level">
-              <select value={form.skill_level} onChange={(e) => setForm({ ...form, skill_level: e.target.value as any })} className={inputCls}>
-                {skillLevels.map((s) => <option key={s} value={s}>{s}</option>)}
+              <select value={form.skill_level} onChange={(e) => setForm({ ...form, skill_level: e.target.value })} className={inputCls}>
+                {getSkillLevels(form.competition_type).map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </Field>
             <Field label="Category">
