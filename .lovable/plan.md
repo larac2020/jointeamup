@@ -1,36 +1,56 @@
-## Add dummy conversations
+# Competition picker with web-sourced names
 
-Seed 4 conversations between **Lara** (real user) and demo athletes, with 3–5 messages each. Tied to existing listings to feel realistic.
+## Goal
+On the post-listing form (and edit form), upgrade the two competition fields:
+1. **Competition type** (HYROX, DEKA, …) — add an `Other` option.
+2. **Competition name** — replace the free-text input with a searchable dropdown of real 2026 events for the chosen type, scraped from each brand's official calendar, with an "Other / not listed" fallback that records the user's typed name for review.
 
-### Conversations
+## How it works
 
-1. **Lara ↔ Mara** — about `HYROX Berlin 2026 / need-teammate` listing
-   - Mara: "Hey! Saw you're into HYROX too — still looking for a Doubles partner for Berlin?"
-   - Lara: "Yes! What's your target time?"
-   - Mara: "Sub 1:10. You?"
-   - Lara: "Same range. Let's do a trial session next week."
+### Data model (new tables)
+- `competitions` — cached scraped events
+  - `competition_type` (text, e.g. HYROX, DEKA…)
+  - `name` (text, e.g. "HYROX Berlin")
+  - `event_date` (date, nullable)
+  - `location` (text, nullable)
+  - `source_url` (text)
+  - `year` (int)
+  - unique on (competition_type, name, year)
+- `competition_sources` — one row per type with the calendar URL + `last_scraped_at`
+- `competition_suggestions` — user-submitted "Other" entries pending review
+  - `competition_type`, `name`, `submitted_by`, `created_at`
 
-2. **Lara ↔ Liam** — about `HYROX Amsterdam / selling-ticket`
-   - Lara: "Hi, is the Amsterdam ticket still available?"
-   - Liam: "Yes, women's open. €95, transfer via official portal."
-   - Lara: "Perfect, I'll take it. Send the transfer link?"
+RLS:
+- `competitions`, `competition_sources` — readable by authenticated users; writes via admin server fn only.
+- `competition_suggestions` — users insert their own; only owner can read theirs.
 
-3. **Lara ↔ Sofia** — about `HYROX Milan / join-team`
-   - Sofia: "Hey Lara — saw your profile, would you consider joining our Milan team?"
-   - Lara: "Tell me more — what format and level?"
-   - Sofia: "Mixed Doubles, sub 1:15 target. We train 4x/week."
+### Scraping (Firecrawl connector)
+- Server function `refreshCompetitions(type)` calls Firecrawl `scrape` with JSON extraction on the brand's calendar page (HYROX, Turf Games, DEKA, CrossFit, Spartan). Each type has a known source URL stored in `competition_sources`.
+- `listCompetitions(type)` server fn returns cached rows; if `last_scraped_at` for that type is older than 7 days, it triggers a background refresh and still returns current cache.
+- A `pg_cron` weekly job calls `/api/public/hooks/refresh-competitions` to refresh all types.
 
-4. **Lara ↔ Nora** — about `Turf Games Copenhagen / join-team`
-   - Nora: "Hi! Looking for a 4th for Turf Games Copenhagen — interested?"
-   - Lara: "Maybe! What's the experience level of the team?"
-   - Nora: "All sub-elite, 2 RX finishers. You'd fit perfectly."
-   - Lara: "Sounds great. Let's chat on a call this week."
+### Form UX changes (`/listings/new` and `/listings/$id/edit`)
+- Competition type select gains `Other`.
+- Competition name becomes a combobox (search input + dropdown of scraped names for the chosen type). Last item: "+ Other competition not listed".
+- When `Other` (type) or "not listed" (name) is chosen, a free text input appears and on submit the entry is also stored in `competition_suggestions`.
 
-### Technical
+## Technical notes
+- Firecrawl is not yet linked — I'll prompt to connect it before writing scraping code.
+- Source URLs (initial seed):
+  - HYROX → `hyrox.com/find-my-race/`
+  - DEKA → `dekafit.com/events`
+  - Turf Games → `turfgames.com/events`
+  - CrossFit (Semifinals/Open events) → `games.crossfit.com/schedule`
+  - Spartan → `spartan.com/en/race/find-race`
+- Scraper uses Firecrawl JSON extraction (`{ events: [{ name, date, location }] }`) so the schema stays consistent across sources.
+- Search/filter in the dropdown is client-side over the cached list (typically <500 rows per type).
+- Server fns: `listCompetitions`, `refreshCompetitions` (admin), `suggestCompetition`.
+- Add `"Other"` to `competitionTypes` in `src/lib/types.ts`.
 
-- Insert into `conversations` (user_a = Lara, user_b = demo, listing_id set).
-- Insert messages with `sender_id`, `recipient_id`, `conversation_id`, staggered `created_at` timestamps (oldest first, last message within past 24h).
-- Update `conversations.last_message_at` to match the latest message per thread (trigger handles this on insert, but we set explicitly to be safe).
-- All marked unread (no `read_at`) on the last 1–2 incoming messages so Lara sees unread badges.
+## Files touched
+- New: migration for 3 tables + RLS, `src/lib/competitions.functions.ts`, `src/lib/competitions.server.ts`, `src/components/CompetitionPicker.tsx`, `src/routes/api/public/hooks/refresh-competitions.ts`.
+- Edited: `src/lib/types.ts`, `src/routes/listings.new.tsx`, `src/routes/listings.$id.edit.tsx`.
+- Cron job inserted via insert tool.
 
-Uses `supabase--insert`. No schema changes.
+## Open dependency
+Firecrawl connector must be linked first — I'll trigger the connect flow at the start of implementation.
