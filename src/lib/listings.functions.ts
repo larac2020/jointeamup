@@ -15,7 +15,7 @@ const filterSchema = z.object({
   limit: z.number().min(1).max(100).optional(),
 }).default({});
 
-const AUTHOR_COLS = "id, first_name, nickname, avatar_url, lives_in, sports";
+const AUTHOR_COLS = "id, first_name, nickname, avatar_url, lives_in, sports, age, experience, bio";
 
 export const listListings = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => filterSchema.parse(input))

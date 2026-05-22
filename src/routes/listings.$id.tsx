@@ -101,17 +101,39 @@ function ListingDetail() {
             </div>
           </div>
           {author && (
-            <div className="flex items-center justify-between gap-4 border-t border-border bg-muted/30 p-6">
-              <Link to="/profile/$id" params={{ id: author.id }} className="flex items-center gap-3 group">
-                <img src={author.avatar_url ?? fallbackAvatar(author.id)} alt={author.first_name} className="h-14 w-14 rounded-xl bg-muted" />
-                <div>
-                  <p className="font-display text-xl tracking-wide group-hover:text-primary">{author.first_name}{author.nickname && ` "${author.nickname}"`}</p>
-                  <p className="text-xs text-muted-foreground">{author.lives_in ?? "—"} · {author.sports.slice(0,2).join(" · ")}</p>
+            <div className="border-t border-border bg-muted/30 p-6">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Posted by</p>
+              <div className="mt-3 flex items-start gap-4">
+                <Link to="/profile/$id" params={{ id: author.id }} className="shrink-0">
+                  <img src={author.avatar_url ?? fallbackAvatar(author.id)} alt={author.first_name} className="h-16 w-16 rounded-xl bg-muted object-cover" />
+                </Link>
+                <div className="min-w-0 flex-1">
+                  <Link to="/profile/$id" params={{ id: author.id }} className="group inline-flex items-baseline gap-2">
+                    <span className="font-display text-2xl tracking-wide group-hover:text-primary">
+                      {author.first_name}{author.nickname && ` "${author.nickname}"`}
+                    </span>
+                    {author.age && <span className="text-sm text-muted-foreground">· {author.age}</span>}
+                  </Link>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {author.lives_in ?? "—"}
+                    {author.experience && ` · ${author.experience}`}
+                    {author.sports.length > 0 && ` · ${author.sports.slice(0, 3).join(" · ")}`}
+                  </p>
+                  {author.bio && (
+                    <p className="mt-2 line-clamp-2 text-sm text-foreground/85">{author.bio}</p>
+                  )}
+                  <Link
+                    to="/profile/$id"
+                    params={{ id: author.id }}
+                    className="mt-3 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:underline"
+                  >
+                    View full profile →
+                  </Link>
                 </div>
-              </Link>
-              <button className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card hover:bg-accent">
-                <Share2 className="h-4 w-4" />
-              </button>
+                <button className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-card hover:bg-accent">
+                  <Share2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           )}
         </div>

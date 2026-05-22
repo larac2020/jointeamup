@@ -10,6 +10,9 @@ export type AuthorBrief = {
   avatar_url: string | null;
   lives_in: string | null;
   sports: string[];
+  age: number | null;
+  experience: string | null;
+  bio: string | null;
 };
 
 export type ListingRow = {

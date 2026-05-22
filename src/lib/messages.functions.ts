@@ -50,7 +50,7 @@ export const listMyConversations = createServerFn({ method: "POST" })
       const otherId = c.user_a === userId ? c.user_b : c.user_a;
       const other =
         profMap[otherId] ??
-        ({ id: otherId, first_name: "Athlete", nickname: null, avatar_url: null, lives_in: null, sports: [] } as AuthorBrief);
+        ({ id: otherId, first_name: "Athlete", nickname: null, avatar_url: null, lives_in: null, sports: [], age: null, experience: null, bio: null } as AuthorBrief);
       return {
         id: c.id,
         other,
