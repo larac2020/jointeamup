@@ -90,7 +90,7 @@ export const listingTypeMeta: Record<ListingType, { label: string; tone: string 
 };
 
 export const competitionTypes = ["HYROX", "Turf Games", "DEKA", "CrossFit", "Spartan", "Other"] as const;
-export const formats: Format[] = ["Individual", "Doubles", "Team"];
+export const formats: Format[] = ["Individual", "Doubles", "Team", "Relay"];
 export const skillLevelsByType: Record<string, string[]> = {
   HYROX: ["Open", "Pro"],
   CrossFit: ["Scaled", "RX", "Elite"],
