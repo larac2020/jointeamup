@@ -8,7 +8,7 @@ const filterSchema = z.object({
   type: z.enum(["selling-ticket", "need-teammate", "join-team"]).optional(),
   competition_type: z.string().min(1).max(60).optional(),
   format: z.enum(["Individual", "Doubles", "Team"]).optional(),
-  skill_level: z.enum(["Beginner", "Intermediate", "Advanced", "Elite"]).optional(),
+  skill_level: z.string().min(1).max(40).optional(),
   gender: z.enum(["Men", "Women", "Mixed", "Open"]).optional(),
   location: z.string().min(1).max(80).optional(),
   query: z.string().min(1).max(120).optional(),
