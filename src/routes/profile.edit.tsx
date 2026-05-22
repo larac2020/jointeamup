@@ -106,6 +106,10 @@ function EditProfile() {
     setGyms(profile.gyms ?? []);
     setComps(profile.competitions ?? []);
     setPrs(profile.prs ?? []);
+    setBio(profile.bio ?? "");
+    setExperience(profile.experience ?? "");
+    setLookingFor(profile.looking_for ?? "");
+    setPhotos(profile.photos ?? []);
   }, [profile]);
 
   const mutation = useMutation({
@@ -124,6 +128,10 @@ function EditProfile() {
           gyms,
           competitions: comps,
           prs,
+          bio: bio.trim() || null,
+          experience: experience.trim() || null,
+          looking_for: lookingFor.trim() || null,
+          photos,
           onboarded: true,
         },
       }),
