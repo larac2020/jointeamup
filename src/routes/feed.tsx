@@ -164,10 +164,7 @@ function EmptyState() {
   return (
     <div className="rounded-2xl border border-dashed border-border p-10 text-center">
       <p className="font-display text-2xl">Nothing matches</p>
-      <p className="mt-1 text-sm text-muted-foreground">Try adjusting your filters or post the first listing.</p>
-      <Link to="/listings/new" className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
-        <Plus className="h-4 w-4" /> Post a listing
-      </Link>
+      <p className="mt-1 text-sm text-muted-foreground">Try adjusting your filters.</p>
     </div>
   );
 }
