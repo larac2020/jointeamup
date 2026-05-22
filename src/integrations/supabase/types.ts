@@ -422,7 +422,7 @@ export type Database = {
       }
     }
     Enums: {
-      format_type: "Individual" | "Doubles" | "Team"
+      format_type: "Individual" | "Doubles" | "Team" | "Relay"
       gender_cat: "Men" | "Women" | "Mixed" | "Open"
       listing_type: "selling-ticket" | "need-teammate" | "join-team"
     }
@@ -552,7 +552,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      format_type: ["Individual", "Doubles", "Team"],
+      format_type: ["Individual", "Doubles", "Team", "Relay"],
       gender_cat: ["Men", "Women", "Mixed", "Open"],
       listing_type: ["selling-ticket", "need-teammate", "join-team"],
     },

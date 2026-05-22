@@ -7,7 +7,7 @@ import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
 const filterSchema = z.object({
   type: z.enum(["selling-ticket", "need-teammate", "join-team"]).optional(),
   competition_type: z.string().min(1).max(60).optional(),
-  format: z.enum(["Individual", "Doubles", "Team"]).optional(),
+  format: z.enum(["Individual", "Doubles", "Team", "Relay"]).optional(),
   skill_level: z.string().min(1).max(40).optional(),
   gender: z.enum(["Men", "Women", "Mixed", "Open"]).optional(),
   location: z.string().min(1).max(80).optional(),
@@ -88,7 +88,7 @@ const createSchema = z.object({
   competition_type: z.string().min(1).max(60),
   event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   location: z.string().min(2).max(120),
-  format: z.enum(["Individual", "Doubles", "Team"]),
+  format: z.enum(["Individual", "Doubles", "Team", "Relay"]),
   skill_level: z.string().min(1).max(40),
   gender: z.enum(["Men", "Women", "Mixed", "Open"]).optional().nullable(),
   spots: z.number().int().min(1).max(20),

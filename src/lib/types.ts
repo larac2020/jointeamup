@@ -1,5 +1,5 @@
 export type ListingType = "selling-ticket" | "need-teammate" | "join-team";
-export type Format = "Individual" | "Doubles" | "Team";
+export type Format = "Individual" | "Doubles" | "Team" | "Relay";
 export type Gender = "Men" | "Women" | "Mixed" | "Open";
 export type SkillLevel = string;
 
@@ -90,7 +90,7 @@ export const listingTypeMeta: Record<ListingType, { label: string; tone: string 
 };
 
 export const competitionTypes = ["HYROX", "Turf Games", "DEKA", "CrossFit", "Spartan", "Other"] as const;
-export const formats: Format[] = ["Individual", "Doubles", "Team"];
+export const formats: Format[] = ["Individual", "Doubles", "Team", "Relay"];
 export const skillLevelsByType: Record<string, string[]> = {
   HYROX: ["Open", "Pro"],
   CrossFit: ["Scaled", "RX", "Elite"],
