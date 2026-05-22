@@ -1,5 +1,5 @@
 export type ListingType = "selling-ticket" | "need-teammate" | "join-team";
-export type Format = "Individual" | "Doubles" | "Team";
+export type Format = "Individual" | "Doubles" | "Team" | "Relay";
 export type Gender = "Men" | "Women" | "Mixed" | "Open";
 export type SkillLevel = string;
 
