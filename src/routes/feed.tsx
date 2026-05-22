@@ -106,18 +106,14 @@ function Feed() {
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={mode === "listings" ? "HYROX, Berlin…" : "Name, sport"}
+                    placeholder="HYROX, Berlin…"
                     maxLength={120}
                     className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
                   />
                 </div>
-                <Select label={mode === "athletes" ? "Sport" : "Competition"} value={comp} onChange={setComp} options={[...competitionTypes]} />
-                {mode === "listings" && (
-                  <>
-                    <Select label="Format" value={format} onChange={setFormat} options={[...formats]} />
-                    <Select label="Skill level" value={level} onChange={setLevel} options={[...skillLevels]} />
-                  </>
-                )}
+                <Select label="Competition" value={comp} onChange={setComp} options={[...competitionTypes]} />
+                <Select label="Format" value={format} onChange={setFormat} options={[...formats]} />
+                <Select label="Skill level" value={level} onChange={setLevel} options={[...skillLevels]} />
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Location</label>
                   <input
