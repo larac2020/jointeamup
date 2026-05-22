@@ -1,12 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Filter, Plus } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
-import { listings, listingTypeMeta } from "@/lib/mock-data";
+import { listListings } from "@/lib/listings.functions";
+import { listingTypeMeta } from "@/lib/types";
+
+const listingsQO = queryOptions({
+  queryKey: ["listings", "feed"],
+  queryFn: () => listListings({ data: { limit: 60 } }),
+});
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Listings feed — TeamUp" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(listingsQO),
   component: Feed,
 });
 
@@ -18,20 +26,24 @@ const tabs = [
 ] as const;
 
 function Feed() {
+  const { data: listings } = useSuspenseQuery(listingsQO);
   const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("all");
-  const filtered = tab === "all" ? listings : listings.filter((l) => l.type === tab);
+  const filtered = useMemo(
+    () => (tab === "all" ? listings : listings.filter((l) => l.type === tab)),
+    [tab, listings],
+  );
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-magenta">Live feed</p>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-primary">Live feed</p>
             <h1 className="mt-1 font-display text-5xl tracking-wide">What's open</h1>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-full bg-warm px-5 py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-blaze hover:opacity-95">
+          <Link to="/listings/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95">
             <Plus className="h-4 w-4" /> Post
-          </button>
+          </Link>
         </div>
         <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2">
           {tabs.map((t) => {
@@ -52,7 +64,12 @@ function Feed() {
           {filtered.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border p-10 text-center">
               <p className="font-display text-2xl">Nothing here yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">Be the first to post a {listingTypeMeta[tab as keyof typeof listingTypeMeta]?.label.toLowerCase() ?? "listing"}.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Be the first to post a {listingTypeMeta[tab as keyof typeof listingTypeMeta]?.label.toLowerCase() ?? "listing"}.
+              </p>
+              <Link to="/listings/new" className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
+                <Plus className="h-4 w-4" /> Post a listing
+              </Link>
             </div>
           )}
         </div>
