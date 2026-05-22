@@ -13,7 +13,7 @@ const stats = [
 ];
 
 const features = [
-  { icon: Ticket, title: "Resell your bib", body: "Injured? Travelling? Pass your spot to another athlete in days, not weeks.", tone: "bg-warm" },
+  { icon: Ticket, title: "Resell your bib", body: "Missing a teammate before race day? Find another athlete based on level, location, and sport.", tone: "bg-warm" },
   { icon: Users, title: "Find a teammate", body: "Lost a partner before race day? Match with athletes by level, location and sport.", tone: "bg-cool" },
   { icon: MessagesSquare, title: "Connect directly", body: "We don't handle payments. We just connect supply and demand — the rest is up to you.", tone: "bg-secondary" },
 ];
