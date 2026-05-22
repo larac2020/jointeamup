@@ -1,7 +1,7 @@
 export type ListingType = "selling-ticket" | "need-teammate" | "join-team";
 export type Format = "Individual" | "Doubles" | "Team";
 export type Gender = "Men" | "Women" | "Mixed" | "Open";
-export type SkillLevel = "Beginner" | "Intermediate" | "Advanced" | "Elite";
+export type SkillLevel = string;
 
 export type AuthorBrief = {
   id: string;
