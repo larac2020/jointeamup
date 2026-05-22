@@ -86,16 +86,28 @@ function NewListing() {
             </div>
           </Field>
 
-          <Field label="Competition name">
-            <input required minLength={2} maxLength={120} value={form.competition} onChange={(e) => setForm({ ...form, competition: e.target.value })} placeholder="HYROX Berlin" className={inputCls} />
-          </Field>
-
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Competition type">
-              <select value={form.competition_type} onChange={(e) => setForm({ ...form, competition_type: e.target.value })} className={inputCls}>
+              <select
+                value={form.competition_type}
+                onChange={(e) => setForm({ ...form, competition_type: e.target.value, competition: "" })}
+                className={inputCls}
+              >
                 {competitionTypes.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
+            <Field label="Competition name">
+              <CompetitionPicker
+                competitionType={form.competition_type}
+                value={form.competition}
+                onChange={(v) => setForm((f) => ({ ...f, competition: v }))}
+                inputClassName={inputCls}
+              />
+            </Field>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+
             <Field label="Date">
               <input required type="date" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} className={inputCls} />
             </Field>
