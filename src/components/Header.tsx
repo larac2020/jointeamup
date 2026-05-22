@@ -38,7 +38,7 @@ export function Header() {
     enabled: !!user,
   });
 
-  });
+
 
   useEffect(() => {
     if (!user) return;
