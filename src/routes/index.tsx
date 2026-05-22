@@ -50,7 +50,7 @@ function Landing() {
           height={1080}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/55 to-background" />
+        <div className="absolute inset-0 bg-secondary/80" />
         <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-40 md:pb-32 md:pt-48">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" /> Built by athletes, for athletes
