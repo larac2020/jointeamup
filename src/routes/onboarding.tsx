@@ -66,6 +66,9 @@ function Onboarding() {
       setSports(profile.sports ?? []);
       setSuperpower(profile.superpower ?? "");
       setKryptonite(profile.kryptonite ?? "");
+      setBio(profile.bio ?? "");
+      setExperience(profile.experience ?? "");
+      setGym(profile.gyms?.[0] ?? "");
     }
     if (consents) {
       setTerms(!!consents.terms_accepted_at);
