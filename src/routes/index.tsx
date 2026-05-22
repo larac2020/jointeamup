@@ -15,7 +15,6 @@ const stats = [
 const features = [
   { icon: Ticket, title: "Resell your bib", body: "Missing a teammate before race day? Find another athlete based on level, location, and sport.", tone: "bg-warm" },
   { icon: Users, title: "Find a teammate", body: "Lost a partner before race day? Match with athletes by level, location and sport.", tone: "bg-cool" },
-  { icon: MessagesSquare, title: "Connect directly", body: "We don't handle payments. We just connect supply and demand — the rest is up to you.", tone: "bg-secondary" },
 ];
 
 function Landing() {
@@ -93,14 +92,14 @@ function Landing() {
         <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-magenta">How it works</p>
-            <h2 className="mt-2 font-display text-5xl tracking-wide md:text-6xl">Three plays.<br />One community.</h2>
+            <h2 className="mt-2 font-display text-5xl tracking-wide md:text-6xl">Two plays.<br />One community.</h2>
           </div>
           <p className="max-w-md text-base text-muted-foreground">
             &ZeroWidthSpace;
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2">
           {features.map((f) => (
             <div key={f.title} className="group rounded-3xl border border-border bg-card p-7 shadow-card transition hover:-translate-y-1 hover:shadow-blaze">
               <div className={`grid h-12 w-12 place-items-center rounded-2xl ${f.tone} text-primary-foreground shadow-md`}>
