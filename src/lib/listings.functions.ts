@@ -82,6 +82,18 @@ export const listListingsByAuthor = createServerFn({ method: "POST" })
     return (rows ?? []) as ListingRow[];
   });
 
+export const listMyListings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ListingRow[]> => {
+    const { data: rows, error } = await context.supabase
+      .from("listings")
+      .select("*")
+      .eq("author_id", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as ListingRow[];
+  });
+
 const createSchema = z.object({
   type: z.enum(["selling-ticket", "need-teammate", "join-team"]),
   competition: z.string().min(2).max(120),

@@ -84,6 +84,15 @@ export function Header() {
           ))}
           {user && (
             <Link
+              to="/listings/mine"
+              className="rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground transition hover:bg-accent hover:text-foreground"
+              activeProps={{ className: "bg-accent text-foreground" }}
+            >
+              My listings
+            </Link>
+          )}
+          {user && (
+            <Link
               to="/listings/new"
               className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-warm px-4 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-blaze hover:opacity-95"
             >

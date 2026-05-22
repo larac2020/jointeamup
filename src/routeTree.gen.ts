@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as ProfileIdRouteImport } from './routes/profile.$id'
 import { Route as ListingsNewRouteImport } from './routes/listings.new'
+import { Route as ListingsMineRouteImport } from './routes/listings.mine'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
 import { Route as ListingsIdEditRouteImport } from './routes/listings.$id.edit'
 import { Route as ApiPublicHooksRefreshCompetitionsRouteImport } from './routes/api/public/hooks/refresh-competitions'
@@ -79,6 +80,11 @@ const ListingsNewRoute = ListingsNewRouteImport.update({
   path: '/listings/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListingsMineRoute = ListingsMineRouteImport.update({
+  id: '/listings/mine',
+  path: '/listings/mine',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListingsIdRoute = ListingsIdRouteImport.update({
   id: '/listings/$id',
   path: '/listings/$id',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
+  '/listings/mine': typeof ListingsMineRoute
   '/listings/new': typeof ListingsNewRoute
   '/profile/$id': typeof ProfileIdRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
+  '/listings/mine': typeof ListingsMineRoute
   '/listings/new': typeof ListingsNewRoute
   '/profile/$id': typeof ProfileIdRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
+  '/listings/mine': typeof ListingsMineRoute
   '/listings/new': typeof ListingsNewRoute
   '/profile/$id': typeof ProfileIdRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/settings'
     | '/listings/$id'
+    | '/listings/mine'
     | '/listings/new'
     | '/profile/$id'
     | '/profile/edit'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/settings'
     | '/listings/$id'
+    | '/listings/mine'
     | '/listings/new'
     | '/profile/$id'
     | '/profile/edit'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/settings'
     | '/listings/$id'
+    | '/listings/mine'
     | '/listings/new'
     | '/profile/$id'
     | '/profile/edit'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
   ListingsIdRoute: typeof ListingsIdRouteWithChildren
+  ListingsMineRoute: typeof ListingsMineRoute
   ListingsNewRoute: typeof ListingsNewRoute
   ProfileIdRoute: typeof ProfileIdRoute
   ProfileEditRoute: typeof ProfileEditRoute
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/listings/mine': {
+      id: '/listings/mine'
+      path: '/listings/mine'
+      fullPath: '/listings/mine'
+      preLoaderRoute: typeof ListingsMineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listings/$id': {
       id: '/listings/$id'
       path: '/listings/$id'
@@ -337,6 +357,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
   ListingsIdRoute: ListingsIdRouteWithChildren,
+  ListingsMineRoute: ListingsMineRoute,
   ListingsNewRoute: ListingsNewRoute,
   ProfileIdRoute: ProfileIdRoute,
   ProfileEditRoute: ProfileEditRoute,

@@ -178,13 +178,23 @@ function Profile() {
           </div>
         </div>
 
-        {myListings.length > 0 && (
+        {(myListings.length > 0 || user?.id === id) && (
           <div className="mt-10">
-            <h2 className="font-display text-3xl tracking-wide">Active listings</h2>
+            <div className="flex items-end justify-between gap-3">
+              <h2 className="font-display text-3xl tracking-wide">Active listings</h2>
+              {user?.id === id && (
+                <Link to="/listings/mine" className="text-sm font-semibold text-primary underline">
+                  Manage my listings
+                </Link>
+              )}
+            </div>
             <div className="mt-4 space-y-4">
               {myListings.map((l) => (
                 <ListingCard key={l.id} listing={{ ...l, author: a }} />
               ))}
+              {myListings.length === 0 && (
+                <p className="text-sm text-muted-foreground">No active listings.</p>
+              )}
             </div>
           </div>
         )}
