@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Search as SearchIcon, X } from "lucide-react
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { listListings } from "@/lib/listings.functions";
-import { competitionTypes, formats, getSkillLevels } from "@/lib/types";
+import { competitionTypes, getCategories } from "@/lib/types";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Browse — TeamUp" }] }),
@@ -25,23 +25,28 @@ function Feed() {
   const [shortcut, setShortcut] = useState<Shortcut>("all");
   const [query, setQuery] = useState("");
   const [comp, setComp] = useState("");
-  const [format, setFormat] = useState("");
-  const [level, setLevel] = useState("");
+  const [category, setCategory] = useState(""); // label from getCategories(comp)
   const [location, setLocation] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const typeFilter = shortcut === "all" ? undefined : shortcut;
+
+  const categoryTuple = useMemo(() => {
+    if (!comp || !category) return null;
+    return getCategories(comp).find((c) => c.label === category) ?? null;
+  }, [comp, category]);
 
   const listingFilters = useMemo(
     () => ({
       query: query || undefined,
       type: typeFilter as any,
       competition_type: comp || undefined,
-      format: (format || undefined) as any,
-      skill_level: (level || undefined) as any,
+      format: (categoryTuple?.format || undefined) as any,
+      skill_level: (categoryTuple?.skill_level || undefined) as any,
+      gender: (categoryTuple?.gender || undefined) as any,
       location: location || undefined,
     }),
-    [query, typeFilter, comp, format, level, location],
+    [query, typeFilter, comp, categoryTuple, location],
   );
 
   const listingsQ = useQuery({
@@ -50,7 +55,7 @@ function Feed() {
   });
 
   const listings = listingsQ.data ?? [];
-  const activeFilters = [comp, format, level, location, query].filter(Boolean).length;
+  const activeFilters = [comp, category, location, query].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,9 +111,15 @@ function Feed() {
                     className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
                   />
                 </div>
-                <Select label="Competition" value={comp} onChange={(v) => { setComp(v); setLevel(""); }} options={[...competitionTypes]} />
-                <Select label="Format" value={format} onChange={setFormat} options={[...formats]} />
-                {comp && <Select label="Skill level" value={level} onChange={setLevel} options={getSkillLevels(comp)} />}
+                <Select label="Competition" value={comp} onChange={(v) => { setComp(v); setCategory(""); }} options={[...competitionTypes]} />
+                {comp && (
+                  <Select
+                    label="Category"
+                    value={category}
+                    onChange={setCategory}
+                    options={getCategories(comp).map((c) => c.label)}
+                  />
+                )}
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Location</label>
                   <input
@@ -121,7 +132,7 @@ function Feed() {
                 </div>
                 {activeFilters > 0 && (
                   <button
-                    onClick={() => { setQuery(""); setComp(""); setFormat(""); setLevel(""); setLocation(""); }}
+                    onClick={() => { setQuery(""); setComp(""); setCategory(""); setLocation(""); }}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                   >
                     <X className="h-3 w-3" /> Clear filters ({activeFilters})
