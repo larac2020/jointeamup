@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { getListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
 import { startConversationFromListing } from "@/lib/messages.functions";
-import { listingTypeMeta, fallbackAvatar } from "@/lib/types";
+import { listingTypeMeta, fallbackAvatar, categoryLabel } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 
 const detailQO = (id: string) =>
@@ -83,15 +83,14 @@ function ListingDetail() {
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
               <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {listing.event_date}</span>
               <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {listing.location}</span>
-              <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {listing.format}</span>
+              <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {categoryLabel(listing, listing.competition_type)}</span>
             </div>
           </div>
           <div className="p-8">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Stat label="Type" value={listing.competition_type} />
-              <Stat label="Level" value={listing.skill_level} />
+            <div className="grid grid-cols-3 gap-3">
+              <Stat label="Sport" value={listing.competition_type} />
+              <Stat label="Category" value={categoryLabel(listing, listing.competition_type)} />
               <Stat label="Spots" value={String(listing.spots)} />
-              <Stat label="Category" value={listing.gender ?? "Open"} />
             </div>
             <h2 className="mt-8 font-display text-2xl tracking-wide">Details</h2>
             {listing.description && <p className="mt-2 text-sm leading-relaxed text-foreground/85">{listing.description}</p>}

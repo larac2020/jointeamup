@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, MapPin, Users } from "lucide-react";
-import { listingTypeMeta, fallbackAvatar, type ListingWithAuthor } from "@/lib/types";
+import { listingTypeMeta, fallbackAvatar, categoryLabel, type ListingWithAuthor } from "@/lib/types";
 
 export function ListingCard({ listing }: { listing: ListingWithAuthor }) {
   const author = listing.author;
@@ -29,8 +29,7 @@ export function ListingCard({ listing }: { listing: ListingWithAuthor }) {
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/70 bg-muted/40 px-5 py-3 text-xs font-medium text-foreground/80">
         <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-primary" /> {listing.event_date}</span>
         <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-primary" /> {listing.location}</span>
-        <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-primary" /> {listing.format} · {listing.skill_level}</span>
-        {listing.gender && <span className="rounded-full bg-background px-2 py-0.5 text-[10px] uppercase tracking-wider">{listing.gender}</span>}
+        <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-primary" /> {categoryLabel(listing, listing.competition_type)}</span>
       </div>
 
       {author && (
