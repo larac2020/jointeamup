@@ -1,41 +1,76 @@
-Dedicated "My listings" page with inline manage actions, linked from header and profile.
+## Goal
 
-## Route
-- New file `src/routes/listings.mine.tsx` → `/listings/mine` (auth-required; redirect to `/login` if no session).
+Replace the three separate fields (Gender, Format, Skill level) with **one Category dropdown** per sport. The category encodes everything in a single human-readable label like `Doubles W Pro` or `RX Men`.
 
-## Data
-- New server fn `listMyListings` in `src/lib/listings.functions.ts`:
-  - `requireSupabaseAuth` middleware
-  - Returns ALL listings for `auth.uid()` (active + inactive), ordered `created_at DESC`
-  - Plain `ListingRow[]` (no author join needed — it's always the current user)
-- Existing `deactivateListing` / `reactivateListing` reused for inline actions.
+## Categories per sport
 
-## Page layout
-- Header + title "My listings" + small "Post a listing" CTA.
-- Two sections, in this order:
-  1. **Active** — `is_active === true`, sorted by `created_at` desc.
-  2. **Past / inactive** — `is_active === false` OR `event_date < today`. Rendered greyed out (`opacity-60`) with a status chip:
-     - "Deactivated" if `is_active === false`
-     - "Expired" if `is_active === true` AND `event_date < today`
-- Empty state when user has no listings ("You haven't posted yet — Post a listing").
+Based on the official divisions each series actually runs:
 
-## Row component (inline, in the same file)
-Reuses listing data and shows the essentials in a compact card:
-- Competition name, type, date, location, format, skill_level, spots
-- Status chip (Active / Deactivated / Expired)
-- Action buttons (icons + labels):
-  - **View** → `Link to="/listings/$id"`
-  - **Edit** → `Link to="/listings/$id/edit"`
-  - **Deactivate** (active rows) / **Reactivate** (deactivated rows, only when not expired) — `useMutation` calling the existing server fns, then `qc.invalidateQueries({ queryKey: ["listings"] })` so this page, the feed, and the profile all refresh.
-- Expired rows hide the Reactivate button (date is in the past so it would be meaningless).
+**HYROX**
+- Mixed (Relay-style mixed event)
+- W Open · W Pro · M Open · M Pro
+- Doubles W Open · Doubles W Pro · Doubles M Open · Doubles M Pro · Doubles Mixed
+- Relay Women · Relay Men · Relay Mixed
 
-## Navigation entry points
-- **Header**: add `{ to: "/listings/mine", label: "My listings" }` to `navItems` in `src/components/Header.tsx`, shown only when `user` is signed in. Place it before "Browse".
-- **Profile (`src/routes/profile.$id.tsx`)**: when the viewed profile is the current user (`user?.id === id`), add a "Manage my listings" link in the "Active listings" section header pointing to `/listings/mine`. No change for other people's profiles.
+**CrossFit**
+- RX Men · RX Women
+- Scaled Men · Scaled Women
+- Masters Men · Masters Women · Teens
+- Team RX · Team Scaled · Team Mixed
+
+**DEKA** (covers FIT / STRONG / MILE — chosen via the existing Competition picker)
+- Solo Open Men · Solo Open Women
+- Solo Pro Men · Solo Pro Women
+- Doubles Men · Doubles Women · Doubles Mixed
+- Team / Relay
+
+**Turf Games**
+- Solo Men · Solo Women
+- Pairs Men · Pairs Women · Pairs Mixed
+- Team
+
+**Spartan**
+- Open Men · Open Women
+- Age Group Men · Age Group Women
+- Elite Men · Elite Women
+- Team / Hurricane Heat
+
+**Other**
+- Individual Men · Individual Women · Individual Mixed
+- Team / Pairs / Relay
+
+## Technical approach
+
+No DB migration. Keep the existing `gender`, `format`, `skill_level` columns and treat them as a derived tuple of the chosen category — this preserves existing listings and filters that already use those columns.
+
+1. `src/lib/types.ts`
+   - Add a `Category` type: `{ label: string; format: Format; gender: Gender; skill_level: string }`.
+   - Add `categoriesByType: Record<string, Category[]>` with the lists above.
+   - Add helpers `getCategories(competitionType)` and `findCategory({format, gender, skill_level}, competitionType)` to round-trip between stored values and a label.
+   - Keep `formats`, `genders`, `getSkillLevels`, `skillLevelsByType` exported for back-compat but mark deprecated.
+
+2. `src/routes/listings.new.tsx` and `src/routes/listings.$id.edit.tsx`
+   - Remove the Gender, Format, Skill level selects.
+   - Add one **Category** select populated from `getCategories(competition_type)`.
+   - On submit, expand the selected category into `format` / `gender` / `skill_level` before calling the server fn.
+   - On edit, preselect by calling `findCategory(...)` against the loaded row.
+
+3. `src/components/ListingCard.tsx` and `src/routes/listings.$id.tsx`
+   - Replace the three separate badges/lines with a single Category badge using `findCategory(...).label` (fallback to a composed string if no exact match — keeps old data readable).
+
+4. `src/routes/feed.tsx` (filters)
+   - Replace the Gender / Format / Skill filters with one **Category** multi-select that lists categories for the currently selected competition type (and shows the union across sports when "All sports" is selected).
+   - Server filter: translate the selected categories back into `(format, gender, skill_level)` tuples and `.or(...)` them.
+
+5. `src/lib/listings.functions.ts`
+   - Update the list/search input validator + query builder to accept `categories: string[]` and expand each into a tuple filter. Keep the existing per-field filters as a fallback so deep links still work.
+
+6. `src/routes/listings.mine.tsx`
+   - Update the inline display to use the new Category badge (purely presentational).
+
+No backend / RLS changes. Existing dummy listings continue to render correctly because the three columns remain populated.
 
 ## Out of scope
-- Pagination (volume is low; simple list is fine).
-- Bulk actions.
-- Server-side date filtering — "expired" is computed client-side from `event_date` so a listing the user re-dates immediately becomes active again without backend changes.
 
-Confirm and I'll build it.
+- Migrating historical rows that don't exactly match a new preset (they'll display via the composed fallback label).
+- Scraping live competition sites — the divisions above are based on each series' published official categories.
