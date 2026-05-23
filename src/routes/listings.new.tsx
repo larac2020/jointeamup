@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/lib/auth";
 import { createListing } from "@/lib/listings.functions";
-import { competitionTypes, formats, genders, getCategories } from "@/lib/types";
+import { competitionTypes, type Format, type Gender, getCategories } from "@/lib/types";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 
 export const Route = createFileRoute("/listings/new")({
@@ -31,9 +31,9 @@ function NewListing() {
     competition_type: "HYROX" as string,
     event_date: "",
     location: "",
-    format: "Individual" as (typeof formats)[number],
+    format: "Doubles" as Format,
     skill_level: "Open" as string,
-    gender: "Open" as (typeof genders)[number],
+    gender: "Mixed" as Gender,
     spots: 1,
     description: "",
   });
