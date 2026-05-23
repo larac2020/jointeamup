@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/lib/auth";
 import { getListing, updateListing } from "@/lib/listings.functions";
-import { competitionTypes, formats, genders, getSkillLevels } from "@/lib/types";
+import { competitionTypes, formats, genders, getCategories } from "@/lib/types";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 
 export const Route = createFileRoute("/listings/$id/edit")({
@@ -111,8 +111,16 @@ function EditListing() {
                 value={form.competition_type}
                 onChange={(e) => {
                   const ct = e.target.value;
-                  const levels = getSkillLevels(ct);
-                  setForm((f) => ({ ...f, competition_type: ct, competition: "", skill_level: levels.includes(f.skill_level) ? f.skill_level : levels[0] }));
+                  const cats = getCategories(ct);
+                  const first = cats[0];
+                  setForm((f) => ({
+                    ...f,
+                    competition_type: ct,
+                    competition: "",
+                    format: first.format,
+                    gender: first.gender,
+                    skill_level: first.skill_level,
+                  }));
                 }}
                 className={inputCls}
               >
@@ -136,19 +144,31 @@ function EditListing() {
             <Field label="Location">
               <input required minLength={2} maxLength={120} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className={inputCls} />
             </Field>
-            <Field label="Format">
-              <select value={form.format} onChange={(e) => setForm({ ...form, format: e.target.value as any })} className={inputCls}>
-                {formats.map((f) => <option key={f} value={f}>{f}</option>)}
-              </select>
-            </Field>
-            <Field label="Skill level">
-              <select value={form.skill_level} onChange={(e) => setForm({ ...form, skill_level: e.target.value })} className={inputCls}>
-                {getSkillLevels(form.competition_type).map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </Field>
             <Field label="Category">
-              <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value as any })} className={inputCls}>
-                {genders.map((g) => <option key={g} value={g}>{g}</option>)}
+              <select
+                value={`${form.format}|${form.gender}|${form.skill_level}`}
+                onChange={(e) => {
+                  const [fmt, gen, lvl] = e.target.value.split("|");
+                  setForm((f) => ({ ...f, format: fmt as any, gender: gen as any, skill_level: lvl }));
+                }}
+                className={inputCls}
+              >
+                {/* Include the current tuple as a fallback so legacy rows preselect cleanly */}
+                {(() => {
+                  const cats = getCategories(form.competition_type);
+                  const currentKey = `${form.format}|${form.gender}|${form.skill_level}`;
+                  const hasCurrent = cats.some((c) => `${c.format}|${c.gender}|${c.skill_level}` === currentKey);
+                  return (
+                    <>
+                      {!hasCurrent && (
+                        <option value={currentKey}>{form.format} · {form.gender} · {form.skill_level} (current)</option>
+                      )}
+                      {cats.map((c) => (
+                        <option key={c.label} value={`${c.format}|${c.gender}|${c.skill_level}`}>{c.label}</option>
+                      ))}
+                    </>
+                  );
+                })()}
               </select>
             </Field>
             <Field label="Spots available">

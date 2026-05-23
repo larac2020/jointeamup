@@ -10,7 +10,7 @@ import {
   deactivateListing,
   reactivateListing,
 } from "@/lib/listings.functions";
-import { listingTypeMeta, type ListingRow } from "@/lib/types";
+import { listingTypeMeta, categoryLabel, type ListingRow } from "@/lib/types";
 
 const myListingsQO = queryOptions({
   queryKey: ["listings", "mine"],
@@ -141,7 +141,7 @@ function Row({ listing, status }: { listing: ListingRow; status: Status }) {
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {listing.event_date}</span>
             <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {listing.location}</span>
-            <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {listing.format} · {listing.skill_level}</span>
+            <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {categoryLabel(listing, listing.competition_type)}</span>
             <span>{listing.spots} spot{listing.spots > 1 ? "s" : ""}</span>
           </div>
         </div>
