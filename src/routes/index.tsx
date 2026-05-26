@@ -136,22 +136,23 @@ function Landing() {
 
       {/* CTA strip */}
       <section className="mx-auto max-w-6xl px-4 pb-24">
-        <div className="relative overflow-hidden rounded-3xl bg-primary p-10 md:p-16 shadow-blaze">
+        <div className="relative overflow-hidden rounded-3xl bg-secondary p-10 md:p-16 shadow-blaze">
           <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <h2 className="font-display text-5xl leading-none tracking-wide text-primary-foreground md:text-6xl">
+              <h2 className="font-display text-5xl leading-none tracking-wide text-white md:text-6xl">
                 Race day is calling.
               </h2>
-              <p className="mt-3 max-w-md text-base font-medium text-primary-foreground/90">
+              <p className="mt-3 max-w-md text-base font-medium text-white/80">
                 Build your athlete profile in 60 seconds. Get matched with tickets and teammates near you.
               </p>
             </div>
-            <Link to="/login" className="inline-flex items-center gap-2 rounded-full bg-primary-foreground px-7 py-3.5 text-sm font-bold uppercase tracking-wider text-foreground shadow-lg hover:opacity-95">
+            <Link to="/login" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-lg hover:opacity-95">
               Get started <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </section>
+
 
       <footer className="border-t border-border/70 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 text-xs text-muted-foreground md:flex-row">
