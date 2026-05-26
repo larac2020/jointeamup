@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
 
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
 const filterSchema = z.object({
   type: z.enum(["selling-ticket", "need-teammate", "join-team"]).optional(),
   competition_type: z.string().min(1).max(60).optional(),
@@ -12,6 +14,8 @@ const filterSchema = z.object({
   gender: z.enum(["Men", "Women", "Mixed", "Open"]).optional(),
   location: z.string().min(1).max(80).optional(),
   query: z.string().min(1).max(120).optional(),
+  date_from: isoDate.optional(),
+  date_to: isoDate.optional(),
   limit: z.number().min(1).max(100).optional(),
 }).default({});
 
@@ -33,7 +37,10 @@ export const listListings = createServerFn({ method: "POST" })
     if (data.skill_level) q = q.eq("skill_level", data.skill_level);
     if (data.gender) q = q.eq("gender", data.gender);
     if (data.location) q = q.ilike("location", `%${data.location}%`);
+    if (data.date_from) q = q.gte("event_date", data.date_from);
+    if (data.date_to) q = q.lte("event_date", data.date_to);
     if (data.query) q = q.or(`competition.ilike.%${data.query}%,description.ilike.%${data.query}%`);
+
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
