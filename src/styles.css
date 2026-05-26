@@ -43,45 +43,45 @@
 :root {
   --radius: 0.875rem;
 
-  /* Aqua Court — solid turquoise/teal palette */
-  --background: oklch(0.985 0.005 220);
-  --foreground: oklch(0.28 0.05 220);
+  /* Acid Green / Black / Off-white palette */
+  --background: oklch(0.985 0.005 110);
+  --foreground: oklch(0.16 0.01 150);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.28 0.05 220);
+  --card-foreground: oklch(0.16 0.01 150);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.28 0.05 220);
+  --popover-foreground: oklch(0.16 0.01 150);
 
-  /* Turquoise primary */
-  --primary: oklch(0.68 0.13 200);
-  --primary-foreground: oklch(0.99 0.005 220);
+  /* Acid green primary */
+  --primary: oklch(0.88 0.27 130);
+  --primary-foreground: oklch(0.16 0.01 150);
 
-  /* Deep teal secondary */
-  --secondary: oklch(0.35 0.06 220);
-  --secondary-foreground: oklch(0.99 0.005 220);
+  /* Black secondary */
+  --secondary: oklch(0.16 0.01 150);
+  --secondary-foreground: oklch(0.985 0.005 110);
 
-  /* Amber accent (repoints legacy "magenta" token) */
-  --magenta: oklch(0.74 0.16 75);
-  --magenta-foreground: oklch(0.22 0.05 60);
+  /* Accent colours reuse acid green & black */
+  --magenta: oklch(0.88 0.27 130);
+  --magenta-foreground: oklch(0.16 0.01 150);
 
-  /* Deeper teal (repoints legacy "violet" token) */
-  --violet: oklch(0.45 0.09 215);
-  --violet-foreground: oklch(0.99 0.005 220);
+  --violet: oklch(0.16 0.01 150);
+  --violet-foreground: oklch(0.88 0.27 130);
 
-  --muted: oklch(0.96 0.01 220);
-  --muted-foreground: oklch(0.48 0.03 220);
-  --accent: oklch(0.93 0.04 200);
-  --accent-foreground: oklch(0.28 0.05 220);
+  --muted: oklch(0.96 0.005 110);
+  --muted-foreground: oklch(0.45 0.01 150);
+  --accent: oklch(0.94 0.12 130);
+  --accent-foreground: oklch(0.16 0.01 150);
 
   --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.99 0.005 220);
-  --border: oklch(0.9 0.015 220);
-  --input: oklch(0.92 0.015 220);
-  --ring: oklch(0.68 0.13 200);
+  --destructive-foreground: oklch(0.99 0.005 110);
+  --border: oklch(0.9 0.01 130);
+  --input: oklch(0.92 0.01 130);
+  --ring: oklch(0.88 0.27 130);
 
-  --shadow-card: 0 4px 18px -6px color-mix(in oklab, oklch(0.28 0.05 220) 14%, transparent);
-  --shadow-aqua: 0 18px 40px -18px color-mix(in oklab, oklch(0.68 0.13 200) 55%, transparent);
+  --shadow-card: 0 4px 18px -6px color-mix(in oklab, oklch(0.16 0.01 150) 18%, transparent);
+  --shadow-aqua: 0 18px 40px -18px color-mix(in oklab, oklch(0.88 0.27 130) 60%, transparent);
 }
+
 
 @layer base {
   * {

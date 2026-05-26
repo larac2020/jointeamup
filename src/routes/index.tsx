@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Ticket, Users, Search, HandHeart, Zap, Sparkles } from "lucide-react";
-import heroImg from "@/assets/hero.jpg";
+
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -59,15 +59,8 @@ function Landing() {
       </header>
 
       {/* Hero */}
-      <section className="relative isolate overflow-hidden">
-        <img
-          src={heroImg}
-          alt="Athletes training in a competition gym"
-          width={1920}
-          height={1080}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-secondary/80" />
+      <section className="relative isolate overflow-hidden bg-secondary">
+
         <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-40 md:pb-32 md:pt-48">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" /> Built by athletes, for athletes
