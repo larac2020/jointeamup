@@ -27,6 +27,8 @@ function Feed() {
   const [comp, setComp] = useState("");
   const [category, setCategory] = useState(""); // label from getCategories(comp)
   const [location, setLocation] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const typeFilter = shortcut === "all" ? undefined : shortcut;
@@ -45,8 +47,10 @@ function Feed() {
       skill_level: (categoryTuple?.skill_level || undefined) as any,
       gender: (categoryTuple?.gender || undefined) as any,
       location: location || undefined,
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
     }),
-    [query, typeFilter, comp, categoryTuple, location],
+    [query, typeFilter, comp, categoryTuple, location, dateFrom, dateTo],
   );
 
   const listingsQ = useQuery({
@@ -55,7 +59,8 @@ function Feed() {
   });
 
   const listings = listingsQ.data ?? [];
-  const activeFilters = [comp, category, location, query].filter(Boolean).length;
+  const activeFilters = [comp, category, location, query, dateFrom, dateTo].filter(Boolean).length;
+
 
   return (
     <div className="min-h-screen bg-background">
