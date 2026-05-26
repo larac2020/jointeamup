@@ -135,14 +135,36 @@ function Feed() {
                     className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
                   />
                 </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Event date</label>
+                  <div className="mt-1 grid grid-cols-2 gap-2">
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      max={dateTo || undefined}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      aria-label="From"
+                      className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none focus:ring-2 ring-ring/40"
+                    />
+                    <input
+                      type="date"
+                      value={dateTo}
+                      min={dateFrom || undefined}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      aria-label="To"
+                      className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none focus:ring-2 ring-ring/40"
+                    />
+                  </div>
+                </div>
                 {activeFilters > 0 && (
                   <button
-                    onClick={() => { setQuery(""); setComp(""); setCategory(""); setLocation(""); }}
+                    onClick={() => { setQuery(""); setComp(""); setCategory(""); setLocation(""); setDateFrom(""); setDateTo(""); }}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                   >
                     <X className="h-3 w-3" /> Clear filters ({activeFilters})
                   </button>
                 )}
+
               </div>
             ) : (
               <button
