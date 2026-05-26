@@ -41,22 +41,23 @@ function Landing() {
       {/* Nav */}
       <header className="absolute inset-x-0 top-0 z-20">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <div className="flex items-center gap-2 text-primary-foreground">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-warm shadow-blaze">
+          <div className="flex items-center gap-2 text-white">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-blaze">
               <Zap className="h-5 w-5" strokeWidth={2.5} />
             </span>
             <span className="font-display text-2xl tracking-wide">TeamUp</span>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/login" className="rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-wider text-primary-foreground/90 hover:text-primary-foreground">
+            <Link to="/login" className="rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-wider text-white/90 hover:text-white">
               Log in
             </Link>
-            <Link to="/login" className="rounded-full bg-primary-foreground px-5 py-2 text-sm font-bold uppercase tracking-wider text-foreground shadow-lg hover:opacity-90">
+            <Link to="/login" className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-lg hover:opacity-90">
               Sign up
             </Link>
           </div>
         </div>
       </header>
+
 
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-secondary">
