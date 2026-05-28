@@ -7,10 +7,11 @@ export const Route = createFileRoute("/")({
 });
 
 const stats = [
-  { k: "12K+", v: "Athletes" },
-  { k: "340", v: "Tickets matched" },
-  { k: "28", v: "Cities" },
+  { k: "10", v: "Athletes" },
+  { k: "16", v: "Open listings" },
+  { k: "10", v: "Cities" },
 ];
+
 
 const sides = [
   {
