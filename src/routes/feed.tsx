@@ -108,7 +108,7 @@ function Feed() {
                 )}
               </button>
             )}
-            <div className={`${sidebarOpen ? "block" : "block md:hidden"} ${!sidebarOpen ? "hidden md:hidden" : ""} space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card`} style={{ display: undefined }}>
+            <div className={`${sidebarOpen ? "block" : "hidden"} md:${sidebarOpen ? "block" : "hidden"} block space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card`}>
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filters</p>
                 <button
