@@ -92,30 +92,44 @@ function Feed() {
         </div>
 
         <div className={`mt-6 grid gap-4 ${sidebarOpen ? "md:grid-cols-[280px_1fr]" : "md:grid-cols-[48px_1fr]"}`}>
-          {/* Collapsible sidebar */}
+          {/* Filters: always shown on mobile, collapsible on desktop */}
           <aside className="h-fit md:sticky md:top-20">
-            {sidebarOpen ? (
-              <div className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filters</p>
-                  <button
-                    onClick={() => setSidebarOpen(false)}
-                    aria-label="Collapse filters"
-                    className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="relative">
-                  <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="HYROX, Berlin…"
-                    maxLength={120}
-                    className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
-                  />
-                </div>
+            {!sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Expand filters"
+                className="relative hidden h-12 w-12 place-items-center rounded-2xl border border-border bg-card shadow-card text-muted-foreground hover:text-foreground md:grid"
+              >
+                <ChevronRight className="h-4 w-4" />
+                {activeFilters > 0 && (
+                  <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+                    {activeFilters}
+                  </span>
+                )}
+              </button>
+            )}
+            <div className={`block ${sidebarOpen ? "md:block" : "md:hidden"} space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card`}>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filters</p>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Collapse filters"
+                  className="hidden md:grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="relative">
+                <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="HYROX, Berlin…"
+                  maxLength={120}
+                  className="w-full rounded-lg border border-input bg-background px-10 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1">
                 <Select label="Competition" value={comp} onChange={(v) => { setComp(v); setCategory(""); }} options={[...competitionTypes]} />
                 {comp && (
                   <Select
@@ -156,30 +170,16 @@ function Feed() {
                     />
                   </div>
                 </div>
-                {activeFilters > 0 && (
-                  <button
-                    onClick={() => { setQuery(""); setComp(""); setCategory(""); setLocation(""); setDateFrom(""); setDateTo(""); }}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                  >
-                    <X className="h-3 w-3" /> Clear filters ({activeFilters})
-                  </button>
-                )}
-
               </div>
-            ) : (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                aria-label="Expand filters"
-                className="relative hidden h-12 w-12 place-items-center rounded-2xl border border-border bg-card shadow-card text-muted-foreground hover:text-foreground md:grid"
-              >
-                <ChevronRight className="h-4 w-4" />
-                {activeFilters > 0 && (
-                  <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
-                    {activeFilters}
-                  </span>
-                )}
-              </button>
-            )}
+              {activeFilters > 0 && (
+                <button
+                  onClick={() => { setQuery(""); setComp(""); setCategory(""); setLocation(""); setDateFrom(""); setDateTo(""); }}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                >
+                  <X className="h-3 w-3" /> Clear filters ({activeFilters})
+                </button>
+              )}
+            </div>
           </aside>
 
           {/* Results */}
