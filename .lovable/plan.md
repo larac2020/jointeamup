@@ -1,76 +1,56 @@
-## Goal
+# Shareholder Demo Mode
 
-Replace the three separate fields (Gender, Format, Skill level) with **one Category dropdown** per sport. The category encodes everything in a single human-readable label like `Doubles W Pro` or `RX Men`.
+A self-contained, presenter-friendly walkthrough at `/demo` that you click through live. On-brand (acid green + black), no auth required, uses mock data so it never depends on what's in the live database.
 
-## Categories per sport
+## What it is
 
-Based on the official divisions each series actually runs:
+A new route `/demo` that runs as a guided slideshow inside the app. Each "slide" is a full-screen panel with:
+- Large headline + supporting copy on the left
+- A live UI mock (real components, fake data) on the right
+- Keyboard nav (← → Space, Esc to exit) + on-screen Prev/Next + slide counter
+- Progress bar at top, slide index in URL (`/demo?step=3`) so you can resume mid-pitch
 
-**HYROX**
-- Mixed (Relay-style mixed event)
-- W Open · W Pro · M Open · M Pro
-- Doubles W Open · Doubles W Pro · Doubles M Open · Doubles M Pro · Doubles Mixed
-- Relay Women · Relay Men · Relay Mixed
+No backend writes, no auth gate, no real listings touched.
 
-**CrossFit**
-- RX Men · RX Women
-- Scaled Men · Scaled Women
-- Masters Men · Masters Women · Teens
-- Team RX · Team Scaled · Team Mixed
+## Structure (≈10 slides)
 
-**DEKA** (covers FIT / STRONG / MILE — chosen via the existing Competition picker)
-- Solo Open Men · Solo Open Women
-- Solo Pro Men · Solo Pro Women
-- Doubles Men · Doubles Women · Doubles Mixed
-- Team / Relay
+**Part 1 — Problem & market (4 slides)**
+1. **Cover** — Logo, tagline, "Shareholder briefing · 2026". Acid green on black, big.
+2. **The problem** — Athletes can't find partners for team competitions. 3 stat callouts (events/year, % needing partners, time wasted searching).
+3. **Today's alternatives** — Side-by-side: Instagram DMs / WhatsApp groups / word of mouth vs. what's missing (filtering, trust, structure).
+4. **Market opportunity** — TAM/SAM/SOM-style framing with the addressable sport categories (CrossFit, Hyrox, etc.) and city reach.
 
-**Turf Games**
-- Solo Men · Solo Women
-- Pairs Men · Pairs Women · Pairs Mixed
-- Team
+**Part 2 — Product walkthrough (5 slides)**
+5. **Browse** — Screenshot-style embed of the feed page with mock listings, callouts pointing at filters (sport, date, location, skill level).
+6. **Listing detail** — Mock detail card highlighting the structured info (event, format, spots, skill).
+7. **Post a listing** — Show the create flow in 3 steps, emphasizing how fast it is.
+8. **Connect** — Messaging UI mock, with contactability/consent shown as a trust feature.
+9. **Profile** — Athlete profile with PRs, sports, gyms — the "why this is more than a classifieds board" slide.
 
-**Spartan**
-- Open Men · Open Women
-- Age Group Men · Age Group Women
-- Elite Men · Elite Women
-- Team / Hurricane Heat
+**Part 3 — Close (1 slide)**
+10. **Where we go next** — One-liner vision + CTA ("Questions?"). Optional: link back to the live app.
 
-**Other**
-- Individual Men · Individual Women · Individual Mixed
-- Team / Pairs / Relay
+## Visual treatment
 
-## Technical approach
+- Acid green (`--primary`) + black backgrounds + white/off-white text — same tokens already in `styles.css`.
+- Big editorial type for headlines (existing display font).
+- Mock UI panels reuse real components (`ListingCard`, message bubbles, profile header) wrapped in a framed "device" container with subtle shadow so it reads as product, not screenshot.
+- Soft motion: each slide fades + slides in 8px on enter (Framer Motion, already in deps).
 
-No DB migration. Keep the existing `gender`, `format`, `skill_level` columns and treat them as a derived tuple of the chosen category — this preserves existing listings and filters that already use those columns.
+## Technical details
 
-1. `src/lib/types.ts`
-   - Add a `Category` type: `{ label: string; format: Format; gender: Gender; skill_level: string }`.
-   - Add `categoriesByType: Record<string, Category[]>` with the lists above.
-   - Add helpers `getCategories(competitionType)` and `findCategory({format, gender, skill_level}, competitionType)` to round-trip between stored values and a label.
-   - Keep `formats`, `genders`, `getSkillLevels`, `skillLevelsByType` exported for back-compat but mark deprecated.
-
-2. `src/routes/listings.new.tsx` and `src/routes/listings.$id.edit.tsx`
-   - Remove the Gender, Format, Skill level selects.
-   - Add one **Category** select populated from `getCategories(competition_type)`.
-   - On submit, expand the selected category into `format` / `gender` / `skill_level` before calling the server fn.
-   - On edit, preselect by calling `findCategory(...)` against the loaded row.
-
-3. `src/components/ListingCard.tsx` and `src/routes/listings.$id.tsx`
-   - Replace the three separate badges/lines with a single Category badge using `findCategory(...).label` (fallback to a composed string if no exact match — keeps old data readable).
-
-4. `src/routes/feed.tsx` (filters)
-   - Replace the Gender / Format / Skill filters with one **Category** multi-select that lists categories for the currently selected competition type (and shows the union across sports when "All sports" is selected).
-   - Server filter: translate the selected categories back into `(format, gender, skill_level)` tuples and `.or(...)` them.
-
-5. `src/lib/listings.functions.ts`
-   - Update the list/search input validator + query builder to accept `categories: string[]` and expand each into a tuple filter. Keep the existing per-field filters as a fallback so deep links still work.
-
-6. `src/routes/listings.mine.tsx`
-   - Update the inline display to use the new Category badge (purely presentational).
-
-No backend / RLS changes. Existing dummy listings continue to render correctly because the three columns remain populated.
+- New file: `src/routes/demo.tsx` — pathless from main nav (not linked in header), accessed via direct URL.
+- New folder: `src/components/demo/` — one file per slide (`SlideCover.tsx`, `SlideProblem.tsx`, …) + `DemoFrame.tsx` (the chrome: progress bar, nav, keyboard handling) + `mockData.ts` (fake listings, profile, messages — no DB calls).
+- URL state: `?step=N` via TanStack Router search params, so refresh keeps position.
+- No new dependencies. No DB changes. No auth changes.
+- Add a small "Demo" link in the footer of `/` (or skip entirely if you'd rather keep it unlisted — let me know).
 
 ## Out of scope
 
-- Migrating historical rows that don't exactly match a new preset (they'll display via the composed fallback label).
-- Scraping live competition sites — the divisions above are based on each series' published official categories.
+- No traction/metrics slides (you didn't pick that focus).
+- No PDF export — this is live-presenter mode only. If you later want a PDF handout, that's a separate build.
+- No editing UI for slide content — copy lives in the slide components; you'd ask me to tweak wording.
+
+## Open question
+
+Should the `/demo` link be discoverable (footer link on homepage) or unlisted (URL-only, you share it manually)? Default: unlisted.
