@@ -61,55 +61,19 @@ export const listListings = createServerFn({ method: "POST" })
     return (rows ?? []).map((r) => ({ ...(r as ListingRow), author: authors[r.author_id] ?? null }));
   });
 
-// Legacy handler chain kept below is removed by the block above; see the historical impl.
-const __removed_listListings = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => filterSchema.parse(input))
-  .handler(async ({ data }): Promise<ListingWithAuthor[]> => {
-    let q = supabaseAdmin
-      .from("listings")
-      .select("*")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false })
-      .limit(data.limit ?? 60);
-
-    if (data.type) q = q.eq("type", data.type);
-    if (data.competition_type) q = q.eq("competition_type", data.competition_type);
-    if (data.format) q = q.eq("format", data.format);
-    if (data.skill_level) q = q.eq("skill_level", data.skill_level);
-    if (data.gender) q = q.eq("gender", data.gender);
-    if (data.location) q = q.ilike("location", `%${data.location}%`);
-    if (data.date_from) q = q.gte("event_date", data.date_from);
-    if (data.date_to) q = q.lte("event_date", data.date_to);
-    if (data.query) q = q.or(`competition.ilike.%${data.query}%,description.ilike.%${data.query}%`);
-
-
-    const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
-
-    const authorIds = Array.from(new Set((rows ?? []).map((r) => r.author_id)));
-    const authors: Record<string, AuthorBrief> = {};
-    if (authorIds.length) {
-      const { data: profs } = await supabaseAdmin
-        .from("profiles")
-        .select(AUTHOR_COLS)
-        .in("id", authorIds);
-      for (const p of profs ?? []) authors[p.id] = p as AuthorBrief;
-    }
-
-    return (rows ?? []).map((r) => ({ ...(r as ListingRow), author: authors[r.author_id] ?? null }));
-  });
-
 export const getListing = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data }): Promise<ListingWithAuthor | null> => {
-    const { data: row, error } = await supabaseAdmin
+    const supabase = createPublicSupabaseClient();
+    const { data: row, error } = await supabase
       .from("listings")
-      .select("*")
+      .select(LISTING_PUBLIC_COLS)
       .eq("id", data.id)
+      .eq("is_active", true)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
-    const { data: author } = await supabaseAdmin
+    const { data: author } = await supabase
       .from("profiles")
       .select(AUTHOR_COLS)
       .eq("id", row.author_id)
@@ -120,9 +84,10 @@ export const getListing = createServerFn({ method: "POST" })
 export const listListingsByAuthor = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ author_id: z.string().uuid() }).parse(input))
   .handler(async ({ data }): Promise<ListingRow[]> => {
-    const { data: rows, error } = await supabaseAdmin
+    const supabase = createPublicSupabaseClient();
+    const { data: rows, error } = await supabase
       .from("listings")
-      .select("*")
+      .select(LISTING_PUBLIC_COLS)
       .eq("author_id", data.author_id)
       .eq("is_active", true)
       .order("created_at", { ascending: false });
