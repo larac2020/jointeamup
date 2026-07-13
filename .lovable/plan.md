@@ -1,56 +1,61 @@
-# Shareholder Demo Mode
 
-A self-contained, presenter-friendly walkthrough at `/demo` that you click through live. On-brand (acid green + black), no auth required, uses mock data so it never depends on what's in the live database.
+# Secure public browsing (Option B)
 
-## What it is
+Keep listings and profiles browsable without login, but stop leaking full PII by routing all public reads through the anon key + narrow RLS policies that only expose safe columns. Kill the unauthenticated admin-client bypass.
 
-A new route `/demo` that runs as a guided slideshow inside the app. Each "slide" is a full-screen panel with:
-- Large headline + supporting copy on the left
-- A live UI mock (real components, fake data) on the right
-- Keyboard nav (← → Space, Esc to exit) + on-screen Prev/Next + slide counter
-- Progress bar at top, slide index in URL (`/demo?step=3`) so you can resume mid-pitch
+## 1. Database migration — narrow public read policies
 
-No backend writes, no auth gate, no real listings touched.
+**`profiles` table**
+- Drop any broad `TO authenticated`/`TO anon` SELECT policy that returns all columns.
+- Add a `TO anon, authenticated` SELECT policy limited to onboarded profiles (`onboarded = true`).
+- Since Postgres RLS is row-level (not column-level), we enforce column safety in the server layer (step 2) by projecting only safe columns. RLS ensures only onboarded rows are visible.
+- Keep the existing owner-scoped policy so users can read/edit their own full profile via `requireSupabaseAuth`.
 
-## Structure (≈10 slides)
+**`listings` table**
+- Add a `TO anon, authenticated` SELECT policy for `is_active = true` rows.
+- Keep owner policy for `/listings/mine` (read own inactive/expired).
 
-**Part 1 — Problem & market (4 slides)**
-1. **Cover** — Logo, tagline, "Shareholder briefing · 2026". Acid green on black, big.
-2. **The problem** — Athletes can't find partners for team competitions. 3 stat callouts (events/year, % needing partners, time wasted searching).
-3. **Today's alternatives** — Side-by-side: Instagram DMs / WhatsApp groups / word of mouth vs. what's missing (filtering, trust, structure).
-4. **Market opportunity** — TAM/SAM/SOM-style framing with the addressable sport categories (CrossFit, Hyrox, etc.) and city reach.
+**Sensitive tables stay locked**: `messages`, `conversations`, `notifications`, `user_consents`, `competition_suggestions` — no anon access.
 
-**Part 2 — Product walkthrough (5 slides)**
-5. **Browse** — Screenshot-style embed of the feed page with mock listings, callouts pointing at filters (sport, date, location, skill level).
-6. **Listing detail** — Mock detail card highlighting the structured info (event, format, spots, skill).
-7. **Post a listing** — Show the create flow in 3 steps, emphasizing how fast it is.
-8. **Connect** — Messaging UI mock, with contactability/consent shown as a trust feature.
-9. **Profile** — Athlete profile with PRs, sports, gyms — the "why this is more than a classifieds board" slide.
+**GRANTs**: `GRANT SELECT ON public.profiles, public.listings TO anon;`
 
-**Part 3 — Close (1 slide)**
-10. **Where we go next** — One-liner vision + CTA ("Questions?"). Optional: link back to the live app.
+## 2. Rewrite public server functions to use publishable client + safe columns
 
-## Visual treatment
+In `src/lib/listings.functions.ts` and `src/lib/profiles.functions.ts`:
 
-- Acid green (`--primary`) + black backgrounds + white/off-white text — same tokens already in `styles.css`.
-- Big editorial type for headlines (existing display font).
-- Mock UI panels reuse real components (`ListingCard`, message bubbles, profile header) wrapped in a framed "device" container with subtle shadow so it reads as product, not screenshot.
-- Soft motion: each slide fades + slides in 8px on enter (Framer Motion, already in deps).
+- Replace `supabaseAdmin` with a per-handler publishable-key client (anon role). This makes RLS apply — anon can only see the columns/rows the policy allows, and even a leaked direct RPC call cannot return more than the safe projection.
+- Explicitly `.select()` only **safe public columns**:
+  - **Profile public columns**: `id, first_name, nickname, avatar_url, lives_in, sports, gyms, competitions, prs, superpower, kryptonite, bio, experience, looking_for, photos, age`
+  - **Profile private columns (never returned to anon)**: `from_location` (precise "from" location), `onboarded`, timestamps
+  - **Listing public columns**: all existing columns are already fine to show publicly (competition, date, location, description, author_id)
+  - **AuthorBrief** on listings: same safe subset as profile above
+- Affected functions: `listListings`, `getListing`, `listListingsByAuthor`, `getProfile`, `listProfiles`.
+- Owner-only functions (`listMyListings`, `updateProfile`, `updateListing`, `deactivateListing`, `reactivateListing`) already use `requireSupabaseAuth` — leave as is.
 
-## Technical details
+Include the `sb_` publishable-key fetch shim (strip default `Authorization` bearer, set `apikey` header) per server-functions-modern knowledge, since Lovable Cloud may issue opaque keys.
 
-- New file: `src/routes/demo.tsx` — pathless from main nav (not linked in header), accessed via direct URL.
-- New folder: `src/components/demo/` — one file per slide (`SlideCover.tsx`, `SlideProblem.tsx`, …) + `DemoFrame.tsx` (the chrome: progress bar, nav, keyboard handling) + `mockData.ts` (fake listings, profile, messages — no DB calls).
-- URL state: `?step=N` via TanStack Router search params, so refresh keeps position.
-- No new dependencies. No DB changes. No auth changes.
-- Add a small "Demo" link in the footer of `/` (or skip entirely if you'd rather keep it unlisted — let me know).
+## 3. Lock down the competitions refresh webhook
 
-## Out of scope
+`src/routes/api/public/hooks/refresh-competitions.ts` currently lets anyone trigger paid Firecrawl scraping.
 
-- No traction/metrics slides (you didn't pick that focus).
-- No PDF export — this is live-presenter mode only. If you later want a PDF handout, that's a separate build.
-- No editing UI for slide content — copy lives in the slide components; you'd ask me to tweak wording.
+- Add a `REFRESH_COMPETITIONS_SECRET` server secret (generated).
+- Handler checks `x-refresh-secret` header (timing-safe compare) before running; returns 401 otherwise.
+- Update the pg_cron job to send the header.
 
-## Open question
+## 4. Address remaining scanner warnings
 
-Should the `/demo` link be discoverable (footer link on homepage) or unlisted (URL-only, you share it manually)? Default: unlisted.
+- **Public storage bucket listing** (`avatars`): tighten `storage.objects` SELECT policy so anon can only SELECT individual objects by path, not list the entire bucket. Reads by URL still work.
+- **SECURITY DEFINER executable by authenticated**: review `has_role`-style helpers (`wants_notification`, `is_user_contactable`, `handle_new_user`, `on_message_insert`, `touch_updated_at`). Trigger functions don't need EXECUTE for anyone; revoke EXECUTE from `PUBLIC`/`authenticated` on non-RPC definer functions.
+
+## What stays working
+
+- Anonymous visitors can still browse `/feed`, view listing detail, and view a profile — but only the safe subset (no precise "from" location, no non-onboarded profiles, no inactive listings).
+- Signed-in flows (`/profile/edit`, `/listings/mine`, messaging, etc.) are unchanged — they use `requireSupabaseAuth` and see full data via RLS as the owner.
+- Direct RPC scraping of the public endpoints now returns only what a browser visitor would already see, capped by RLS.
+
+## Verification
+
+- Run the Supabase linter after the migration.
+- Hit `listListings` / `getProfile` with no bearer token → confirm only safe columns come back.
+- Hit refresh-competitions without the secret → 401.
+- Mark the two `agent_security` findings as fixed once verified.
