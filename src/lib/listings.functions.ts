@@ -1,8 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { createPublicSupabaseClient } from "@/lib/supabase-public.server";
 import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
+
+const LISTING_PUBLIC_COLS =
+  "id, author_id, type, competition, competition_type, event_date, location, format, gender, skill_level, spots, description, is_active, created_at";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -24,9 +27,10 @@ const AUTHOR_COLS = "id, first_name, nickname, avatar_url, lives_in, sports, age
 export const listListings = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => filterSchema.parse(input))
   .handler(async ({ data }): Promise<ListingWithAuthor[]> => {
-    let q = supabaseAdmin
+    const supabase = createPublicSupabaseClient();
+    let q = supabase
       .from("listings")
-      .select("*")
+      .select(LISTING_PUBLIC_COLS)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 60);
@@ -41,14 +45,13 @@ export const listListings = createServerFn({ method: "POST" })
     if (data.date_to) q = q.lte("event_date", data.date_to);
     if (data.query) q = q.or(`competition.ilike.%${data.query}%,description.ilike.%${data.query}%`);
 
-
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
     const authorIds = Array.from(new Set((rows ?? []).map((r) => r.author_id)));
     const authors: Record<string, AuthorBrief> = {};
     if (authorIds.length) {
-      const { data: profs } = await supabaseAdmin
+      const { data: profs } = await supabase
         .from("profiles")
         .select(AUTHOR_COLS)
         .in("id", authorIds);
@@ -61,14 +64,16 @@ export const listListings = createServerFn({ method: "POST" })
 export const getListing = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data }): Promise<ListingWithAuthor | null> => {
-    const { data: row, error } = await supabaseAdmin
+    const supabase = createPublicSupabaseClient();
+    const { data: row, error } = await supabase
       .from("listings")
-      .select("*")
+      .select(LISTING_PUBLIC_COLS)
       .eq("id", data.id)
+      .eq("is_active", true)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
-    const { data: author } = await supabaseAdmin
+    const { data: author } = await supabase
       .from("profiles")
       .select(AUTHOR_COLS)
       .eq("id", row.author_id)
@@ -79,9 +84,10 @@ export const getListing = createServerFn({ method: "POST" })
 export const listListingsByAuthor = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ author_id: z.string().uuid() }).parse(input))
   .handler(async ({ data }): Promise<ListingRow[]> => {
-    const { data: rows, error } = await supabaseAdmin
+    const supabase = createPublicSupabaseClient();
+    const { data: rows, error } = await supabase
       .from("listings")
-      .select("*")
+      .select(LISTING_PUBLIC_COLS)
       .eq("author_id", data.author_id)
       .eq("is_active", true)
       .order("created_at", { ascending: false });
