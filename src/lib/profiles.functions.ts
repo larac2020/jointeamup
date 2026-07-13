@@ -4,11 +4,11 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createPublicSupabaseClient } from "@/lib/supabase-public.server";
 import type { ProfilePublic } from "@/lib/types";
 
-// Public-facing columns only. `from_location` (precise "from") is intentionally omitted
-// to reduce PII exposure. Owner-side edit flows fetch the full row through the
-// authenticated Supabase client, which sees all columns via RLS as the row owner.
+// Public-facing columns only. Excludes `onboarded` and timestamps.
+// Owner-side edit flows fetch the full row through the authenticated Supabase client,
+// which sees all columns via RLS as the row owner.
 const COLS =
-  "id, first_name, nickname, avatar_url, lives_in, sports, age, gyms, competitions, prs, superpower, kryptonite, bio, experience, looking_for, photos";
+  "id, first_name, nickname, avatar_url, lives_in, from_location, sports, age, gyms, competitions, prs, superpower, kryptonite, bio, experience, looking_for, photos";
 
 export const getProfile = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
