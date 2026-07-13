@@ -1,8 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { createPublicSupabaseClient } from "@/lib/supabase-public.server";
 import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
+
+const LISTING_PUBLIC_COLS =
+  "id, author_id, type, competition, competition_type, event_date, location, format, gender, skill_level, spots, description, is_active, created_at";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -22,6 +25,44 @@ const filterSchema = z.object({
 const AUTHOR_COLS = "id, first_name, nickname, avatar_url, lives_in, sports, age, experience, bio";
 
 export const listListings = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => filterSchema.parse(input))
+  .handler(async ({ data }): Promise<ListingWithAuthor[]> => {
+    const supabase = createPublicSupabaseClient();
+    let q = supabase
+      .from("listings")
+      .select(LISTING_PUBLIC_COLS)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 60);
+
+    if (data.type) q = q.eq("type", data.type);
+    if (data.competition_type) q = q.eq("competition_type", data.competition_type);
+    if (data.format) q = q.eq("format", data.format);
+    if (data.skill_level) q = q.eq("skill_level", data.skill_level);
+    if (data.gender) q = q.eq("gender", data.gender);
+    if (data.location) q = q.ilike("location", `%${data.location}%`);
+    if (data.date_from) q = q.gte("event_date", data.date_from);
+    if (data.date_to) q = q.lte("event_date", data.date_to);
+    if (data.query) q = q.or(`competition.ilike.%${data.query}%,description.ilike.%${data.query}%`);
+
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const authorIds = Array.from(new Set((rows ?? []).map((r) => r.author_id)));
+    const authors: Record<string, AuthorBrief> = {};
+    if (authorIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select(AUTHOR_COLS)
+        .in("id", authorIds);
+      for (const p of profs ?? []) authors[p.id] = p as AuthorBrief;
+    }
+
+    return (rows ?? []).map((r) => ({ ...(r as ListingRow), author: authors[r.author_id] ?? null }));
+  });
+
+// Legacy handler chain kept below is removed by the block above; see the historical impl.
+const __removed_listListings = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => filterSchema.parse(input))
   .handler(async ({ data }): Promise<ListingWithAuthor[]> => {
     let q = supabaseAdmin
