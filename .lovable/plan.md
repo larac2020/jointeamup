@@ -1,38 +1,68 @@
-# Connection review + publish readiness
+# Leaked .env: rotate keys and stop tracking the file
 
-## Connections status
+## First, the reassuring part
 
-- **Firecrawl** — connected and linked in this workspace. `FIRECRAWL_API_KEY` is present and the connection runs in direct-API mode, which matches `src/lib/competitions.server.ts` (it calls the Firecrawl SDK with that key). No change needed.
-- **Lovable Cloud (database, auth, storage)** — project-owned, moves with the project. `SUPABASE_*` values are present in the project env.
-- **Lovable AI (`LOVABLE_API_KEY`)** — present, though no app code currently calls it.
-- **`REFRESH_COMPETITIONS_SECRET`** — still set. The competitions cron webhook requires it.
+The values in your `.env` are all **publishable**, not secret:
 
-No other third-party connector is referenced anywhere in the code, so Firecrawl was the only one that needed relinking.
+- `VITE_SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_PUBLISHABLE_KEY` — the anon key. It is designed to be shipped to every browser that loads your site; anyone can already read it from the page source. It grants nothing on its own — row-level security decides what it can read or write.
+- `VITE_SUPABASE_URL` / `SUPABASE_URL` and the project ID — also public by design.
 
-## What currently blocks publishing
+Your real secrets (service role key, `FIRECRAWL_API_KEY`, `REFRESH_COMPETITIONS_SECRET`, `LOVABLE_API_KEY`) are **not** in this file. They live in the encrypted backend secret store and were never in the repo. So this commit did not expose anything that a visitor to the site could not already see.
 
-The publish check refuses to ship while error-level security findings are open. There are three, plus two warnings.
+That said, rotating is cheap and there is a real hygiene issue worth fixing.
 
-1. **Stale finding — server functions bypass RLS** (`server_functions_bypass_rls`, error). Already fixed: the public read functions use the anon-key client in `src/lib/supabase-public.server.ts`, and the owner-scoped ones use `requireSupabaseAuth`. Action: re-run the security scan so this clears, and mark it fixed if it lingers.
+## 1. Rotate the Supabase API keys
 
-2. **Profiles readable by anonymous visitors** (`profiles_anon_public_read`, error) and **listings readable by anonymous visitors** (`listings_anon_public_read`, error). These are the deliberate Option B design: browsing without login, through the anon key, limited to onboarded profiles and active listings with only safe columns projected. Action: mark both as accepted risk with a written justification and record it in security memory so future scans don't reopen them. Alternative, only if the intent has changed: restrict both policies to `authenticated` and require login to browse.
+Run the key rotation for the backend. This issues fresh publishable and service-role keys, invalidates the old ones, and rewrites `.env` and the runtime environment with the new values.
 
-3. **Avatars bucket publicly readable** (warn). Expected — profile images render on public pages via public URLs. Accept, or make the bucket private and serve signed URLs (breaks anonymous browsing of photos).
+Note on impact: rotating invalidates the old anon key immediately. The published site keeps working because it gets rebuilt with the new key, but any browser tab left open on the old build, and anything external you hardcoded the old key into, will start failing until it reloads. You will want to publish again right after rotating.
 
-4. **Critical advisory in TanStack dependencies** (warn) — `seroval` deserialization issue reachable via `@tanstack/react-router`, `@tanstack/react-start`, `@tanstack/router-plugin`. Action: bump those packages to patched versions and confirm the app still builds and routes correctly.
+## 2. The real exposure to check
 
-## Follow-up not blocking publish
+The leaked key matters only in proportion to how permissive your database rules are. Right now `profiles` and `listings` both allow anonymous reads by design, so anyone with the anon key (i.e. anyone) can read onboarded profiles and active listings. That was your deliberate choice for public browsing, and the server functions project only safe columns. Worth re-confirming that no other table allows anonymous access — I'll run the database linter and review the policies as part of this work.
 
-- The pg_cron job that calls `/api/public/hooks/refresh-competitions` must send the `x-refresh-secret` header, or competition data stops refreshing (401). Worth verifying the job in the database has the header.
-- Confirm every content route has its own title/description before going live.
+## 3. Stop tracking `.env`
 
-## Proposed order of work
+`.gitignore` currently has no entry for it. Add:
 
-1. Bump the TanStack packages and verify the build.
-2. Re-run the security scan.
-3. Accept the two anonymous-read findings (or lock them down, if you prefer login-gated browsing) and update security memory.
-4. Verify the cron header, then publish.
+```text
+# Local env
+.env
+.env.*
+!.env.example
+```
 
-## Decision needed
+Then create a committed `.env.example` listing the variable names with empty values, so anyone cloning the repo knows what to fill in.
 
-Should anonymous browsing stay (accept the two findings) or should profiles and listings require login? Everything else above is straightforward cleanup.
+**One caveat to decide on:** Lovable regenerates `.env` for you and, on Git-synced projects, expects it in the repo so the connection survives a clone. Untracking it is the right call for a public repo, but if you later clone the repo and build outside Lovable, you must supply those variables yourself.
+
+## 4. Purge it from git history
+
+Removing the file from tracking going forward does **not** erase it from past commits — it stays readable in the repo history on GitHub. This is the one step I cannot do for you: Lovable does not run history-rewriting git commands on your repo. On your machine:
+
+```bash
+git rm --cached .env
+git commit -m "Stop tracking .env"
+# then rewrite history, e.g. with git-filter-repo:
+git filter-repo --path .env --invert-paths
+git push --force
+```
+
+Since the values are publishable, rewriting history is optional housekeeping rather than an emergency.
+
+## 5. Consider making the repo private
+
+If nothing depends on it being public, this removes the whole class of problem.
+
+## What I will do on approval
+
+1. Rotate the Supabase API keys.
+2. Add the `.env` entries to `.gitignore` and add a `.env.example`.
+3. Run the database linter and review anonymous-access policies, reporting anything beyond the intended public browsing.
+4. Tell you when to publish so the live site picks up the new key.
+
+Steps 4 and 5 above (history purge, repo visibility) are yours to run on GitHub.
+
+## Question
+
+Do you want the keys rotated now, given the anon key is public by design and rotating briefly breaks open tabs until you republish?
