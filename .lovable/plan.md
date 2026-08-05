@@ -1,61 +1,38 @@
+# Connection review + publish readiness
 
-# Secure public browsing (Option B)
+## Connections status
 
-Keep listings and profiles browsable without login, but stop leaking full PII by routing all public reads through the anon key + narrow RLS policies that only expose safe columns. Kill the unauthenticated admin-client bypass.
+- **Firecrawl** — connected and linked in this workspace. `FIRECRAWL_API_KEY` is present and the connection runs in direct-API mode, which matches `src/lib/competitions.server.ts` (it calls the Firecrawl SDK with that key). No change needed.
+- **Lovable Cloud (database, auth, storage)** — project-owned, moves with the project. `SUPABASE_*` values are present in the project env.
+- **Lovable AI (`LOVABLE_API_KEY`)** — present, though no app code currently calls it.
+- **`REFRESH_COMPETITIONS_SECRET`** — still set. The competitions cron webhook requires it.
 
-## 1. Database migration — narrow public read policies
+No other third-party connector is referenced anywhere in the code, so Firecrawl was the only one that needed relinking.
 
-**`profiles` table**
-- Drop any broad `TO authenticated`/`TO anon` SELECT policy that returns all columns.
-- Add a `TO anon, authenticated` SELECT policy limited to onboarded profiles (`onboarded = true`).
-- Since Postgres RLS is row-level (not column-level), we enforce column safety in the server layer (step 2) by projecting only safe columns. RLS ensures only onboarded rows are visible.
-- Keep the existing owner-scoped policy so users can read/edit their own full profile via `requireSupabaseAuth`.
+## What currently blocks publishing
 
-**`listings` table**
-- Add a `TO anon, authenticated` SELECT policy for `is_active = true` rows.
-- Keep owner policy for `/listings/mine` (read own inactive/expired).
+The publish check refuses to ship while error-level security findings are open. There are three, plus two warnings.
 
-**Sensitive tables stay locked**: `messages`, `conversations`, `notifications`, `user_consents`, `competition_suggestions` — no anon access.
+1. **Stale finding — server functions bypass RLS** (`server_functions_bypass_rls`, error). Already fixed: the public read functions use the anon-key client in `src/lib/supabase-public.server.ts`, and the owner-scoped ones use `requireSupabaseAuth`. Action: re-run the security scan so this clears, and mark it fixed if it lingers.
 
-**GRANTs**: `GRANT SELECT ON public.profiles, public.listings TO anon;`
+2. **Profiles readable by anonymous visitors** (`profiles_anon_public_read`, error) and **listings readable by anonymous visitors** (`listings_anon_public_read`, error). These are the deliberate Option B design: browsing without login, through the anon key, limited to onboarded profiles and active listings with only safe columns projected. Action: mark both as accepted risk with a written justification and record it in security memory so future scans don't reopen them. Alternative, only if the intent has changed: restrict both policies to `authenticated` and require login to browse.
 
-## 2. Rewrite public server functions to use publishable client + safe columns
+3. **Avatars bucket publicly readable** (warn). Expected — profile images render on public pages via public URLs. Accept, or make the bucket private and serve signed URLs (breaks anonymous browsing of photos).
 
-In `src/lib/listings.functions.ts` and `src/lib/profiles.functions.ts`:
+4. **Critical advisory in TanStack dependencies** (warn) — `seroval` deserialization issue reachable via `@tanstack/react-router`, `@tanstack/react-start`, `@tanstack/router-plugin`. Action: bump those packages to patched versions and confirm the app still builds and routes correctly.
 
-- Replace `supabaseAdmin` with a per-handler publishable-key client (anon role). This makes RLS apply — anon can only see the columns/rows the policy allows, and even a leaked direct RPC call cannot return more than the safe projection.
-- Explicitly `.select()` only **safe public columns**:
-  - **Profile public columns**: `id, first_name, nickname, avatar_url, lives_in, sports, gyms, competitions, prs, superpower, kryptonite, bio, experience, looking_for, photos, age`
-  - **Profile private columns (never returned to anon)**: `from_location` (precise "from" location), `onboarded`, timestamps
-  - **Listing public columns**: all existing columns are already fine to show publicly (competition, date, location, description, author_id)
-  - **AuthorBrief** on listings: same safe subset as profile above
-- Affected functions: `listListings`, `getListing`, `listListingsByAuthor`, `getProfile`, `listProfiles`.
-- Owner-only functions (`listMyListings`, `updateProfile`, `updateListing`, `deactivateListing`, `reactivateListing`) already use `requireSupabaseAuth` — leave as is.
+## Follow-up not blocking publish
 
-Include the `sb_` publishable-key fetch shim (strip default `Authorization` bearer, set `apikey` header) per server-functions-modern knowledge, since Lovable Cloud may issue opaque keys.
+- The pg_cron job that calls `/api/public/hooks/refresh-competitions` must send the `x-refresh-secret` header, or competition data stops refreshing (401). Worth verifying the job in the database has the header.
+- Confirm every content route has its own title/description before going live.
 
-## 3. Lock down the competitions refresh webhook
+## Proposed order of work
 
-`src/routes/api/public/hooks/refresh-competitions.ts` currently lets anyone trigger paid Firecrawl scraping.
+1. Bump the TanStack packages and verify the build.
+2. Re-run the security scan.
+3. Accept the two anonymous-read findings (or lock them down, if you prefer login-gated browsing) and update security memory.
+4. Verify the cron header, then publish.
 
-- Add a `REFRESH_COMPETITIONS_SECRET` server secret (generated).
-- Handler checks `x-refresh-secret` header (timing-safe compare) before running; returns 401 otherwise.
-- Update the pg_cron job to send the header.
+## Decision needed
 
-## 4. Address remaining scanner warnings
-
-- **Public storage bucket listing** (`avatars`): tighten `storage.objects` SELECT policy so anon can only SELECT individual objects by path, not list the entire bucket. Reads by URL still work.
-- **SECURITY DEFINER executable by authenticated**: review `has_role`-style helpers (`wants_notification`, `is_user_contactable`, `handle_new_user`, `on_message_insert`, `touch_updated_at`). Trigger functions don't need EXECUTE for anyone; revoke EXECUTE from `PUBLIC`/`authenticated` on non-RPC definer functions.
-
-## What stays working
-
-- Anonymous visitors can still browse `/feed`, view listing detail, and view a profile — but only the safe subset (no precise "from" location, no non-onboarded profiles, no inactive listings).
-- Signed-in flows (`/profile/edit`, `/listings/mine`, messaging, etc.) are unchanged — they use `requireSupabaseAuth` and see full data via RLS as the owner.
-- Direct RPC scraping of the public endpoints now returns only what a browser visitor would already see, capped by RLS.
-
-## Verification
-
-- Run the Supabase linter after the migration.
-- Hit `listListings` / `getProfile` with no bearer token → confirm only safe columns come back.
-- Hit refresh-competitions without the secret → 401.
-- Mark the two `agent_security` findings as fixed once verified.
+Should anonymous browsing stay (accept the two findings) or should profiles and listings require login? Everything else above is straightforward cleanup.
