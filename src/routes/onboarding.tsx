@@ -185,6 +185,13 @@ function Onboarding() {
                 title="I accept the Privacy Policy"
                 body="How we store and process your personal data."
               />
+              <p className="text-xs text-muted-foreground">
+                Read the{" "}
+                <a href="/terms" target="_blank" rel="noreferrer" className="font-bold underline hover:text-foreground">Terms of Service</a>
+                {" "}and the{" "}
+                <a href="/privacy" target="_blank" rel="noreferrer" className="font-bold underline hover:text-foreground">Privacy Policy</a>.
+              </p>
+
 
               <p className="pt-3 text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Optional — recommended</p>
 
