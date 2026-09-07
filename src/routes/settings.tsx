@@ -49,26 +49,28 @@ function Settings() {
   };
 
   const exportData = async () => {
-    const [{ data: profile }, { data: c }, { data: l }, { data: msgs }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle(),
-      supabase.from("user_consents").select("*").eq("user_id", session.user.id).maybeSingle(),
-      supabase.from("listings").select("*").eq("author_id", session.user.id),
-      supabase.from("messages").select("*").eq("sender_id", session.user.id),
-    ]);
-    const blob = new Blob([JSON.stringify({ profile, consents: c, listings: l, messages: msgs }, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "teamup-data.json"; a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Data exported");
+    try {
+      const payload = await runExport({ data: undefined });
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = "teamup-data.json"; a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Data exported");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Export failed");
+    }
   };
 
   const deleteAccount = async () => {
-    if (!confirm("Permanently delete your account and all data? This cannot be undone.")) return;
-    const { error } = await supabase.from("profiles").delete().eq("id", session.user.id);
-    if (error) { toast.error(error.message); return; }
-    await signOut();
-    toast.success("Your account has been deleted");
-    navigate({ to: "/" });
+    if (!confirm("Permanently delete your account, photos, listings and messages? This cannot be undone.")) return;
+    try {
+      await runDelete({ data: undefined });
+      await signOut();
+      toast.success("Your account and all your data have been deleted");
+      navigate({ to: "/" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Deletion failed");
+    }
   };
 
   return (
