@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ShieldCheck, MessageSquare, Bell, Mail, Trash2, Download } from "lucide-react";
+import { ArrowLeft, ShieldCheck, MessageSquare, Bell, Mail, Trash2, Download, FileText } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { exportMyData, deleteMyAccount } from "@/lib/gdpr.functions";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — TeamUp" }] }),
@@ -13,6 +15,8 @@ export const Route = createFileRoute("/settings")({
 function Settings() {
   const { session, consents, refresh, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const runExport = useServerFn(exportMyData);
+  const runDelete = useServerFn(deleteMyAccount);
   const [contactable, setContactable] = useState(false);
   const [notifMessages, setNotifMessages] = useState(false);
   const [notifListings, setNotifListings] = useState(false);
