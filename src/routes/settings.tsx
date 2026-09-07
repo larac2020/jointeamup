@@ -105,7 +105,7 @@ function Settings() {
         <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-card">
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">Your data (GDPR)</p>
           <h2 className="mt-1 font-display text-2xl tracking-wide">Export or delete</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Download a copy of your data, or permanently delete your account.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Download everything we hold about you, or permanently delete your account — profile, photos, listings, messages and login are all removed straight away.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button onClick={exportData} className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold uppercase tracking-wider hover:bg-accent">
               <Download className="h-4 w-4" /> Export my data
@@ -113,6 +113,18 @@ function Settings() {
             <button onClick={deleteAccount} className="inline-flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-destructive hover:bg-destructive/20">
               <Trash2 className="h-4 w-4" /> Delete account
             </button>
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-card">
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">Legal</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link to="/privacy" className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold uppercase tracking-wider hover:bg-accent">
+              <FileText className="h-4 w-4" /> Privacy policy
+            </Link>
+            <Link to="/terms" className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold uppercase tracking-wider hover:bg-accent">
+              <FileText className="h-4 w-4" /> Terms of service
+            </Link>
           </div>
         </section>
       </div>
