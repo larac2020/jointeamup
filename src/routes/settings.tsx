@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ShieldCheck, MessageSquare, Bell, Mail, Trash2, Download } from "lucide-react";
+import { ArrowLeft, ShieldCheck, MessageSquare, Bell, Mail, Trash2, Download, FileText } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { exportMyData, deleteMyAccount } from "@/lib/gdpr.functions";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — TeamUp" }] }),
@@ -13,6 +15,8 @@ export const Route = createFileRoute("/settings")({
 function Settings() {
   const { session, consents, refresh, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const runExport = useServerFn(exportMyData);
+  const runDelete = useServerFn(deleteMyAccount);
   const [contactable, setContactable] = useState(false);
   const [notifMessages, setNotifMessages] = useState(false);
   const [notifListings, setNotifListings] = useState(false);
@@ -49,26 +53,28 @@ function Settings() {
   };
 
   const exportData = async () => {
-    const [{ data: profile }, { data: c }, { data: l }, { data: msgs }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle(),
-      supabase.from("user_consents").select("*").eq("user_id", session.user.id).maybeSingle(),
-      supabase.from("listings").select("*").eq("author_id", session.user.id),
-      supabase.from("messages").select("*").eq("sender_id", session.user.id),
-    ]);
-    const blob = new Blob([JSON.stringify({ profile, consents: c, listings: l, messages: msgs }, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "teamup-data.json"; a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Data exported");
+    try {
+      const payload = await runExport({ data: undefined });
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = "teamup-data.json"; a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Data exported");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Export failed");
+    }
   };
 
   const deleteAccount = async () => {
-    if (!confirm("Permanently delete your account and all data? This cannot be undone.")) return;
-    const { error } = await supabase.from("profiles").delete().eq("id", session.user.id);
-    if (error) { toast.error(error.message); return; }
-    await signOut();
-    toast.success("Your account has been deleted");
-    navigate({ to: "/" });
+    if (!confirm("Permanently delete your account, photos, listings and messages? This cannot be undone.")) return;
+    try {
+      await runDelete({ data: undefined });
+      await signOut();
+      toast.success("Your account and all your data have been deleted");
+      navigate({ to: "/" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Deletion failed");
+    }
   };
 
   return (
@@ -99,7 +105,7 @@ function Settings() {
         <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-card">
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">Your data (GDPR)</p>
           <h2 className="mt-1 font-display text-2xl tracking-wide">Export or delete</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Download a copy of your data, or permanently delete your account.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Download everything we hold about you, or permanently delete your account — profile, photos, listings, messages and login are all removed straight away.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button onClick={exportData} className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold uppercase tracking-wider hover:bg-accent">
               <Download className="h-4 w-4" /> Export my data
@@ -107,6 +113,18 @@ function Settings() {
             <button onClick={deleteAccount} className="inline-flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-destructive hover:bg-destructive/20">
               <Trash2 className="h-4 w-4" /> Delete account
             </button>
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-card">
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">Legal</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link to="/privacy" className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold uppercase tracking-wider hover:bg-accent">
+              <FileText className="h-4 w-4" /> Privacy policy
+            </Link>
+            <Link to="/terms" className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold uppercase tracking-wider hover:bg-accent">
+              <FileText className="h-4 w-4" /> Terms of service
+            </Link>
           </div>
         </section>
       </div>

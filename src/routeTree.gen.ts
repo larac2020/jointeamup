@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -26,6 +28,11 @@ import { Route as ListingsIdRouteImport } from './routes/listings.$id'
 import { Route as ListingsIdEditRouteImport } from './routes/listings.$id.edit'
 import { Route as ApiPublicHooksRefreshCompetitionsRouteImport } from './routes/api/public/hooks/refresh-competitions'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -34,6 +41,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -116,8 +128,10 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
   '/listings/mine': typeof ListingsMineRoute
   '/listings/new': typeof ListingsNewRoute
@@ -134,8 +148,10 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
   '/listings/mine': typeof ListingsMineRoute
   '/listings/new': typeof ListingsNewRoute
@@ -153,8 +169,10 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/listings/$id': typeof ListingsIdRouteWithChildren
   '/listings/mine': typeof ListingsMineRoute
   '/listings/new': typeof ListingsNewRoute
@@ -173,8 +191,10 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/onboarding'
+    | '/privacy'
     | '/reset-password'
     | '/settings'
+    | '/terms'
     | '/listings/$id'
     | '/listings/mine'
     | '/listings/new'
@@ -191,8 +211,10 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/onboarding'
+    | '/privacy'
     | '/reset-password'
     | '/settings'
+    | '/terms'
     | '/listings/$id'
     | '/listings/mine'
     | '/listings/new'
@@ -209,8 +231,10 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/onboarding'
+    | '/privacy'
     | '/reset-password'
     | '/settings'
+    | '/terms'
     | '/listings/$id'
     | '/listings/mine'
     | '/listings/new'
@@ -228,8 +252,10 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
+  TermsRoute: typeof TermsRoute
   ListingsIdRoute: typeof ListingsIdRouteWithChildren
   ListingsMineRoute: typeof ListingsMineRoute
   ListingsNewRoute: typeof ListingsNewRoute
@@ -240,6 +266,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -252,6 +285,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -375,8 +415,10 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
+  TermsRoute: TermsRoute,
   ListingsIdRoute: ListingsIdRouteWithChildren,
   ListingsMineRoute: ListingsMineRoute,
   ListingsNewRoute: ListingsNewRoute,
