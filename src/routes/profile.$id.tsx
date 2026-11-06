@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { Dumbbell, LogOut, MapPin, MessageSquare, Settings, Share2, Skull, Sparkles, Target, Trophy, Zap } from "lucide-react";
+import { useEffect } from "react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { useAuth } from "@/lib/auth";
@@ -31,7 +32,12 @@ function Profile() {
   });
   const isMe = user?.id === id;
 
+  useEffect(() => {
+    if (!a && isMe) void navigate({ to: "/onboarding", replace: true });
+  }, [a, isMe, navigate]);
+
   if (!a) {
+    if (isMe) return null;
     return (
       <div className="min-h-screen bg-background">
         <Header />
