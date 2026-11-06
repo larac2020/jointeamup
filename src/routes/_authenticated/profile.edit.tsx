@@ -11,8 +11,8 @@ import { experienceLevels, prPresets } from "@/lib/types";
 import { ImageCropperModal } from "@/components/ImageCropperModal";
 import { fileToDataUrl } from "@/lib/image-utils";
 
-export const Route = createFileRoute("/profile/edit")({
-  head: () => ({ meta: [{ title: "Edit profile — TeamUp" }] }),
+export const Route = createFileRoute("/_authenticated/profile/edit")({
+  head: () => ({ meta: [{ title: "Edit profile — TeamUp" }, { name: "description", content: "Update your TeamUp athlete profile." }, { property: "og:title", content: "Edit profile — TeamUp" }, { property: "og:description", content: "Update your TeamUp athlete profile." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: EditProfile,
 });
 
@@ -84,10 +84,6 @@ function EditProfile() {
       setCropTarget(null);
     }
   };
-
-  useEffect(() => {
-    if (!loading && !session) navigate({ to: "/login" });
-  }, [loading, session, navigate]);
 
   useEffect(() => {
     if (!profile) return;

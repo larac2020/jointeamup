@@ -1,10 +1,9 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Calendar, MapPin, Users, Pencil, Eye, EyeOff, RotateCcw, Plus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
-import { supabase } from "@/integrations/supabase/client";
 import {
   listMyListings,
   deactivateListing,
@@ -29,11 +28,8 @@ const myListingsQO = queryOptions({
   queryFn: () => listMyListings(),
 });
 
-export const Route = createFileRoute("/listings/mine")({
-  beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/login" });
-  },
+export const Route = createFileRoute("/_authenticated/listings/mine")({
+  head: () => ({ meta: [{ title: "My listings — TeamUp" }, { name: "description", content: "Manage your TeamUp competition listings." }, { property: "og:title", content: "My listings — TeamUp" }, { property: "og:description", content: "Manage your TeamUp competition listings." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(myListingsQO),
   component: MyListingsPage,
 });

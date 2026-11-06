@@ -6,8 +6,8 @@ import { Check, MessageSquare, Bell, Mail, Sparkles, ShieldCheck, Zap } from "lu
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Welcome — TeamUp" }] }),
+export const Route = createFileRoute("/_authenticated/onboarding")({
+  head: () => ({ meta: [{ title: "Welcome — TeamUp" }, { name: "description", content: "Complete your TeamUp athlete profile and preferences." }, { property: "og:title", content: "Welcome — TeamUp" }, { property: "og:description", content: "Complete your TeamUp athlete profile and preferences." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Onboarding,
 });
 
@@ -52,10 +52,6 @@ function Onboarding() {
   const [gym, setGym] = useState("");
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !session) navigate({ to: "/login" });
-  }, [loading, session, navigate]);
 
   useEffect(() => {
     if (profile) {
