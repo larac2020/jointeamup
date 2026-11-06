@@ -10,26 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as MessagesRouteImport } from './routes/messages'
-import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
-import { Route as ListingsMineRouteImport } from './routes/listings.mine'
-import { Route as ListingsNewRouteImport } from './routes/listings.new'
 import { Route as ProfileIdRouteImport } from './routes/profile.$id'
-import { Route as ProfileEditRouteImport } from './routes/profile.edit'
-import { Route as ListingsIdEditRouteImport } from './routes/listings.$id.edit'
+import { Route as AuthenticatedListingsMineRouteImport } from './routes/_authenticated/listings.mine'
+import { Route as AuthenticatedListingsNewRouteImport } from './routes/_authenticated/listings.new'
+import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
+import { Route as AuthenticatedListingsIdEditRouteImport } from './routes/_authenticated/listings.$id.edit'
 import { Route as ApiPublicHooksRefreshCompetitionsRouteImport } from './routes/api/public/hooks/refresh-competitions'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedRoute = FeedRouteImport.update({
@@ -42,21 +47,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MessagesRoute = MessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -67,29 +57,35 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ListingsIdRoute = ListingsIdRouteImport.update({
   id: '/listings/$id',
   path: '/listings/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ListingsMineRoute = ListingsMineRouteImport.update({
-  id: '/listings/mine',
-  path: '/listings/mine',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ListingsNewRoute = ListingsNewRouteImport.update({
-  id: '/listings/new',
-  path: '/listings/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileIdRoute = ProfileIdRouteImport.update({
@@ -97,16 +93,30 @@ const ProfileIdRoute = ProfileIdRouteImport.update({
   path: '/profile/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileEditRoute = ProfileEditRouteImport.update({
-  id: '/profile/edit',
-  path: '/profile/edit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ListingsIdEditRoute = ListingsIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => ListingsIdRoute,
-} as any)
+const AuthenticatedListingsMineRoute =
+  AuthenticatedListingsMineRouteImport.update({
+    id: '/listings/mine',
+    path: '/listings/mine',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedListingsNewRoute =
+  AuthenticatedListingsNewRouteImport.update({
+    id: '/listings/new',
+    path: '/listings/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfileEditRoute =
+  AuthenticatedProfileEditRouteImport.update({
+    id: '/profile/edit',
+    path: '/profile/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedListingsIdEditRoute =
+  AuthenticatedListingsIdEditRouteImport.update({
+    id: '/listings/$id/edit',
+    path: '/listings/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicHooksRefreshCompetitionsRoute =
   ApiPublicHooksRefreshCompetitionsRouteImport.update({
     id: '/api/public/hooks/refresh-competitions',
@@ -118,58 +128,59 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
-  '/messages': typeof MessagesRoute
-  '/notifications': typeof NotificationsRoute
-  '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
-  '/listings/$id': typeof ListingsIdRouteWithChildren
-  '/listings/mine': typeof ListingsMineRoute
-  '/listings/new': typeof ListingsNewRoute
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/listings/$id': typeof ListingsIdRoute
   '/profile/$id': typeof ProfileIdRoute
-  '/profile/edit': typeof ProfileEditRoute
-  '/listings/$id/edit': typeof ListingsIdEditRoute
+  '/listings/mine': typeof AuthenticatedListingsMineRoute
+  '/listings/new': typeof AuthenticatedListingsNewRoute
+  '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
   '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
-  '/messages': typeof MessagesRoute
-  '/notifications': typeof NotificationsRoute
-  '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
-  '/listings/$id': typeof ListingsIdRouteWithChildren
-  '/listings/mine': typeof ListingsMineRoute
-  '/listings/new': typeof ListingsNewRoute
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/listings/$id': typeof ListingsIdRoute
   '/profile/$id': typeof ProfileIdRoute
-  '/profile/edit': typeof ProfileEditRoute
-  '/listings/$id/edit': typeof ListingsIdEditRoute
+  '/listings/mine': typeof AuthenticatedListingsMineRoute
+  '/listings/new': typeof AuthenticatedListingsNewRoute
+  '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
   '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
-  '/messages': typeof MessagesRoute
-  '/notifications': typeof NotificationsRoute
-  '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
-  '/listings/$id': typeof ListingsIdRouteWithChildren
-  '/listings/mine': typeof ListingsMineRoute
-  '/listings/new': typeof ListingsNewRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/listings/$id': typeof ListingsIdRoute
   '/profile/$id': typeof ProfileIdRoute
-  '/profile/edit': typeof ProfileEditRoute
-  '/listings/$id/edit': typeof ListingsIdEditRoute
+  '/_authenticated/listings/mine': typeof AuthenticatedListingsMineRoute
+  '/_authenticated/listings/new': typeof AuthenticatedListingsNewRoute
+  '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/_authenticated/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
   '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRouteTypes {
@@ -178,17 +189,17 @@ export interface FileRouteTypes {
     | '/'
     | '/feed'
     | '/login'
+    | '/privacy'
+    | '/reset-password'
+    | '/terms'
     | '/messages'
     | '/notifications'
     | '/onboarding'
-    | '/privacy'
-    | '/reset-password'
     | '/settings'
-    | '/terms'
     | '/listings/$id'
+    | '/profile/$id'
     | '/listings/mine'
     | '/listings/new'
-    | '/profile/$id'
     | '/profile/edit'
     | '/listings/$id/edit'
     | '/api/public/hooks/refresh-competitions'
@@ -197,57 +208,52 @@ export interface FileRouteTypes {
     | '/'
     | '/feed'
     | '/login'
+    | '/privacy'
+    | '/reset-password'
+    | '/terms'
     | '/messages'
     | '/notifications'
     | '/onboarding'
-    | '/privacy'
-    | '/reset-password'
     | '/settings'
-    | '/terms'
     | '/listings/$id'
+    | '/profile/$id'
     | '/listings/mine'
     | '/listings/new'
-    | '/profile/$id'
     | '/profile/edit'
     | '/listings/$id/edit'
     | '/api/public/hooks/refresh-competitions'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/feed'
     | '/login'
-    | '/messages'
-    | '/notifications'
-    | '/onboarding'
     | '/privacy'
     | '/reset-password'
-    | '/settings'
     | '/terms'
+    | '/_authenticated/messages'
+    | '/_authenticated/notifications'
+    | '/_authenticated/onboarding'
+    | '/_authenticated/settings'
     | '/listings/$id'
-    | '/listings/mine'
-    | '/listings/new'
     | '/profile/$id'
-    | '/profile/edit'
-    | '/listings/$id/edit'
+    | '/_authenticated/listings/mine'
+    | '/_authenticated/listings/new'
+    | '/_authenticated/profile/edit'
+    | '/_authenticated/listings/$id/edit'
     | '/api/public/hooks/refresh-competitions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
-  MessagesRoute: typeof MessagesRoute
-  NotificationsRoute: typeof NotificationsRoute
-  OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  SettingsRoute: typeof SettingsRoute
   TermsRoute: typeof TermsRoute
-  ListingsIdRoute: typeof ListingsIdRouteWithChildren
-  ListingsMineRoute: typeof ListingsMineRoute
-  ListingsNewRoute: typeof ListingsNewRoute
+  ListingsIdRoute: typeof ListingsIdRoute
   ProfileIdRoute: typeof ProfileIdRoute
-  ProfileEditRoute: typeof ProfileEditRoute
   ApiPublicHooksRefreshCompetitionsRoute: typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 
@@ -258,6 +264,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed': {
@@ -274,27 +287,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/messages': {
-      id: '/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof MessagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notifications': {
-      id: '/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -309,13 +301,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -323,25 +308,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/listings/$id': {
       id: '/listings/$id'
       path: '/listings/$id'
       fullPath: '/listings/$id'
       preLoaderRoute: typeof ListingsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/listings/mine': {
-      id: '/listings/mine'
-      path: '/listings/mine'
-      fullPath: '/listings/mine'
-      preLoaderRoute: typeof ListingsMineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/listings/new': {
-      id: '/listings/new'
-      path: '/listings/new'
-      fullPath: '/listings/new'
-      preLoaderRoute: typeof ListingsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$id': {
@@ -351,19 +350,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile/edit': {
-      id: '/profile/edit'
+    '/_authenticated/listings/mine': {
+      id: '/_authenticated/listings/mine'
+      path: '/listings/mine'
+      fullPath: '/listings/mine'
+      preLoaderRoute: typeof AuthenticatedListingsMineRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/listings/new': {
+      id: '/_authenticated/listings/new'
+      path: '/listings/new'
+      fullPath: '/listings/new'
+      preLoaderRoute: typeof AuthenticatedListingsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile/edit': {
+      id: '/_authenticated/profile/edit'
       path: '/profile/edit'
       fullPath: '/profile/edit'
-      preLoaderRoute: typeof ProfileEditRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedProfileEditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/listings/$id/edit': {
-      id: '/listings/$id/edit'
-      path: '/edit'
+    '/_authenticated/listings/$id/edit': {
+      id: '/_authenticated/listings/$id/edit'
+      path: '/listings/$id/edit'
       fullPath: '/listings/$id/edit'
-      preLoaderRoute: typeof ListingsIdEditRouteImport
-      parentRoute: typeof ListingsIdRoute
+      preLoaderRoute: typeof AuthenticatedListingsIdEditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/hooks/refresh-competitions': {
       id: '/api/public/hooks/refresh-competitions'
@@ -375,34 +388,41 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface ListingsIdRouteChildren {
-  ListingsIdEditRoute: typeof ListingsIdEditRoute
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedListingsMineRoute: typeof AuthenticatedListingsMineRoute
+  AuthenticatedListingsNewRoute: typeof AuthenticatedListingsNewRoute
+  AuthenticatedProfileEditRoute: typeof AuthenticatedProfileEditRoute
+  AuthenticatedListingsIdEditRoute: typeof AuthenticatedListingsIdEditRoute
 }
 
-const ListingsIdRouteChildren: ListingsIdRouteChildren = {
-  ListingsIdEditRoute: ListingsIdEditRoute,
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedListingsMineRoute: AuthenticatedListingsMineRoute,
+  AuthenticatedListingsNewRoute: AuthenticatedListingsNewRoute,
+  AuthenticatedProfileEditRoute: AuthenticatedProfileEditRoute,
+  AuthenticatedListingsIdEditRoute: AuthenticatedListingsIdEditRoute,
 }
 
-const ListingsIdRouteWithChildren = ListingsIdRoute._addFileChildren(
-  ListingsIdRouteChildren,
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
-  MessagesRoute: MessagesRoute,
-  NotificationsRoute: NotificationsRoute,
-  OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  SettingsRoute: SettingsRoute,
   TermsRoute: TermsRoute,
-  ListingsIdRoute: ListingsIdRouteWithChildren,
-  ListingsMineRoute: ListingsMineRoute,
-  ListingsNewRoute: ListingsNewRoute,
+  ListingsIdRoute: ListingsIdRoute,
   ProfileIdRoute: ProfileIdRoute,
-  ProfileEditRoute: ProfileEditRoute,
   ApiPublicHooksRefreshCompetitionsRoute:
     ApiPublicHooksRefreshCompetitionsRoute,
 }
