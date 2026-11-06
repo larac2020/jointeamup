@@ -127,17 +127,31 @@ export function Header() {
                   </span>
                 )}
               </Link>
-              <Link
-                to="/profile/$id"
-                params={{ id: user.id }}
-                className="ml-1 grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-primary text-primary-foreground hover:opacity-90"
-              >
-                {profileQ.data?.avatar_url ? (
-                  <img src={profileQ.data.avatar_url} alt={profileQ.data.first_name ?? "Profile"} className="h-full w-full object-cover" />
-                ) : (
-                  <User className="h-5 w-5" />
-                )}
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  aria-label="Account menu"
+                  className="ml-1 grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-primary text-primary-foreground outline-none hover:opacity-90"
+                >
+                  {profileQ.data?.avatar_url ? (
+                    <img src={profileQ.data.avatar_url} alt={profileQ.data.first_name ?? "Profile"} className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile/$id" params={{ id: user.id }} className="cursor-pointer">
+                      <User className="h-4 w-4" /> Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onSelect={async () => { await signOut(); navigate({ to: "/" }); }}
+                  >
+                    <LogOut className="h-4 w-4" /> Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
             </>
           ) : (
