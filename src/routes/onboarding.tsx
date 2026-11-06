@@ -307,7 +307,7 @@ function Onboarding() {
               </button>
               <button
                 onClick={saveProfile}
-                disabled={saving || !firstName.trim() || sports.length === 0}
+                disabled={saving}
                 className="flex-1 rounded-2xl bg-warm px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-blaze hover:opacity-95 disabled:opacity-60"
               >
                 {saving ? "Saving…" : "Enter TeamUp"}
