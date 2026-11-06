@@ -66,9 +66,6 @@ function Terms() {
         You can delete your account at any time from Settings, which permanently removes your data.
         We may terminate accounts that seriously or repeatedly breach these terms.
       </P>
-
-      <H>7. Contact</H>
-      <P>Questions about these terms: hello@jointeamup.app.</P>
     </LegalShell>
   );
 }
