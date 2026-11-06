@@ -35,8 +35,7 @@ function Privacy() {
 
       <H>1. Who is responsible</H>
       <P>
-        TeamUp is the data controller for the information described here. For any privacy question
-        or request, contact us at <strong>privacy@jointeamup.app</strong>.
+        TeamUp is the data controller for the information described here.
       </P>
 
       <H>2. What we collect</H>
