@@ -6,11 +6,6 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const stats = [
-  { k: "10", v: "Athletes" },
-  { k: "16", v: "Open listings" },
-  { k: "10", v: "Cities" },
-];
 
 
 const sides = [
@@ -83,15 +78,6 @@ function Landing() {
             </Link>
           
           </div>
-
-          <dl className="mt-14 grid max-w-md grid-cols-3 gap-6">
-            {stats.map((s) => (
-              <div key={s.v}>
-                <dt className="font-display text-4xl text-white">{s.k}</dt>
-                <dd className="text-xs font-semibold uppercase tracking-wider text-white/70">{s.v}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
       </section>
 
