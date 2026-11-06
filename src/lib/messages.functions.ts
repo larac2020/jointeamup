@@ -129,11 +129,14 @@ export const startConversationFromListing = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: listing, error: lErr } = await supabase
       .from("listings")
-      .select("id, author_id")
+      .select("id, author_id, is_active, event_date")
       .eq("id", data.listing_id)
       .maybeSingle();
     if (lErr) throw new Error(lErr.message);
     if (!listing) throw new Error("Listing not found");
+    if (listing.event_date < new Date().toISOString().slice(0, 10) || !listing.is_active) {
+      throw new Error("This listing is no longer open.");
+    }
     if (listing.author_id === userId) {
       throw new Error("You can't message yourself about your own listing.");
     }

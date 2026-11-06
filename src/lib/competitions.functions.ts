@@ -44,6 +44,7 @@ export const listCompetitions = createServerFn({ method: "POST" })
       .select("id, competition_type, name, event_date, location, year")
       .eq("competition_type", competition_type)
       .gte("year", thisYear)
+      .gte("event_date", new Date().toISOString().slice(0, 10))
       .order("event_date", { ascending: true, nullsFirst: false })
       .limit(500);
     if (error) throw new Error(error.message);

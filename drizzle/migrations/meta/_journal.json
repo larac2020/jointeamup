@@ -15,6 +15,13 @@
       "when": 1793954179891,
       "tag": "0001_messaging_always_contactable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793954788681,
+      "tag": "0002_hide_expired_listings",
+      "breakpoints": true
     }
   ]
 }

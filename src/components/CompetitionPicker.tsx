@@ -116,6 +116,13 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
         </span>
         <ChevronDown className="h-4 w-4 opacity-60" />
       </button>
+      <button
+        type="button"
+        onClick={() => select(OTHER)}
+        className="mt-1.5 text-xs font-semibold text-primary hover:underline"
+      >
+        Not in the list? Type any competition name
+      </button>
 
       {open && (
         <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-border bg-card shadow-lg">
@@ -136,7 +143,16 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
               </div>
             )}
             {!isLoading && filtered.length === 0 && (
-              <div className="px-3 py-3 text-xs text-muted-foreground">No matches</div>
+              <div className="px-3 py-3 text-xs text-muted-foreground">No upcoming events match</div>
+            )}
+            {search.trim().length >= 2 && (
+              <button
+                type="button"
+                onClick={() => { setOtherMode(true); setOpen(false); onChange(search.trim()); setSearch(""); }}
+                className="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-sm font-semibold text-primary hover:bg-muted"
+              >
+                Use “{search.trim()}”
+              </button>
             )}
             {filtered.map((c) => (
               <button
@@ -156,7 +172,7 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
               onClick={() => select(OTHER)}
               className="flex w-full items-center gap-2 border-t border-border px-3 py-2 text-left text-sm font-medium hover:bg-muted"
             >
-              + Other competition not listed
+              + Type any competition name
             </button>
           </div>
         </div>
