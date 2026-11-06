@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Users, Loader2, Pencil, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
-import { getListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
+import { getListing, getMyListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
 import { startConversationFromListing } from "@/lib/messages.functions";
 import { listingTypeMeta, fallbackAvatar, categoryLabel } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
@@ -25,7 +25,15 @@ function ListingDetail() {
   const navigate = useNavigate();
   const { session, user } = useAuth();
   const qc = useQueryClient();
-  const { data: listing } = useSuspenseQuery(detailQO(id));
+  const { data: publicListing } = useSuspenseQuery(detailQO(id));
+  const getMineFn = useServerFn(getMyListing);
+  // Expired or deactivated listings are hidden publicly; the owner can still open them.
+  const { data: ownListing, isLoading: ownLoading } = useQuery({
+    queryKey: ["listings", id, "mine"],
+    queryFn: () => getMineFn({ data: { id } }),
+    enabled: !publicListing && !!session,
+  });
+  const listing = publicListing ?? ownListing ?? null;
   const startFn = useServerFn(startConversationFromListing);
   const deactivateFn = useServerFn(deactivateListing);
   const reactivateFn = useServerFn(reactivateListing);
@@ -46,6 +54,14 @@ function ListingDetail() {
     onError: (e: any) => toast.error("Update failed", { description: e?.message }),
   });
 
+  if (!listing && !!session && ownLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+      </div>
+    );
+  }
   if (!listing) {
     return (
       <div className="min-h-screen bg-background">
@@ -60,6 +76,7 @@ function ListingDetail() {
   const author = listing.author;
   const meta = listingTypeMeta[listing.type];
   const isMine = user?.id === listing.author_id;
+  const isExpired = listing.event_date < new Date().toISOString().slice(0, 10);
 
   const onMessage = () => {
     if (!session) {
@@ -132,12 +149,17 @@ function ListingDetail() {
             </div>
           )}
         </div>
-        {!listing.is_active && (
+        {isExpired && (
+          <div className="mt-6 rounded-2xl border border-border bg-muted px-4 py-3 text-sm font-semibold text-foreground">
+            Expired — this event date has passed. Only you can see this listing.
+          </div>
+        )}
+        {!isExpired && !listing.is_active && (
           <div className="mt-6 rounded-2xl border border-warm/40 bg-warm/10 px-4 py-3 text-sm font-semibold text-foreground">
             This listing is deactivated — only you can see it.
           </div>
         )}
-        {isMine ? (
+        {isMine ? (isExpired ? null : (
           <div className="sticky bottom-4 mt-6 flex flex-col gap-2 sm:flex-row">
             <Link
               to="/listings/$id/edit"
@@ -155,7 +177,7 @@ function ListingDetail() {
               {listing.is_active ? "Deactivate" : "Reactivate"}
             </button>
           </div>
-        ) : author && (
+        )) : author && !isExpired && listing.is_active && (
           <div className="sticky bottom-4 mt-6">
             <button
               onClick={onMessage}
