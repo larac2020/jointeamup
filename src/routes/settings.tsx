@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ShieldCheck, MessageSquare, Bell, Mail, Trash2, Download, FileText } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Bell, Mail, Trash2, Download, FileText } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { exportMyData, deleteMyAccount } from "@/lib/gdpr.functions";
@@ -17,7 +17,6 @@ function Settings() {
   const navigate = useNavigate();
   const runExport = useServerFn(exportMyData);
   const runDelete = useServerFn(deleteMyAccount);
-  const [contactable, setContactable] = useState(false);
   const [notifMessages, setNotifMessages] = useState(false);
   const [notifListings, setNotifListings] = useState(false);
   const [notifMarketing, setNotifMarketing] = useState(false);
@@ -28,7 +27,6 @@ function Settings() {
 
   useEffect(() => {
     if (consents) {
-      setContactable(consents.contactable_by_athletes);
       setNotifMessages(consents.notifications_messages);
       setNotifListings(consents.notifications_listings);
       setNotifMarketing(consents.notifications_marketing);
@@ -40,8 +38,6 @@ function Settings() {
   const save = async () => {
     const now = new Date().toISOString();
     const { error } = await supabase.from("user_consents").update({
-      contactable_by_athletes: contactable,
-      contactable_consent_at: contactable ? now : null,
       notifications_messages: notifMessages,
       notifications_listings: notifListings,
       notifications_marketing: notifMarketing,
@@ -92,7 +88,6 @@ function Settings() {
             <p className="text-xs font-bold uppercase tracking-[0.25em]">Privacy & consents</p>
           </div>
           <div className="mt-4 space-y-3">
-            <Toggle icon={MessageSquare} title="Allow other athletes to message me" body="Required to receive listing replies and team applications." checked={contactable} onChange={setContactable} />
             <Toggle icon={Bell} title="Notify me about new messages" body="In-app notifications when someone replies." checked={notifMessages} onChange={setNotifMessages} />
             <Toggle icon={Bell} title="Notify me about new listings" body="Heads-up when something matches your sport." checked={notifListings} onChange={setNotifListings} />
             <Toggle icon={Mail} title="Product news & tips" body="Occasional emails. Never sold." checked={notifMarketing} onChange={setNotifMarketing} />

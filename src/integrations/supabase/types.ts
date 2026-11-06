@@ -415,7 +415,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_user_contactable: { Args: { _user_id: string }; Returns: boolean }
       wants_notification: {
         Args: { _kind: string; _user_id: string }
         Returns: boolean
