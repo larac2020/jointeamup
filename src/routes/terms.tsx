@@ -47,10 +47,10 @@ function Terms() {
 
       <H>3. Tickets and teammates</H>
       <P>
-        TeamUp is an introduction platform. We are not party to any ticket transfer or team
-        agreement, we don't handle payments, and we can't guarantee that a race organiser will
-        approve a transfer. Always check the organiser's transfer rules before agreeing anything,
-        and take normal precautions when meeting or paying someone.
+        TeamUp only connects athletes. Any arrangement between users, including transferring a
+        ticket, happens outside TeamUp and is the users' own responsibility. We can't guarantee
+        that a race organiser will approve a transfer, so always check the organiser's transfer
+        rules first and take normal precautions when meeting someone.
       </P>
 
       <H>4. Behaviour</H>

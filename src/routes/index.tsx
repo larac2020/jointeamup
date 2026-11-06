@@ -15,7 +15,7 @@ const sides = [
     accent: "bg-warm",
     accentText: "text-warm",
     items: [
-      { icon: Ticket, title: "Resell your bib", body: "Injured, travelling, or out of shape? List your spot and pass it to an athlete who's ready." },
+      { icon: Ticket, title: "Pass on your bib", body: "Injured, travelling, or out of shape? List your spot and pass it to an athlete who's ready." },
       { icon: Users, title: "Replace a teammate", body: "Lost a partner before race day? Find a stand-in by sport, level, and location." },
     ],
   },
@@ -68,7 +68,7 @@ function Landing() {
           </h1>
           <p className="mt-6 max-w-xl text-lg font-medium text-white/85">
             Can’t make your competition anymore? Need a last-minute teammate who fits your team vibe?<br />
-            TeamUp helps you connect with athletes to buy, resell, and replace teammates in sports competitions, like HYROX, TurfGames, DEKA, and more.
+            TeamUp helps you connect with athletes to pass on race spots and find or replace teammates in sports competitions, like HYROX, TurfGames, DEKA, and more.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">

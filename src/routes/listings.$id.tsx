@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Shield, Users, Loader2, Pencil, EyeOff, Eye } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Users, Loader2, Pencil, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { getListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
@@ -94,12 +94,6 @@ function ListingDetail() {
             </div>
             <h2 className="mt-8 font-display text-2xl tracking-wide">Details</h2>
             {listing.description && <p className="mt-2 text-sm leading-relaxed text-foreground/85">{listing.description}</p>}
-            {listing.type === "selling-ticket" && (
-              <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-                <Shield className="h-3.5 w-3.5 text-primary" />
-                TeamUp connects athletes — payments happen directly between you and the seller.
-              </div>
-            )}
           </div>
           {author && (
             <div className="border-t border-border bg-muted/30 p-6">

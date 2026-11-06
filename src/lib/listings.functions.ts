@@ -7,6 +7,8 @@ import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
 const LISTING_PUBLIC_COLS =
   "id, author_id, type, competition, competition_type, event_date, location, format, gender, skill_level, spots, description, is_active, created_at";
 
+const today = () => new Date().toISOString().slice(0, 10);
+
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const filterSchema = z.object({
@@ -32,6 +34,7 @@ export const listListings = createServerFn({ method: "POST" })
       .from("listings")
       .select(LISTING_PUBLIC_COLS)
       .eq("is_active", true)
+      .gte("event_date", today())
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 60);
 
@@ -70,6 +73,7 @@ export const getListing = createServerFn({ method: "POST" })
       .select(LISTING_PUBLIC_COLS)
       .eq("id", data.id)
       .eq("is_active", true)
+      .gte("event_date", today())
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
@@ -90,6 +94,7 @@ export const listListingsByAuthor = createServerFn({ method: "POST" })
       .select(LISTING_PUBLIC_COLS)
       .eq("author_id", data.author_id)
       .eq("is_active", true)
+      .gte("event_date", today())
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return (rows ?? []) as ListingRow[];
@@ -153,6 +158,7 @@ export const updateListing = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => updateSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
+    await assertNotExpired(context.supabase, id);
     const { error } = await context.supabase
       .from("listings")
       .update({ ...rest, gender: rest.gender ?? null })
@@ -165,10 +171,63 @@ export const reactivateListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
+    await assertNotExpired(context.supabase, data.id);
     const { error } = await context.supabase
       .from("listings")
       .update({ is_active: true })
       .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertNotExpired(supabase: any, id: string) {
+  const { data: row } = await supabase.from("listings").select("event_date").eq("id", id).maybeSingle();
+  if (!row) throw new Error("Listing not found");
+  if (row.event_date < today()) throw new Error("Expired listings can't be edited or reactivated.");
+}
+
+/** Owner-only view of a single listing (includes deactivated/expired). */
+export const getMyListing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }): Promise<ListingWithAuthor | null> => {
+    const { data: row, error } = await context.supabase
+      .from("listings")
+      .select(LISTING_PUBLIC_COLS)
+      .eq("id", data.id)
+      .eq("author_id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) return null;
+    const { data: author } = await context.supabase
+      .from("profiles")
+      .select(AUTHOR_COLS)
+      .eq("id", row.author_id)
+      .maybeSingle();
+    return { ...(row as ListingRow), author: (author as AuthorBrief | null) ?? null };
+  });
+
+/** Permanently delete one of your own expired or deactivated listings. Conversations keep working (their listing link is cleared). */
+export const deleteListing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: row, error: rErr } = await context.supabase
+      .from("listings")
+      .select("id, author_id, is_active, event_date")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!row || row.author_id !== context.userId) throw new Error("Listing not found");
+    if (row.is_active && row.event_date >= today()) {
+      throw new Error("Deactivate this listing before deleting it.");
+    }
+    const { error } = await context.supabase
+      .from("listings")
+      .delete()
+      .eq("id", data.id)
+      .eq("author_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

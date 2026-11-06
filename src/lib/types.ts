@@ -87,7 +87,7 @@ export type NotificationRow = {
 };
 
 export const listingTypeMeta: Record<ListingType, { label: string; tone: string }> = {
-  "selling-ticket": { label: "Ticket for sale", tone: "bg-warm text-primary-foreground" },
+  "selling-ticket": { label: "Ticket to pass on", tone: "bg-warm text-primary-foreground" },
   "need-teammate": { label: "Need teammate", tone: "bg-cool text-primary-foreground" },
   "join-team": { label: "Looking for team", tone: "bg-secondary text-secondary-foreground" },
 };

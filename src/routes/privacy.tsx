@@ -50,7 +50,7 @@ function Privacy() {
         ]}
       />
       <P>
-        We do not collect health data, payment data, or special category data, and we do not use
+        We do not collect health data or special category data, and we do not use
         advertising or tracking cookies. The only cookies and local storage we use keep you signed
         in.
       </P>
