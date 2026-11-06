@@ -35,7 +35,6 @@ function Onboarding() {
   // Step 1: consents
   const [terms, setTerms] = useState(false);
   const [privacy, setPrivacy] = useState(false);
-  const [contactable, setContactable] = useState(true);
   const [notifMessages, setNotifMessages] = useState(true);
   const [notifListings, setNotifListings] = useState(true);
   const [notifMarketing, setNotifMarketing] = useState(false);
@@ -51,6 +50,7 @@ function Onboarding() {
   const [bio, setBio] = useState("");
   const [experience, setExperience] = useState("");
   const [gym, setGym] = useState("");
+  const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -73,7 +73,6 @@ function Onboarding() {
     if (consents) {
       setTerms(!!consents.terms_accepted_at);
       setPrivacy(!!consents.privacy_accepted_at);
-      setContactable(consents.contactable_by_athletes);
       setNotifMessages(consents.notifications_messages);
       setNotifListings(consents.notifications_listings);
       setNotifMarketing(consents.notifications_marketing);
@@ -92,8 +91,8 @@ function Onboarding() {
       user_id: session.user.id,
       terms_accepted_at: now,
       privacy_accepted_at: now,
-      contactable_by_athletes: contactable,
-      contactable_consent_at: contactable ? now : null,
+      contactable_by_athletes: true,
+      contactable_consent_at: now,
       notifications_messages: notifMessages,
       notifications_listings: notifListings,
       notifications_marketing: notifMarketing,
@@ -118,6 +117,7 @@ function Onboarding() {
       gym,
     });
     if (!parsed.success) {
+      setShowErrors(true);
       toast.error(parsed.error.issues[0].message);
       return;
     }
@@ -194,14 +194,6 @@ function Onboarding() {
 
 
               <p className="pt-3 text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Optional — recommended</p>
-
-              <Consent
-                icon={MessageSquare}
-                checked={contactable}
-                onChange={setContactable}
-                title="Allow other athletes to message me"
-                body="Without this, no one can contact you — including teams replying to your listings."
-              />
               <Consent
                 icon={Bell}
                 checked={notifMessages}
@@ -240,7 +232,10 @@ function Onboarding() {
             <h1 className="mt-2 font-display text-4xl tracking-wide">Your athlete profile</h1>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Field label="First name *" value={firstName} onChange={setFirstName} placeholder="Maya" />
+              <div>
+                <Field label="First name *" value={firstName} onChange={setFirstName} placeholder="Maya" />
+                {showErrors && !firstName.trim() && <p className="mt-1 text-xs font-bold text-destructive">First name is required</p>}
+              </div>
               <Field label="Nickname" value={nickname} onChange={setNickname} placeholder="Sledgehammer" />
               <Field label="Age" value={age} onChange={setAge} placeholder="28" type="number" />
               <Field label="Lives in" value={livesIn} onChange={setLivesIn} placeholder="Berlin, DE" />
@@ -302,6 +297,7 @@ function Onboarding() {
                   );
                 })}
               </div>
+              {showErrors && sports.length === 0 && <p className="mt-2 text-xs font-bold text-destructive">Pick at least one sport</p>}
             </div>
 
 
@@ -311,7 +307,7 @@ function Onboarding() {
               </button>
               <button
                 onClick={saveProfile}
-                disabled={saving}
+                disabled={saving || !firstName.trim() || sports.length === 0}
                 className="flex-1 rounded-2xl bg-warm px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-blaze hover:opacity-95 disabled:opacity-60"
               >
                 {saving ? "Saving…" : "Enter TeamUp"}

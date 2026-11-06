@@ -25,6 +25,10 @@ function Terms() {
         By creating a TeamUp account you agree to these terms. If you don't agree, please don't use
         the platform.
       </P>
+      <P>
+        By creating an account, you agree that other TeamUp athletes can message you about listings
+        and teams.
+      </P>
 
       <H>1. Your account</H>
       <P>
