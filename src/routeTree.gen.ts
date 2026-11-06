@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoRouteImport } from './routes/demo'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -31,11 +30,6 @@ import { Route as ApiPublicHooksRefreshCompetitionsRouteImport } from './routes/
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoRoute = DemoRouteImport.update({
-  id: '/demo',
-  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedRoute = FeedRouteImport.update({
@@ -122,7 +116,6 @@ const ApiPublicHooksRefreshCompetitionsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/demo': typeof DemoRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
@@ -142,7 +135,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/demo': typeof DemoRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
@@ -163,7 +155,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/demo': typeof DemoRoute
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
@@ -185,7 +176,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/demo'
     | '/feed'
     | '/login'
     | '/messages'
@@ -205,7 +195,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/demo'
     | '/feed'
     | '/login'
     | '/messages'
@@ -225,7 +214,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/demo'
     | '/feed'
     | '/login'
     | '/messages'
@@ -246,7 +234,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DemoRoute: typeof DemoRoute
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
@@ -271,13 +258,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo': {
-      id: '/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed': {
@@ -409,7 +389,6 @@ const ListingsIdRouteWithChildren = ListingsIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DemoRoute: DemoRoute,
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
