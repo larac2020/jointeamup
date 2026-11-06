@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "@tanstack/react-router";
+import { isSignupConfirmation } from "@/lib/auth-redirect";
 
 export type Consents = {
   user_id: string;
@@ -48,6 +50,7 @@ type AuthCtx = {
 const Ctx = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [consents, setConsents] = useState<Consents | null>(null);
@@ -63,9 +66,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Capture the confirmation marker before the auth client clears the hash.
+    let confirmationPending = isSignupConfirmation(window.location.hash);
+    const finishConfirmation = (s: Session | null) => {
+      if (!confirmationPending || !s?.user) return;
+      confirmationPending = false;
+      void navigate({ to: "/feed", replace: true });
+    };
     // 1. Set up listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
+      finishConfirmation(s);
       if (s?.user) {
         // Defer DB calls to avoid deadlock with auth events
         setTimeout(() => loadUserData(s.user.id), 0);
@@ -78,12 +89,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 2. Then check existing session
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
+      finishConfirmation(s);
       if (s?.user) loadUserData(s.user.id).finally(() => setLoading(false));
       else setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const refresh = async () => {
     if (session?.user) await loadUserData(session.user.id);
