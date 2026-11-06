@@ -74,12 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       void navigate({ to: "/feed", replace: true });
     };
     // 1. Set up listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       finishConfirmation(s);
       if (s?.user) {
+        if (event === "SIGNED_IN") setLoading(true);
         // Defer DB calls to avoid deadlock with auth events
-        setTimeout(() => loadUserData(s.user.id), 0);
+        setTimeout(() => { void loadUserData(s.user.id).finally(() => setLoading(false)); }, 0);
       } else {
         setProfile(null);
         setConsents(null);

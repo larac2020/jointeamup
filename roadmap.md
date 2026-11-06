@@ -1,0 +1,3 @@
+- [ ] Put all eight protected pages behind the shared browser-session gate without changing URLs.
+- [ ] Preserve safe requested destinations after login.
+- [ ] Test signed-in refreshes and signed-out redirects.
