@@ -15,7 +15,7 @@ const navItems = [
 
 
 export function Header() {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const unreadMsgFn = useServerFn(unreadMessageCount);
@@ -142,7 +142,12 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
                   <DropdownMenuItem asChild>
-                    <Link to="/profile/$id" params={{ id: user.id }} className="cursor-pointer">
+                    <Link
+                      {...(profile?.onboarded
+                        ? { to: "/profile/$id" as const, params: { id: user.id } }
+                        : { to: "/onboarding" as const })}
+                      className="cursor-pointer"
+                    >
                       <User className="h-4 w-4" /> Profile
                     </Link>
                   </DropdownMenuItem>
