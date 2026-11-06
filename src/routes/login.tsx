@@ -12,7 +12,7 @@ const searchSchema = z.object({ mode: z.enum(["signin", "signup", "forgot"]).opt
 
 export const Route = createFileRoute("/login")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Log in or sign up — TeamUp" }] }),
+  head: () => ({ meta: [{ title: "Log in or sign up — TeamUp" }, { name: "description", content: "Sign in to your TeamUp account." }, { property: "og:title", content: "Log in or sign up — TeamUp" }, { property: "og:description", content: "Sign in to your TeamUp account." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Login,
 });
 
