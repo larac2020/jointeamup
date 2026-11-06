@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Calendar, MapPin, Users, Pencil, Eye, EyeOff, RotateCcw, Plus, Loader2 } from "lucide-react";
+import { Calendar, MapPin, Users, Pencil, Eye, EyeOff, RotateCcw, Plus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,19 @@ import {
   listMyListings,
   deactivateListing,
   reactivateListing,
+  deleteListing,
 } from "@/lib/listings.functions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { listingTypeMeta, categoryLabel, type ListingRow } from "@/lib/types";
 
 const myListingsQO = queryOptions({
@@ -28,9 +40,9 @@ export const Route = createFileRoute("/listings/mine")({
 
 type Status = "active" | "expired" | "deactivated";
 function statusOf(l: ListingRow): Status {
-  if (!l.is_active) return "deactivated";
   const today = new Date().toISOString().slice(0, 10);
   if (l.event_date < today) return "expired";
+  if (!l.is_active) return "deactivated";
   return "active";
 }
 
@@ -103,6 +115,15 @@ function Row({ listing, status }: { listing: ListingRow; status: Status }) {
   const qc = useQueryClient();
   const deactivateFn = useServerFn(deactivateListing);
   const reactivateFn = useServerFn(reactivateListing);
+  const deleteFn = useServerFn(deleteListing);
+  const delMut = useMutation({
+    mutationFn: () => deleteFn({ data: { id: listing.id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["listings"] });
+      toast.success("Listing deleted");
+    },
+    onError: (e: any) => toast.error("Delete failed", { description: e?.message }),
+  });
   const meta = listingTypeMeta[listing.type];
   const dimmed = status !== "active";
 
@@ -155,13 +176,15 @@ function Row({ listing, status }: { listing: ListingRow; status: Status }) {
         >
           <Eye className="h-3.5 w-3.5" /> View
         </Link>
-        <Link
-          to="/listings/$id/edit"
-          params={{ id: listing.id }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
-        >
-          <Pencil className="h-3.5 w-3.5" /> Edit
-        </Link>
+        {status !== "expired" && (
+          <Link
+            to="/listings/$id/edit"
+            params={{ id: listing.id }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
+          >
+            <Pencil className="h-3.5 w-3.5" /> Edit
+          </Link>
+        )}
         {status === "active" && (
           <button
             disabled={mut.isPending}
@@ -179,6 +202,30 @@ function Row({ listing, status }: { listing: ListingRow; status: Status }) {
           >
             {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} Reactivate
           </button>
+        )}
+        {status !== "active" && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                disabled={delMut.isPending}
+                className="inline-flex items-center gap-1.5 rounded-full border border-destructive/40 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50"
+              >
+                {delMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />} Delete
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this listing permanently?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This can't be undone. Your conversations about it will stay in Messages.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => delMut.mutate()}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
     </div>
