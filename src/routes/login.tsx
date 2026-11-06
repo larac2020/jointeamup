@@ -111,7 +111,7 @@ function Login() {
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {mode === "signup"
-              ? "Build your athlete card in 60 seconds."
+              ? ""
               : mode === "forgot"
               ? "We'll email you a reset link."
               : "Welcome back, athlete."}
