@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 
-const OPEN_PATHS = ["/onboarding", "/login", "/privacy", "/terms", "/demo"];
+const OPEN_PATHS = ["/onboarding", "/login", "/privacy", "/terms"];
 
 /** Signed-in users who haven't completed profile setup are sent to /onboarding. */
 export function OnboardingGate() {
