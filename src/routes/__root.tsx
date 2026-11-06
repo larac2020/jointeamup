@@ -12,6 +12,7 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "sonner";
+import { OnboardingGate } from "@/components/OnboardingGate";
 
 function NotFoundComponent() {
   return (
@@ -118,6 +119,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <OnboardingGate />
         <Outlet />
         <Toaster richColors position="top-center" />
       </AuthProvider>
