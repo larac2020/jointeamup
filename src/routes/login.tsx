@@ -30,7 +30,7 @@ function Login() {
   useEffect(() => {
     if (loading || !session) return;
     if (profile?.onboarded) void navigate({ href: returnPath ?? "/feed", replace: true });
-    else void navigate({ to: "/onboarding", replace: true });
+    else void navigate({ to: "/onboarding", search: { redirect: returnPath === "/onboarding" ? undefined : returnPath }, replace: true });
   }, [loading, session, profile, returnPath, navigate]);
 
   const handleGoogle = async () => {
