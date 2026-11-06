@@ -1,29 +1,23 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
-import { useAuth } from "@/lib/auth";
 import { createListing } from "@/lib/listings.functions";
 import { competitionTypes, type Format, type Gender, getCategories } from "@/lib/types";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 
-export const Route = createFileRoute("/listings/new")({
-  head: () => ({ meta: [{ title: "Post a listing — TeamUp" }] }),
+export const Route = createFileRoute("/_authenticated/listings/new")({
+  head: () => ({ meta: [{ title: "Post a listing — TeamUp" }, { name: "description", content: "Find a teammate or pass on a competition ticket on TeamUp." }, { property: "og:title", content: "Post a listing — TeamUp" }, { property: "og:description", content: "Find a teammate or pass on a competition ticket on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: NewListing,
 });
 
 function NewListing() {
-  const { session, loading } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const createFn = useServerFn(createListing);
-
-  useEffect(() => {
-    if (!loading && !session) navigate({ to: "/login" });
-  }, [loading, session, navigate]);
 
   const [form, setForm] = useState({
     type: "selling-ticket" as "selling-ticket" | "need-teammate" | "join-team",

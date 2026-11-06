@@ -6,20 +6,20 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/lib/auth";
-import { signupConfirmationDestination } from "@/lib/auth-redirect";
+import { signupConfirmationDestination, safeLoginReturnPath } from "@/lib/auth-redirect";
 
-const searchSchema = z.object({ mode: z.enum(["signin", "signup", "forgot"]).optional() });
+const searchSchema = z.object({ mode: z.enum(["signin", "signup", "forgot"]).optional(), redirect: z.unknown().optional().transform(safeLoginReturnPath) });
 
 export const Route = createFileRoute("/login")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Log in or sign up — TeamUp" }] }),
+  head: () => ({ meta: [{ title: "Log in or sign up — TeamUp" }, { name: "description", content: "Sign in to your TeamUp account." }, { property: "og:title", content: "Log in or sign up — TeamUp" }, { property: "og:description", content: "Sign in to your TeamUp account." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Login,
 });
 
 function Login() {
   const navigate = useNavigate();
-  const { mode: initialMode } = useSearch({ from: "/login" });
-  const { session, profile } = useAuth();
+  const { mode: initialMode, redirect: returnPath } = useSearch({ from: "/login" });
+  const { session, profile, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">(initialMode ?? "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,14 +28,16 @@ function Login() {
 
   // If already signed in, route them away.
   useEffect(() => {
-    if (!session) return;
-    if (profile?.onboarded) navigate({ to: "/feed" });
-    else navigate({ to: "/onboarding" });
-  }, [session, profile, navigate]);
+    if (loading || !session) return;
+    if (profile?.onboarded) void navigate({ href: returnPath ?? "/feed", replace: true });
+    else void navigate({ to: "/onboarding", search: { redirect: returnPath === "/onboarding" ? undefined : returnPath }, replace: true });
+  }, [loading, session, profile, returnPath, navigate]);
 
   const handleGoogle = async () => {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const callback = new URL("/login", window.location.origin);
+    if (returnPath) callback.searchParams.set("redirect", returnPath);
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: callback.href });
     if (result.error) {
       toast.error("Google sign-in failed", { description: result.error.message });
       setBusy(false);

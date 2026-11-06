@@ -12,8 +12,8 @@ import {
   markNotificationRead,
 } from "@/lib/notifications.functions";
 
-export const Route = createFileRoute("/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — TeamUp" }] }),
+export const Route = createFileRoute("/_authenticated/notifications")({
+  head: () => ({ meta: [{ title: "Notifications — TeamUp" }, { name: "description", content: "Your TeamUp messages and listing updates." }, { property: "og:title", content: "Notifications — TeamUp" }, { property: "og:description", content: "Your TeamUp messages and listing updates." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Notifications,
 });
 
@@ -27,16 +27,12 @@ const toneMap: Record<string, string> = {
 };
 
 function Notifications() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const listFn = useServerFn(listMyNotifications);
   const markFn = useServerFn(markNotificationRead);
   const markAllFn = useServerFn(markAllNotificationsRead);
-
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [loading, user, navigate]);
 
   const q = useQuery({
     queryKey: ["notifications"],

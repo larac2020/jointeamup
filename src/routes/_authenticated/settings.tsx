@@ -7,23 +7,19 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { exportMyData, deleteMyAccount } from "@/lib/gdpr.functions";
 
-export const Route = createFileRoute("/settings")({
-  head: () => ({ meta: [{ title: "Settings — TeamUp" }] }),
+export const Route = createFileRoute("/_authenticated/settings")({
+  head: () => ({ meta: [{ title: "Settings — TeamUp" }, { name: "description", content: "Manage your TeamUp account and privacy preferences." }, { property: "og:title", content: "Settings — TeamUp" }, { property: "og:description", content: "Manage your TeamUp account and privacy preferences." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Settings,
 });
 
 function Settings() {
-  const { session, consents, refresh, signOut, loading } = useAuth();
+  const { session, consents, refresh, signOut } = useAuth();
   const navigate = useNavigate();
   const runExport = useServerFn(exportMyData);
   const runDelete = useServerFn(deleteMyAccount);
   const [notifMessages, setNotifMessages] = useState(false);
   const [notifListings, setNotifListings] = useState(false);
   const [notifMarketing, setNotifMarketing] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !session) navigate({ to: "/login" });
-  }, [loading, session, navigate]);
 
   useEffect(() => {
     if (consents) {

@@ -18,14 +18,14 @@ import { fallbackAvatar } from "@/lib/types";
 
 const searchSchema = z.object({ c: z.string().uuid().optional() });
 
-export const Route = createFileRoute("/messages")({
+export const Route = createFileRoute("/_authenticated/messages")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Messages — TeamUp" }] }),
+  head: () => ({ meta: [{ title: "Messages — TeamUp" }, { name: "description", content: "Your conversations with the TeamUp community." }, { property: "og:title", content: "Messages — TeamUp" }, { property: "og:description", content: "Your conversations with the TeamUp community." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Messages,
 });
 
 function Messages() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const search = Route.useSearch();
   const qc = useQueryClient();
@@ -33,10 +33,6 @@ function Messages() {
   const listMsgFn = useServerFn(listMessages);
   const sendFn = useServerFn(sendMessage);
   const markReadFn = useServerFn(markConversationRead);
-
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [loading, user, navigate]);
 
   const convQ = useQuery({
     queryKey: ["conversations"],

@@ -5,9 +5,11 @@ import { toast } from "sonner";
 import { Check, MessageSquare, Bell, Mail, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { safeLoginReturnPath } from "@/lib/auth-redirect";
 
-export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Welcome — TeamUp" }] }),
+export const Route = createFileRoute("/_authenticated/onboarding")({
+  validateSearch: z.object({ redirect: z.unknown().optional().transform(safeLoginReturnPath) }),
+  head: () => ({ meta: [{ title: "Welcome — TeamUp" }, { name: "description", content: "Complete your TeamUp athlete profile and preferences." }, { property: "og:title", content: "Welcome — TeamUp" }, { property: "og:description", content: "Complete your TeamUp athlete profile and preferences." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Onboarding,
 });
 
@@ -28,6 +30,7 @@ const SPORTS = ["HYROX", "HYROX Doubles", "Turf Games", "CrossFit", "DEKA", "Spa
 const EXPERIENCE = ["Beginner", "Intermediate", "Advanced", "Elite", "Pro"];
 
 function Onboarding() {
+  const { redirect: returnPath } = Route.useSearch();
   const { session, profile, consents, refresh, loading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -52,10 +55,6 @@ function Onboarding() {
   const [gym, setGym] = useState("");
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !session) navigate({ to: "/login" });
-  }, [loading, session, navigate]);
 
   useEffect(() => {
     if (profile) {
@@ -140,7 +139,7 @@ function Onboarding() {
     if (error) { toast.error(error.message); return; }
     await refresh();
     toast.success("Welcome to TeamUp 🔥");
-    navigate({ to: "/feed" });
+    void navigate({ href: returnPath === "/onboarding" ? "/feed" : returnPath ?? "/feed", replace: true });
   };
 
   return (

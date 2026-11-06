@@ -10,8 +10,8 @@ import { getListing, updateListing } from "@/lib/listings.functions";
 import { competitionTypes, type Format, type Gender, getCategories } from "@/lib/types";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 
-export const Route = createFileRoute("/listings/$id/edit")({
-  head: () => ({ meta: [{ title: "Edit listing — TeamUp" }] }),
+export const Route = createFileRoute("/_authenticated/listings/$id/edit")({
+  head: () => ({ meta: [{ title: "Edit listing — TeamUp" }, { name: "description", content: "Update your TeamUp competition listing." }, { property: "og:title", content: "Edit listing — TeamUp" }, { property: "og:description", content: "Update your TeamUp competition listing." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: EditListing,
 });
 
@@ -39,10 +39,6 @@ function EditListing() {
     spots: 1,
     description: "",
   });
-
-  useEffect(() => {
-    if (!loading && !session) navigate({ to: "/login" });
-  }, [loading, session, navigate]);
 
   useEffect(() => {
     if (!listing) return;
