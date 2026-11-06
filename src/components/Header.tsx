@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, MessageSquare, Plus, User, Zap } from "lucide-react";
+import { Bell, LogOut, MessageSquare, Plus, User, Zap } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { unreadMessageCount } from "@/lib/messages.functions";
@@ -14,7 +15,8 @@ const navItems = [
 
 
 export function Header() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const unreadMsgFn = useServerFn(unreadMessageCount);
   const unreadNotifFn = useServerFn(unreadNotificationCount);
