@@ -16,6 +16,7 @@ export type AuthorBrief = {
 };
 
 export type ListingRow = {
+  competition_id?: string | null;
   id: string;
   author_id: string;
   type: ListingType;

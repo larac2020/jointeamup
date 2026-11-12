@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { getListing, updateListing } from "@/lib/listings.functions";
 import { competitionTypes, type Format, type Gender, getCategories } from "@/lib/types";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
+import type { CompetitionOption } from "@/lib/competitions.functions";
 
 export const Route = createFileRoute("/_authenticated/listings/$id/edit")({
   head: () => ({ meta: [{ title: "Edit listing — TeamUp" }, { name: "description", content: "Update your TeamUp competition listing." }, { property: "og:title", content: "Edit listing — TeamUp" }, { property: "og:description", content: "Update your TeamUp competition listing." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -27,6 +28,8 @@ function EditListing() {
     queryFn: () => getListing({ data: { id } }),
   });
 
+  const [comp, setComp] = useState<CompetitionOption | null>(null);
+  const [compErr, setCompErr] = useState<string | null>(null);
   const [form, setForm] = useState({
     type: "selling-ticket" as "selling-ticket" | "need-teammate" | "join-team",
     competition: "",
@@ -42,6 +45,7 @@ function EditListing() {
 
   useEffect(() => {
     if (!listing) return;
+    setComp(listing.competition_id ? { id: listing.competition_id, name: listing.competition, city: listing.location, event_date: listing.event_date, listing_count: 0 } : null);
     setForm({
       type: listing.type,
       competition: listing.competition,
@@ -57,7 +61,8 @@ function EditListing() {
   }, [listing]);
 
   const mutation = useMutation({
-    mutationFn: () => updateFn({ data: { id, ...form } }),
+    mutationFn: () =>
+      updateFn({ data: { id, ...form, competition_id: comp!.id, competition: comp!.name, event_date: comp!.event_date, location: comp!.city ?? "" } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["listings"] });
       toast.success("Listing updated");
@@ -83,7 +88,7 @@ function EditListing() {
         <h1 className="mt-3 font-display text-5xl tracking-wide">Edit listing</h1>
 
         <form
-          onSubmit={(e) => { e.preventDefault(); mutation.mutate(); }}
+          onSubmit={(e) => { e.preventDefault(); if (!comp) { setCompErr("Pick an event or add a new one."); return; } mutation.mutate(); }}
           className="mt-6 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card"
         >
           <Field label="Listing type">
@@ -113,6 +118,10 @@ function EditListing() {
                     ...f,
                     competition_type: ct,
                     competition: "",
+                  }));
+                  setComp(null);
+                  setForm((f) => ({
+                    ...f,
                     format: first.format,
                     gender: first.gender,
                     skill_level: first.skill_level,
@@ -126,20 +135,15 @@ function EditListing() {
             <Field label="Competition name">
               <CompetitionPicker
                 competitionType={form.competition_type}
-                value={form.competition}
-                onChange={(v) => setForm((f) => ({ ...f, competition: v }))}
+                value={comp}
+                onChange={(c) => { setComp(c); setCompErr(null); }}
                 inputClassName={inputCls}
               />
+              {compErr && <p className="mt-1 text-xs font-medium text-destructive">{compErr}</p>}
             </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Date">
-              <input required type="date" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} className={inputCls} />
-            </Field>
-            <Field label="Location">
-              <input required minLength={2} maxLength={120} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className={inputCls} />
-            </Field>
             <Field label="Category">
               <select
                 value={`${form.format}|${form.gender}|${form.skill_level}`}

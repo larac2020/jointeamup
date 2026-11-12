@@ -64,34 +64,43 @@ export type Database = {
       }
       competitions: {
         Row: {
+          city: string | null
           competition_type: string
           created_at: string
-          event_date: string | null
+          created_by: string | null
+          event_date: string
           id: string
           location: string | null
           name: string
+          normalized_name: string
           source_url: string | null
           updated_at: string
           year: number
         }
         Insert: {
+          city?: string | null
           competition_type: string
           created_at?: string
-          event_date?: string | null
+          created_by?: string | null
+          event_date: string
           id?: string
           location?: string | null
           name: string
+          normalized_name?: string
           source_url?: string | null
           updated_at?: string
-          year: number
+          year?: number
         }
         Update: {
+          city?: string | null
           competition_type?: string
           created_at?: string
-          event_date?: string | null
+          created_by?: string | null
+          event_date?: string
           id?: string
           location?: string | null
           name?: string
+          normalized_name?: string
           source_url?: string | null
           updated_at?: string
           year?: number
@@ -151,6 +160,7 @@ export type Database = {
         Row: {
           author_id: string
           competition: string
+          competition_id: string | null
           competition_type: string
           created_at: string
           description: string
@@ -167,6 +177,7 @@ export type Database = {
         Insert: {
           author_id: string
           competition: string
+          competition_id?: string | null
           competition_type: string
           created_at?: string
           description: string
@@ -183,6 +194,7 @@ export type Database = {
         Update: {
           author_id?: string
           competition?: string
+          competition_id?: string | null
           competition_type?: string
           created_at?: string
           description?: string
@@ -202,6 +214,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
             referencedColumns: ["id"]
           },
         ]
@@ -415,6 +434,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      match_competitions: {
+        Args: { _city: string; _date: string; _name: string; _type: string }
+        Returns: {
+          city: string
+          event_date: string
+          id: string
+          listing_count: number
+          name: string
+          score: number
+        }[]
+      }
+      normalize_competition_name: { Args: { _name: string }; Returns: string }
+      search_competitions: {
+        Args: { _q?: string; _type: string }
+        Returns: {
+          city: string
+          event_date: string
+          id: string
+          listing_count: number
+          name: string
+        }[]
+      }
       wants_notification: {
         Args: { _kind: string; _user_id: string }
         Returns: boolean

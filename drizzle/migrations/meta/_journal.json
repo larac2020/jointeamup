@@ -22,6 +22,20 @@
       "when": 1793954788681,
       "tag": "0002_hide_expired_listings",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794485477421,
+      "tag": "0003_user_created_competitions",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794485663550,
+      "tag": "0004_allow_empty_listing_description",
+      "breakpoints": true
     }
   ]
 }
