@@ -1,3 +1,4 @@
 - [x] Put all eight protected pages behind the shared browser-session gate without changing URLs.
 - [x] Preserve safe requested destinations after login.
-- [x] Test signed-in refreshes and signed-out redirects.
+- [x] Test signed-in refreshes and signed-out redirects.- [x] Remove automatic competition scraping (cron, route, scraper, scraped rows).
+- [x] User-created events with picker, inline create and "Did you mean" duplicate suggestions.
