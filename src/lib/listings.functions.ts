@@ -5,7 +5,7 @@ import { createPublicSupabaseClient } from "@/lib/supabase-public.server";
 import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
 
 const LISTING_PUBLIC_COLS =
-  "id, author_id, type, competition, competition_type, event_date, location, format, gender, skill_level, spots, description, is_active, created_at";
+  "id, author_id, type, competition_id, competition, competition_type, event_date, location, format, gender, skill_level, spots, description, is_active, created_at";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -114,10 +114,11 @@ export const listMyListings = createServerFn({ method: "POST" })
 
 const createSchema = z.object({
   type: z.enum(["selling-ticket", "need-teammate", "join-team"]),
-  competition: z.string().min(2).max(120),
+  competition_id: z.string().uuid(),
+  competition: z.string().min(2).max(200),
   competition_type: z.string().min(1).max(60),
   event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  location: z.string().min(2).max(120),
+  location: z.string().max(120).optional().default(""),
   format: z.enum(["Individual", "Doubles", "Team", "Relay"]),
   skill_level: z.string().min(1).max(40),
   gender: z.enum(["Men", "Women", "Mixed", "Open"]).optional().nullable(),
@@ -130,9 +131,10 @@ export const createListing = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const ev = await resolveCompetition(supabase, data.competition_id, data.competition_type);
     const { data: row, error } = await supabase
       .from("listings")
-      .insert({ ...data, author_id: userId, gender: data.gender ?? null })
+      .insert({ ...data, ...ev, author_id: userId, gender: data.gender ?? null })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -159,9 +161,10 @@ export const updateListing = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     await assertNotExpired(context.supabase, id);
+    const ev = await resolveCompetition(context.supabase, rest.competition_id, rest.competition_type);
     const { error } = await context.supabase
       .from("listings")
-      .update({ ...rest, gender: rest.gender ?? null })
+      .update({ ...rest, ...ev, gender: rest.gender ?? null })
       .eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -179,6 +182,19 @@ export const reactivateListing = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** The linked event is the source of truth for name, date and city. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveCompetition(supabase: any, competitionId: string, competitionType: string) {
+  const { data: c } = await supabase
+    .from("competitions")
+    .select("id, name, city, event_date, competition_type")
+    .eq("id", competitionId)
+    .maybeSingle();
+  if (!c) throw new Error("Pick an upcoming event for this listing.");
+  if (c.competition_type !== competitionType) throw new Error("The event doesn't match the competition type.");
+  return { competition_id: c.id, competition: c.name, event_date: c.event_date, location: c.city ?? "" };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertNotExpired(supabase: any, id: string) {

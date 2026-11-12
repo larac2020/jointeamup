@@ -20,6 +20,8 @@ function NewListing() {
   const qc = useQueryClient();
   const createFn = useServerFn(createListing);
 
+  const [comp, setComp] = useState<CompetitionOption | null>(null);
+  const [compErr, setCompErr] = useState<string | null>(null);
   const [form, setForm] = useState({
     type: "selling-ticket" as "selling-ticket" | "need-teammate" | "join-team",
     competition: "",
@@ -34,7 +36,8 @@ function NewListing() {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: typeof form) => createFn({ data }),
+    mutationFn: (data: typeof form) =>
+      createFn({ data: { ...data, competition_id: comp!.id, competition: comp!.name, event_date: comp!.event_date, location: comp!.city ?? "" } }),
     onSuccess: ({ id }) => {
       qc.invalidateQueries({ queryKey: ["listings"] });
       toast.success("Listing posted");
@@ -56,6 +59,7 @@ function NewListing() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (!comp) { setCompErr("Pick an event or add a new one."); return; }
             mutation.mutate(form);
           }}
           className="mt-6 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card"

@@ -28,6 +28,8 @@ function EditListing() {
     queryFn: () => getListing({ data: { id } }),
   });
 
+  const [comp, setComp] = useState<CompetitionOption | null>(null);
+  const [compErr, setCompErr] = useState<string | null>(null);
   const [form, setForm] = useState({
     type: "selling-ticket" as "selling-ticket" | "need-teammate" | "join-team",
     competition: "",
@@ -43,6 +45,7 @@ function EditListing() {
 
   useEffect(() => {
     if (!listing) return;
+    setComp(listing.competition_id ? { id: listing.competition_id, name: listing.competition, city: listing.location, event_date: listing.event_date, listing_count: 0 } : null);
     setForm({
       type: listing.type,
       competition: listing.competition,
@@ -58,7 +61,8 @@ function EditListing() {
   }, [listing]);
 
   const mutation = useMutation({
-    mutationFn: () => updateFn({ data: { id, ...form } }),
+    mutationFn: () =>
+      updateFn({ data: { id, ...form, competition_id: comp!.id, competition: comp!.name, event_date: comp!.event_date, location: comp!.city ?? "" } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["listings"] });
       toast.success("Listing updated");
@@ -84,7 +88,7 @@ function EditListing() {
         <h1 className="mt-3 font-display text-5xl tracking-wide">Edit listing</h1>
 
         <form
-          onSubmit={(e) => { e.preventDefault(); mutation.mutate(); }}
+          onSubmit={(e) => { e.preventDefault(); if (!comp) { setCompErr("Pick an event or add a new one."); return; } mutation.mutate(); }}
           className="mt-6 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card"
         >
           <Field label="Listing type">
