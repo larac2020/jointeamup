@@ -1,72 +1,71 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { refreshType } from "./competitions.server";
+import { createPublicSupabaseClient } from "@/lib/supabase-public.server";
 
-export type CompetitionRow = {
+export type CompetitionOption = {
   id: string;
-  competition_type: string;
   name: string;
-  event_date: string | null;
-  location: string | null;
-  year: number;
+  city: string | null;
+  event_date: string;
+  listing_count: number;
 };
 
-const STALE_MS = 7 * 24 * 60 * 60 * 1000;
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const today = () => new Date().toISOString().slice(0, 10);
 
+/** Public: upcoming user-created events for a competition type. */
 export const listCompetitions = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z.object({ competition_type: z.string().min(1).max(60) }).parse(input),
+    z.object({ competition_type: z.string().min(1).max(60), q: z.string().max(120).optional() }).parse(input),
   )
-  .handler(async ({ data }): Promise<CompetitionRow[]> => {
-    const { competition_type } = data;
-
-    // Check freshness; if stale, fire-and-forget refresh
-    const { data: src } = await supabaseAdmin
-      .from("competition_sources")
-      .select("last_scraped_at")
-      .eq("competition_type", competition_type)
-      .maybeSingle();
-
-    const stale =
-      !src?.last_scraped_at ||
-      Date.now() - new Date(src.last_scraped_at).getTime() > STALE_MS;
-
-    if (stale && src) {
-      // Don't await — let it fill cache for next request
-      refreshType(competition_type).catch((e) => console.error("refreshType failed:", e));
-    }
-
-    const thisYear = new Date().getFullYear();
-    const { data: rows, error } = await supabaseAdmin
-      .from("competitions")
-      .select("id, competition_type, name, event_date, location, year")
-      .eq("competition_type", competition_type)
-      .gte("year", thisYear)
-      .gte("event_date", new Date().toISOString().slice(0, 10))
-      .order("event_date", { ascending: true, nullsFirst: false })
-      .limit(500);
-    if (error) throw new Error(error.message);
-    return (rows ?? []) as CompetitionRow[];
-  });
-
-export const suggestCompetition = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        competition_type: z.string().min(1).max(60),
-        name: z.string().min(2).max(200),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    const { error } = await supabaseAdmin.from("competition_suggestions").insert({
-      competition_type: data.competition_type,
-      name: data.name.trim(),
-      submitted_by: context.userId,
+  .handler(async ({ data }): Promise<CompetitionOption[]> => {
+    const supabase = createPublicSupabaseClient();
+    const { data: rows, error } = await supabase.rpc("search_competitions", {
+      _type: data.competition_type,
+      _q: data.q ?? "",
     });
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return (rows ?? []).map((r) => ({ ...r, listing_count: Number(r.listing_count) }));
+  });
+
+const newEventSchema = z.object({
+  competition_type: z.string().min(1).max(60),
+  name: z.string().trim().min(2).max(200),
+  city: z.string().trim().min(2).max(120),
+  event_date: isoDate,
+});
+
+/** Likely duplicates: similar name, same city, date within ±7 days. Suggestion only. */
+export const findCompetitionMatches = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => newEventSchema.parse(input))
+  .handler(async ({ data, context }): Promise<CompetitionOption[]> => {
+    const { data: rows, error } = await context.supabase.rpc("match_competitions", {
+      _type: data.competition_type,
+      _name: data.name,
+      _city: data.city,
+      _date: data.event_date,
+    });
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((r) => ({
+      id: r.id, name: r.name, city: r.city, event_date: r.event_date, listing_count: Number(r.listing_count),
+    }));
+  });
+
+export const createCompetition = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => newEventSchema.parse(input))
+  .handler(async ({ data, context }): Promise<CompetitionOption> => {
+    if (data.event_date < today()) throw new Error("The event date must be today or later.");
+    const { data: row, error } = await context.supabase
+      .from("competitions")
+      .insert({ ...data, created_by: context.userId })
+      .select("id, name, city, event_date")
+      .single();
+    if (error) {
+      if (error.code === "23505") throw new Error("This event already exists — pick it from the list.");
+      throw new Error(error.message);
+    }
+    return { ...row, listing_count: 0 };
   });
