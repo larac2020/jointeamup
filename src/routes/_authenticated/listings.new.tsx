@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { createListing } from "@/lib/listings.functions";
 import { competitionTypes, type Format, type Gender, getCategories } from "@/lib/types";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
+import type { CompetitionOption } from "@/lib/competitions.functions";
 
 export const Route = createFileRoute("/_authenticated/listings/new")({
   head: () => ({ meta: [{ title: "Post a listing — TeamUp" }, { name: "description", content: "Find a teammate or pass on a competition ticket on TeamUp." }, { property: "og:title", content: "Post a listing — TeamUp" }, { property: "og:description", content: "Find a teammate or pass on a competition ticket on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -92,6 +93,10 @@ function NewListing() {
                     ...f,
                     competition_type: ct,
                     competition: "",
+                  }));
+                  setComp(null);
+                  setForm((f) => ({
+                    ...f,
                     format: first.format,
                     gender: first.gender,
                     skill_level: first.skill_level,
@@ -105,20 +110,15 @@ function NewListing() {
             <Field label="Competition name">
               <CompetitionPicker
                 competitionType={form.competition_type}
-                value={form.competition}
-                onChange={(v) => setForm((f) => ({ ...f, competition: v }))}
+                value={comp}
+                onChange={(c) => { setComp(c); setCompErr(null); }}
                 inputClassName={inputCls}
               />
+              {compErr && <p className="mt-1 text-xs font-medium text-destructive">{compErr}</p>}
             </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Date">
-              <input required type="date" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} className={inputCls} />
-            </Field>
-            <Field label="Location">
-              <input required minLength={2} maxLength={120} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Berlin, DE" className={inputCls} />
-            </Field>
             <Field label="Category">
               <select
                 value={`${form.format}|${form.gender}|${form.skill_level}`}
