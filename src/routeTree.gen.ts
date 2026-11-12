@@ -26,7 +26,6 @@ import { Route as AuthenticatedListingsMineRouteImport } from './routes/_authent
 import { Route as AuthenticatedListingsNewRouteImport } from './routes/_authenticated/listings.new'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
 import { Route as AuthenticatedListingsIdEditRouteImport } from './routes/_authenticated/listings.$id.edit'
-import { Route as ApiPublicHooksRefreshCompetitionsRouteImport } from './routes/api/public/hooks/refresh-competitions'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -117,12 +116,6 @@ const AuthenticatedListingsIdEditRoute =
     path: '/listings/$id/edit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiPublicHooksRefreshCompetitionsRoute =
-  ApiPublicHooksRefreshCompetitionsRouteImport.update({
-    id: '/api/public/hooks/refresh-competitions',
-    path: '/api/public/hooks/refresh-competitions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -141,7 +134,6 @@ export interface FileRoutesByFullPath {
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
-  '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,7 +152,6 @@ export interface FileRoutesByTo {
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
-  '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,7 +172,6 @@ export interface FileRoutesById {
   '/_authenticated/listings/new': typeof AuthenticatedListingsNewRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
-  '/api/public/hooks/refresh-competitions': typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -202,7 +192,6 @@ export interface FileRouteTypes {
     | '/listings/new'
     | '/profile/edit'
     | '/listings/$id/edit'
-    | '/api/public/hooks/refresh-competitions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,7 +210,6 @@ export interface FileRouteTypes {
     | '/listings/new'
     | '/profile/edit'
     | '/listings/$id/edit'
-    | '/api/public/hooks/refresh-competitions'
   id:
     | '__root__'
     | '/'
@@ -241,7 +229,6 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/new'
     | '/_authenticated/profile/edit'
     | '/_authenticated/listings/$id/edit'
-    | '/api/public/hooks/refresh-competitions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -254,7 +241,6 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   ListingsIdRoute: typeof ListingsIdRoute
   ProfileIdRoute: typeof ProfileIdRoute
-  ApiPublicHooksRefreshCompetitionsRoute: typeof ApiPublicHooksRefreshCompetitionsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -378,13 +364,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedListingsIdEditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/public/hooks/refresh-competitions': {
-      id: '/api/public/hooks/refresh-competitions'
-      path: '/api/public/hooks/refresh-competitions'
-      fullPath: '/api/public/hooks/refresh-competitions'
-      preLoaderRoute: typeof ApiPublicHooksRefreshCompetitionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -423,8 +402,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   ListingsIdRoute: ListingsIdRoute,
   ProfileIdRoute: ProfileIdRoute,
-  ApiPublicHooksRefreshCompetitionsRoute:
-    ApiPublicHooksRefreshCompetitionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
