@@ -23,6 +23,9 @@ export type ListingRow = {
   competition: string;
   competition_type: string;
   event_date: string; // YYYY-MM-DD
+  end_date: string | null;
+  race_day: string | null;
+  expires_on?: string;
   location: string;
   format: Format;
   gender: Gender | null;
@@ -88,9 +91,9 @@ export type NotificationRow = {
 };
 
 export const listingTypeMeta: Record<ListingType, { label: string; tone: string }> = {
-  "selling-ticket": { label: "Ticket to pass on", tone: "bg-warm text-primary-foreground" },
-  "need-teammate": { label: "Need teammate", tone: "bg-cool text-primary-foreground" },
-  "join-team": { label: "Looking for team", tone: "bg-secondary text-secondary-foreground" },
+  "selling-ticket": { label: "Ticket available", tone: "bg-warm text-primary-foreground" },
+  "need-teammate": { label: "Teammates wanted", tone: "bg-cool text-primary-foreground" },
+  "join-team": { label: "Looking for a team", tone: "bg-secondary text-secondary-foreground" },
 };
 
 export const competitionTypes = ["HYROX", "Turf Games", "DEKA", "CrossFit", "Spartan", "Other"] as const;

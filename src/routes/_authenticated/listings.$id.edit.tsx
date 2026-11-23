@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { eventEnd } from "@/lib/event-dates";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/lib/auth";
-import { getListing, updateListing } from "@/lib/listings.functions";
+import { getMyListing, updateListing } from "@/lib/listings.functions";
 import { competitionTypes, type Format, type Gender } from "@/lib/types";
 import { ListingSportFields } from "@/components/ListingSportFields";
 import { defaultSportValues, spotsLabel } from "@/lib/listing-sports";
@@ -28,7 +29,7 @@ function EditListing() {
 
   const { data: listing } = useQuery({
     queryKey: ["listings", id],
-    queryFn: () => getListing({ data: { id } }),
+    queryFn: () => getMyListing({ data: { id } }),
   });
 
   const [comp, setComp] = useState<CompetitionOption | null>(null);
@@ -38,6 +39,7 @@ function EditListing() {
     competition: "",
     competition_type: "HYROX",
     event_date: "",
+    race_day: "",
     location: "",
     format: "Individual" as Format,
     skill_level: "Open" as string,
@@ -48,12 +50,13 @@ function EditListing() {
 
   useEffect(() => {
     if (!listing) return;
-    setComp(listing.competition_id ? { id: listing.competition_id, name: listing.competition, city: listing.location, event_date: listing.event_date, listing_count: 0 } : null);
+    setComp(listing.competition_id ? { id: listing.competition_id, name: listing.competition, city: listing.location, event_date: listing.event_date, end_date: listing.end_date ?? listing.event_date, listing_count: 0 } : null);
     setForm({
       type: listing.type,
       competition: listing.competition,
       competition_type: listing.competition_type,
       event_date: listing.event_date,
+      race_day: listing.race_day ?? "",
       location: listing.location,
       format: listing.format,
       skill_level: listing.skill_level,
@@ -66,7 +69,7 @@ function EditListing() {
   const mutation = useMutation({
     mutationFn: () => {
       if (!comp) throw new Error("Pick an event or add a new one.");
-      return updateFn({ data: { id, ...form, competition_id: comp.id, competition: comp.name, event_date: comp.event_date, location: comp.city ?? "" } });
+      return updateFn({ data: { id, ...form, competition_id: comp.id, competition: comp.name, event_date: comp.event_date, location: comp.city ?? "", race_day: comp.end_date > comp.event_date ? form.race_day || null : null } });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["listings"] });
@@ -96,20 +99,22 @@ function EditListing() {
           onSubmit={(e) => { e.preventDefault(); if (!comp) { setCompErr("Pick an event or add a new one."); return; } mutation.mutate(); }}
           className="mt-6 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card"
         >
-          <Field label="Listing type">
-            <div className="grid grid-cols-3 gap-2">
+          <Field label="What do you want to do?">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {([
-                ["selling-ticket", "Ticket"],
-                ["need-teammate", "Teammate"],
-                ["join-team", "Join team"],
+                ["selling-ticket", "Pass on my ticket"],
+                ["need-teammate", "Find teammates for my team"],
+                ["join-team", "Join a team"],
               ] as const).map(([v, l]) => (
                 <Button variant="outline" key={v} type="button" onClick={() => setForm((f) => ({ ...f, type: v }))}
-                  className={`rounded-xl border px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition ${form.type === v ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"}`}>
+                  className={`h-auto min-h-12 whitespace-normal rounded-xl border px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition ${form.type === v ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"}`}>
                   {l}
                 </Button>
               ))}
             </div>
           </Field>
+
+          <p className="text-xs text-muted-foreground">Have a team but missing people? Choose Find teammates for my team.</p>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Competition type">
@@ -117,7 +122,7 @@ function EditListing() {
                 value={form.competition_type}
                 onChange={(e) => {
                   const ct = e.target.value;
-                  setForm((f) => ({ ...f, competition_type: ct, competition: "", ...defaultSportValues(ct) }));
+                  setForm((f) => ({ ...f, competition_type: ct, competition: "", race_day: "", ...defaultSportValues(ct) }));
                   setComp(null);
                 }}
                 className={inputCls}
@@ -129,12 +134,18 @@ function EditListing() {
               <CompetitionPicker
                 competitionType={form.competition_type}
                 value={comp}
-                onChange={(c) => { setComp(c); setCompErr(null); }}
+                onChange={(c) => { setComp(c); setCompErr(null); setForm((f) => ({ ...f, race_day: "" })); }}
                 inputClassName={inputCls}
               />
               {compErr && <p className="mt-1 text-xs font-medium text-destructive">{compErr}</p>}
             </Field>
           </div>
+
+          {comp && eventEnd(comp) > comp.event_date && (
+            <Field label="Race day (optional)">
+              <input aria-label="Race day (optional)" type="date" min={comp.event_date} max={eventEnd(comp)} value={form.race_day} onChange={(e) => setForm((f) => ({ ...f, race_day: e.target.value }))} className={inputCls} />
+            </Field>
+          )}
 
           <ListingSportFields sport={form.competition_type} value={form}
             onChange={(values) => setForm((current) => ({ ...current, ...values, gender: values.gender ?? "Open" }))} inputClassName={inputCls} />

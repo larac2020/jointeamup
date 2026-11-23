@@ -23,7 +23,7 @@ const profileSchema = z.object({
   bio: z.string().trim().max(600).optional().or(z.literal("")),
   experience: z.string().trim().max(40).optional().or(z.literal("")),
   gym: z.string().trim().max(80).optional().or(z.literal("")),
-  sports: z.array(z.string()).min(1, "Pick at least one sport"),
+  sports: z.array(z.string()).min(1, "Pick at least one competition"),
 });
 
 const SPORTS = ["HYROX", "HYROX Doubles", "Turf Games", "CrossFit", "DEKA", "Spartan", "Running", "Rowing", "Triathlon"];
@@ -205,7 +205,7 @@ function Onboarding() {
                 checked={notifListings}
                 onChange={setNotifListings}
                 title="Notify me about new listings near me"
-                body="Heads-up when a ticket or team matches your sport."
+                body="Heads-up when a ticket or team matches your competition."
               />
               <Consent
                 icon={Mail}
@@ -227,7 +227,7 @@ function Onboarding() {
 
         {step === 1 && (
           <div className="rounded-3xl border border-border bg-card p-6 shadow-card md:p-8">
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-magenta">Build your sports card</p>
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-magenta">Build your competition card</p>
             <h1 className="mt-2 font-display text-4xl tracking-wide">Your athlete profile</h1>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -278,7 +278,7 @@ function Onboarding() {
             </div>
 
             <div className="mt-5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sports *</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Competitions *</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {SPORTS.map((s) => {
                   const on = sports.includes(s);
@@ -296,7 +296,7 @@ function Onboarding() {
                   );
                 })}
               </div>
-              {showErrors && sports.length === 0 && <p className="mt-2 text-xs font-bold text-destructive">Pick at least one sport</p>}
+              {showErrors && sports.length === 0 && <p className="mt-2 text-xs font-bold text-destructive">Pick at least one competition</p>}
             </div>
 
 

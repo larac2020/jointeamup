@@ -1,0 +1,4 @@
+CREATE FUNCTION public.conversations_listing_before_insert() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NEW.listing_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.listings l WHERE l.id=NEW.listing_id AND l.is_active AND l.expires_on>=CURRENT_DATE) THEN RAISE EXCEPTION 'This listing is no longer open'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER conversations_listing_before_insert BEFORE INSERT ON public.conversations FOR EACH ROW EXECUTE FUNCTION public.conversations_listing_before_insert();
+REVOKE ALL ON FUNCTION public.conversations_listing_before_insert() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.listings_event_dates_before_write() FROM PUBLIC;

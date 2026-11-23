@@ -85,7 +85,7 @@ function Settings() {
           </div>
           <div className="mt-4 space-y-3">
             <Toggle icon={Bell} title="Notify me about new messages" body="In-app notifications when someone replies." checked={notifMessages} onChange={setNotifMessages} />
-            <Toggle icon={Bell} title="Notify me about new listings" body="Heads-up when something matches your sport." checked={notifListings} onChange={setNotifListings} />
+            <Toggle icon={Bell} title="Notify me about new listings" body="Heads-up when something matches your competition." checked={notifListings} onChange={setNotifListings} />
             <Toggle icon={Mail} title="Product news & tips" body="Occasional emails. Never sold." checked={notifMarketing} onChange={setNotifMarketing} />
           </div>
           <button onClick={save} className="mt-6 w-full rounded-2xl bg-warm px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-blaze hover:opacity-95">

@@ -1,3 +1,4 @@
+import { eventDateLabel, shortDate, isExpired as listingIsExpired } from "@/lib/event-dates";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,7 +18,7 @@ const detailQO = (id: string) =>
   });
 
 export const Route = createFileRoute("/listings/$id")({
-  head: () => ({ meta: [{ title: "Competition listing \u2014 TeamUp" }, { name: "description", content: "View an athlete\u2019s competition listing, sport choices and team details on TeamUp." }, { property: "og:title", content: "Competition listing \u2014 TeamUp" }, { property: "og:description", content: "View an athlete\u2019s competition listing, sport choices and team details on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Competition listing \u2014 TeamUp" }, { name: "description", content: "View an athlete\u2019s competition listing, competition choices and team details on TeamUp." }, { property: "og:title", content: "Competition listing \u2014 TeamUp" }, { property: "og:description", content: "View an athlete\u2019s competition listing, competition choices and team details on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(detailQO(params.id)),
   component: ListingDetail,
 });
@@ -78,7 +79,7 @@ function ListingDetail() {
   const author = listing.author;
   const meta = listingTypeMeta[listing.type];
   const isMine = user?.id === listing.author_id;
-  const isExpired = listing.event_date < new Date().toISOString().slice(0, 10);
+  const isExpired = listingIsExpired(listing);
 
   const onMessage = () => {
     if (!session) {
@@ -100,17 +101,18 @@ function ListingDetail() {
             <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur">{meta.label}</span>
             <h1 className="mt-4 font-display text-6xl leading-none tracking-wide">{listing.competition}</h1>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-              <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {listing.event_date}</span>
+              <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {eventDateLabel(listing)}</span>
               <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {listing.location}</span>
               <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {categoryLabel(listing, listing.competition_type)}</span>
             </div>
           </div>
           <div className="p-8">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <Stat label="Sport" value={listing.competition_type} />
+              <Stat label="Competition" value={listing.competition_type} />
               {sportFields(listing.competition_type, listing.format).map((field) => (
                 <Stat key={field.key} label={field.label} value={field.options.find((option) => option.value === listing[field.key])?.label ?? "—"} />
               ))}
+              {listing.race_day && <Stat label="Race day" value={shortDate(listing.race_day)} />}
               <Stat label={spotsLabel(listing.type)} value={String(listing.spots)} />
             </div>
             <h2 className="mt-8 font-display text-2xl tracking-wide">Details</h2>

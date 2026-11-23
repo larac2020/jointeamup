@@ -10,15 +10,15 @@ import { competitionTypes, type Format, type Gender } from "@/lib/types";
 import { sportFields } from "@/lib/listing-sports";
 
 export const Route = createFileRoute("/feed")({
-  head: () => ({ meta: [{ title: "Browse \u2014 TeamUp" }, { name: "description", content: "Browse upcoming competition listings and find athletes by sport, format, division and location." }, { property: "og:title", content: "Browse \u2014 TeamUp" }, { property: "og:description", content: "Browse upcoming competition listings and find athletes by sport, format, division and location." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Browse \u2014 TeamUp" }, { name: "description", content: "Browse upcoming competition listings and find athletes by competition, format, division and location." }, { property: "og:title", content: "Browse \u2014 TeamUp" }, { property: "og:description", content: "Browse upcoming competition listings and find athletes by competition, format, division and location." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Feed,
 });
 
 const shortcuts = [
   { id: "all", label: "All" },
   { id: "selling-ticket", label: "Tickets" },
-  { id: "need-teammate", label: "Need teammate" },
-  { id: "join-team", label: "Join a team" },
+  { id: "need-teammate", label: "Teams recruiting" },
+  { id: "join-team", label: "Looking for a team" },
 ] as const;
 
 type Shortcut = (typeof shortcuts)[number]["id"];
@@ -179,8 +179,8 @@ function Feed() {
 
           {/* Results */}
           <section>
-            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              {listingsQ.isLoading ? "Loading…" : `${listings.length} results`}
+            <p className="mb-3 text-xs font-bold tracking-wider text-muted-foreground">
+              {listingsQ.isLoading ? "Loading…" : `${listings.length} ${listings.length === 1 ? "result" : "results"}`}
             </p>
             <div className="space-y-4">
               {listings.map((l) => <ListingCard key={l.id} listing={l} />)}

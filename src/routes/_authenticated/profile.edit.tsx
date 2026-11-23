@@ -151,7 +151,7 @@ function EditProfile() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!firstName.trim()) { toast.error("First name is required"); return; }
-            if (sports.length === 0) { toast.error("Pick at least one sport"); return; }
+            if (sports.length === 0) { toast.error("Pick at least one competition"); return; }
             mutation.mutate();
           }}
           className="mt-6 space-y-6 rounded-3xl border border-border bg-card p-6 shadow-card md:p-8"
@@ -271,7 +271,7 @@ function EditProfile() {
 
 
 
-          <Group label="Sports *">
+          <Group label="Competitions *">
             <div className="flex flex-wrap gap-2">
               {SPORTS.map((s) => {
                 const on = sports.includes(s);

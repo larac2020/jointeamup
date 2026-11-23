@@ -4,10 +4,11 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createPublicSupabaseClient } from "@/lib/supabase-public.server";
 import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
 
+import { isExpired, validRaceDay } from "@/lib/event-dates";
 import { validSportValues } from "@/lib/listing-sports";
 
 const LISTING_PUBLIC_COLS =
-  "id, author_id, type, competition_id, competition, competition_type, event_date, location, format, gender, skill_level, spots, description, is_active, created_at";
+  "id, author_id, type, competition_id, competition, competition_type, event_date, end_date, race_day, expires_on, location, format, gender, skill_level, spots, description, is_active, created_at";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -36,7 +37,7 @@ export const listListings = createServerFn({ method: "POST" })
       .from("listings")
       .select(LISTING_PUBLIC_COLS)
       .eq("is_active", true)
-      .gte("event_date", today())
+      .gte("expires_on", today())
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 60);
 
@@ -75,7 +76,7 @@ export const getListing = createServerFn({ method: "POST" })
       .select(LISTING_PUBLIC_COLS)
       .eq("id", data.id)
       .eq("is_active", true)
-      .gte("event_date", today())
+      .gte("expires_on", today())
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
@@ -96,7 +97,7 @@ export const listListingsByAuthor = createServerFn({ method: "POST" })
       .select(LISTING_PUBLIC_COLS)
       .eq("author_id", data.author_id)
       .eq("is_active", true)
-      .gte("event_date", today())
+      .gte("expires_on", today())
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return (rows ?? []) as ListingRow[];
@@ -120,6 +121,7 @@ const createSchema = z.object({
   competition: z.string().min(2).max(200),
   competition_type: z.string().min(1).max(60),
   event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  race_day: isoDate.optional().nullable(),
   location: z.string().max(120).optional().default(""),
   format: z.enum(["Individual", "Doubles", "Team", "Relay"]),
   skill_level: z.string().min(1).max(40),
@@ -133,8 +135,8 @@ export const createListing = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    if (!validSportValues(data.competition_type, { ...data, gender: data.gender ?? null })) throw new Error("Choose valid sport-specific fields.");
-    const ev = await resolveCompetition(supabase, data.competition_id, data.competition_type);
+    if (!validSportValues(data.competition_type, { ...data, gender: data.gender ?? null })) throw new Error("Choose valid competition-specific fields.");
+    const ev = await resolveCompetition(supabase, data.competition_id, data.competition_type, data.race_day);
     const { data: row, error } = await supabase
       .from("listings")
       .insert({ ...data, ...ev, author_id: userId, gender: data.gender ?? null })
@@ -164,8 +166,8 @@ export const updateListing = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     await assertNotExpired(context.supabase, id);
-    if (!validSportValues(rest.competition_type, { ...rest, gender: rest.gender ?? null })) throw new Error("Choose valid sport-specific fields.");
-    const ev = await resolveCompetition(context.supabase, rest.competition_id, rest.competition_type);
+    if (!validSportValues(rest.competition_type, { ...rest, gender: rest.gender ?? null })) throw new Error("Choose valid competition-specific fields.");
+    const ev = await resolveCompetition(context.supabase, rest.competition_id, rest.competition_type, rest.race_day);
     const { error } = await context.supabase
       .from("listings")
       .update({ ...rest, ...ev, gender: rest.gender ?? null })
@@ -189,22 +191,24 @@ export const reactivateListing = createServerFn({ method: "POST" })
 
 /** The linked event is the source of truth for name, date and city. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function resolveCompetition(supabase: any, competitionId: string, competitionType: string) {
+async function resolveCompetition(supabase: any, competitionId: string, competitionType: string, raceDay?: string | null) {
   const { data: c } = await supabase
     .from("competitions")
-    .select("id, name, city, event_date, competition_type")
+    .select("id, name, city, event_date, end_date, competition_type")
     .eq("id", competitionId)
     .maybeSingle();
   if (!c) throw new Error("Pick an upcoming event for this listing.");
   if (c.competition_type !== competitionType) throw new Error("The event doesn't match the competition type.");
-  return { competition_id: c.id, competition: c.name, event_date: c.event_date, location: c.city ?? "" };
+  if (!validRaceDay(c, raceDay)) throw new Error("Race day must fall within the event dates.");
+  if (isExpired({ ...c, race_day: raceDay })) throw new Error("Choose an upcoming race day or event.");
+  return { end_date: c.end_date ?? c.event_date, race_day: raceDay || null, competition_id: c.id, competition: c.name, event_date: c.event_date, location: c.city ?? "" };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertNotExpired(supabase: any, id: string) {
-  const { data: row } = await supabase.from("listings").select("event_date").eq("id", id).maybeSingle();
+  const { data: row } = await supabase.from("listings").select("event_date, end_date, race_day").eq("id", id).maybeSingle();
   if (!row) throw new Error("Listing not found");
-  if (row.event_date < today()) throw new Error("Expired listings can't be edited or reactivated.");
+  if (isExpired(row)) throw new Error("Expired listings can't be edited or reactivated.");
 }
 
 /** Owner-only view of a single listing (includes deactivated/expired). */
@@ -235,12 +239,12 @@ export const deleteListing = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error: rErr } = await context.supabase
       .from("listings")
-      .select("id, author_id, is_active, event_date")
+      .select("id, author_id, is_active, event_date, end_date, race_day")
       .eq("id", data.id)
       .maybeSingle();
     if (rErr) throw new Error(rErr.message);
     if (!row || row.author_id !== context.userId) throw new Error("Listing not found");
-    if (row.is_active && row.event_date >= today()) {
+    if (row.is_active && !isExpired(row)) {
       throw new Error("Deactivate this listing before deleting it.");
     }
     const { error } = await context.supabase

@@ -68,6 +68,7 @@ export type Database = {
           competition_type: string
           created_at: string
           created_by: string | null
+          end_date: string | null
           event_date: string
           id: string
           location: string | null
@@ -82,6 +83,7 @@ export type Database = {
           competition_type: string
           created_at?: string
           created_by?: string | null
+          end_date?: string | null
           event_date: string
           id?: string
           location?: string | null
@@ -96,6 +98,7 @@ export type Database = {
           competition_type?: string
           created_at?: string
           created_by?: string | null
+          end_date?: string | null
           event_date?: string
           id?: string
           location?: string | null
@@ -164,12 +167,15 @@ export type Database = {
           competition_type: string
           created_at: string
           description: string
+          end_date: string | null
           event_date: string
+          expires_on: string | null
           format: Database["public"]["Enums"]["format_type"]
           gender: Database["public"]["Enums"]["gender_cat"] | null
           id: string
           is_active: boolean
           location: string
+          race_day: string | null
           skill_level: string
           spots: number
           type: Database["public"]["Enums"]["listing_type"]
@@ -181,12 +187,15 @@ export type Database = {
           competition_type: string
           created_at?: string
           description: string
+          end_date?: string | null
           event_date: string
+          expires_on?: string | null
           format: Database["public"]["Enums"]["format_type"]
           gender?: Database["public"]["Enums"]["gender_cat"] | null
           id?: string
           is_active?: boolean
           location: string
+          race_day?: string | null
           skill_level: string
           spots?: number
           type: Database["public"]["Enums"]["listing_type"]
@@ -198,12 +207,15 @@ export type Database = {
           competition_type?: string
           created_at?: string
           description?: string
+          end_date?: string | null
           event_date?: string
+          expires_on?: string | null
           format?: Database["public"]["Enums"]["format_type"]
           gender?: Database["public"]["Enums"]["gender_cat"] | null
           id?: string
           is_active?: boolean
           location?: string
+          race_day?: string | null
           skill_level?: string
           spots?: number
           type?: Database["public"]["Enums"]["listing_type"]
@@ -434,6 +446,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      match_competition_ranges: {
+        Args: {
+          _city: string
+          _date: string
+          _end_date?: string
+          _name: string
+          _type: string
+        }
+        Returns: {
+          city: string
+          end_date: string
+          event_date: string
+          id: string
+          listing_count: number
+          name: string
+          score: number
+        }[]
+      }
       match_competitions: {
         Args: { _city: string; _date: string; _name: string; _type: string }
         Returns: {
@@ -446,6 +476,17 @@ export type Database = {
         }[]
       }
       normalize_competition_name: { Args: { _name: string }; Returns: string }
+      search_competition_ranges: {
+        Args: { _q?: string; _type: string }
+        Returns: {
+          city: string
+          end_date: string
+          event_date: string
+          id: string
+          listing_count: number
+          name: string
+        }[]
+      }
       search_competitions: {
         Args: { _q?: string; _type: string }
         Returns: {

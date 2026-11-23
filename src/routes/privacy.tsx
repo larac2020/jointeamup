@@ -42,7 +42,7 @@ function Privacy() {
       <UL
         items={[
           "Account data: email address and login credentials, handled by our authentication provider. If you sign in with Google we receive your email, name and profile picture only.",
-          "Profile data you choose to publish: first name, nickname, age, home town and city, sports, gyms, competitions, personal records, experience level, bio, what you're looking for, and up to five photos.",
+          "Profile data you choose to publish: first name, nickname, age, home town and city, competitions, gyms, completed competitions, personal records, experience level, bio, what you're looking for, and up to five photos.",
           "Listings you post: competition, category, date, location, spots and description.",
           "Messages and notifications generated when you contact other athletes.",
           "Consent records: which permissions you granted and when.",

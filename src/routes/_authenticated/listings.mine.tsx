@@ -1,3 +1,4 @@
+import { eventDateLabel, shortDate, isExpired as listingIsExpired } from "@/lib/event-dates";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/_authenticated/listings/mine")({
 type Status = "active" | "expired" | "deactivated";
 function statusOf(l: ListingRow): Status {
   const today = new Date().toISOString().slice(0, 10);
-  if (l.event_date < today) return "expired";
+  if (listingIsExpired(l, today)) return "expired";
   if (!l.is_active) return "deactivated";
   return "active";
 }
@@ -156,9 +157,10 @@ function Row({ listing, status }: { listing: ListingRow; status: Status }) {
           </div>
           <h3 className="mt-2 font-display text-2xl leading-tight tracking-wide">{listing.competition}</h3>
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {listing.event_date}</span>
+            <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {eventDateLabel(listing)}</span>
             <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {listing.location}</span>
             <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {categoryLabel(listing, listing.competition_type)}</span>
+            {listing.race_day && <span>Race day: {shortDate(listing.race_day)}</span>}
             <span>{listing.spots} spot{listing.spots > 1 ? "s" : ""}</span>
           </div>
         </div>

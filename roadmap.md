@@ -5,3 +5,6 @@
 - [x] Replace listing categories with sport-specific fields and migrate existing listings without deletion.
 - [x] Add matching Browse filters and requested Post/Edit copy.
 - [x] Test Turf Games posting, card, detail and filtering; remove test data.
+- [x] Update listing labels and Competition wording; singular Browse results.
+- [x] Add event date ranges and optional race days with server-side expiry and duplicate suggestions.
+- [x] Correct Winter TurfGames type; test multi-day Post/Edit and clean up only test data.
