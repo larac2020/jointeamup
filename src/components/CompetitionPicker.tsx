@@ -18,15 +18,12 @@ type Props = {
   inputClassName?: string;
 };
 
-const fmtDate = (d: string) =>
-  new Date(d + "T00:00:00").toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
-
 function OptionLine({ c }: { c: CompetitionOption }) {
   return (
     <span className="flex min-w-0 flex-col text-left">
       <span className="truncate font-semibold">{c.name}</span>
       <span className="whitespace-normal text-[11px] text-muted-foreground">
-        {[c.city, c.end_date !== c.event_date ? eventDateLabel(c) : fmtDate(c.event_date)].filter(Boolean).join(" · ")} · {c.listing_count} listing{c.listing_count === 1 ? "" : "s"}
+        {[c.city, eventDateLabel(c)].filter(Boolean).join(" · ")} · {c.listing_count} listing{c.listing_count === 1 ? "" : "s"}
       </span>
     </span>
   );
@@ -41,7 +38,7 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
-  const [draft, setDraft] = useState({ name: "", city: "", event_date: "", end_date: "" });
+  const [draft, setDraft] = useState({ name: "", city: "", event_date: "" });
   const [matches, setMatches] = useState<CompetitionOption[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -62,7 +59,7 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
   }, []);
 
   const startCreate = () => {
-    setDraft({ name: search.trim(), city: "", event_date: "", end_date: "" });
+    setDraft({ name: search.trim(), city: "", event_date: "" });
     setMatches(null);
     setErr(null);
     setCreating(true);
@@ -73,7 +70,7 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
     setBusy(true);
     setErr(null);
     try {
-      const row = await createFn({ data: { competition_type: competitionType, ...draft, end_date: draft.end_date || draft.event_date } });
+      const row = await createFn({ data: { competition_type: competitionType, ...draft } });
       qc.invalidateQueries({ queryKey: ["competitions", competitionType] });
       onChange(row);
       setCreating(false);
@@ -93,7 +90,7 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
     setBusy(true);
     setErr(null);
     try {
-      const found = await matchFn({ data: { competition_type: competitionType, ...draft, end_date: draft.end_date || draft.event_date } });
+      const found = await matchFn({ data: { competition_type: competitionType, ...draft } });
       if (found.length) {
         setMatches(found);
         setBusy(false);
@@ -123,10 +120,7 @@ export function CompetitionPicker({ competitionType, value, onChange, inputClass
         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">New {competitionType} event</p>
         <input aria-label="Event name" value={draft.name} onChange={(e) => { setDraft({ ...draft, name: e.target.value }); setMatches(null); }} placeholder="Event name, e.g. HYROX Berlin" className={inputClassName} />
         <input aria-label="Event city" value={draft.city} onChange={(e) => { setDraft({ ...draft, city: e.target.value }); setMatches(null); }} placeholder="City" className={inputClassName} />
-        <div className="grid gap-2 sm:grid-cols-2">
-          <label className="text-xs text-muted-foreground">Start date<input aria-label="Start date" type="date" value={draft.event_date} onChange={(e) => { setDraft({ ...draft, event_date: e.target.value }); setMatches(null); }} className={inputClassName} /></label>
-          <label className="text-xs text-muted-foreground">End date (optional)<input aria-label="End date (optional)" type="date" min={draft.event_date || undefined} value={draft.end_date} onChange={(e) => { setDraft({ ...draft, end_date: e.target.value }); setMatches(null); }} className={inputClassName} /></label>
-        </div>
+        <label className="text-xs text-muted-foreground">Date<input aria-label="Event date" type="date" min={new Date().toISOString().slice(0, 10)} value={draft.event_date} onChange={(e) => { setDraft({ ...draft, event_date: e.target.value }); setMatches(null); }} className={inputClassName} /></label>
 
         {matches && matches.length > 0 && (
           <div className="rounded-lg border border-primary/40 bg-primary/5 p-2">

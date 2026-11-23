@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { eventEnd } from "@/lib/event-dates";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
@@ -13,7 +12,7 @@ import { ListingSportFields } from "@/components/ListingSportFields";
 import { defaultSportValues, spotsLabel } from "@/lib/listing-sports";
 import { Button } from "@/components/ui/button";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
-import type { CompetitionOption } from "@/lib/competitions.functions";
+import { listCompetitions, type CompetitionOption } from "@/lib/competitions.functions";
 
 export const Route = createFileRoute("/_authenticated/listings/$id/edit")({
   head: () => ({ meta: [{ title: "Edit listing — TeamUp" }, { name: "description", content: "Update your TeamUp competition listing." }, { property: "og:title", content: "Edit listing — TeamUp" }, { property: "og:description", content: "Update your TeamUp competition listing." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -26,10 +25,17 @@ function EditListing() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const updateFn = useServerFn(updateListing);
+  const listEventsFn = useServerFn(listCompetitions);
 
   const { data: listing } = useQuery({
     queryKey: ["listings", id],
     queryFn: () => getMyListing({ data: { id } }),
+  });
+
+  const { data: linkedEvents } = useQuery({
+    queryKey: ["competitions", "edit", listing?.competition_type, listing?.competition],
+    queryFn: () => listEventsFn({ data: { competition_type: listing?.competition_type ?? "HYROX", q: listing?.competition ?? "" } }),
+    enabled: !!listing,
   });
 
   const [comp, setComp] = useState<CompetitionOption | null>(null);
@@ -39,7 +45,7 @@ function EditListing() {
     competition: "",
     competition_type: "HYROX",
     event_date: "",
-    race_day: "",
+    competition_date: "",
     location: "",
     format: "Individual" as Format,
     skill_level: "Open" as string,
@@ -50,13 +56,12 @@ function EditListing() {
 
   useEffect(() => {
     if (!listing) return;
-    setComp(listing.competition_id ? { id: listing.competition_id, name: listing.competition, city: listing.location, event_date: listing.event_date, end_date: listing.end_date ?? listing.event_date, listing_count: 0 } : null);
     setForm({
       type: listing.type,
       competition: listing.competition,
       competition_type: listing.competition_type,
       event_date: listing.event_date,
-      race_day: listing.race_day ?? "",
+      competition_date: listing.competition_date || listing.event_date,
       location: listing.location,
       format: listing.format,
       skill_level: listing.skill_level,
@@ -66,13 +71,18 @@ function EditListing() {
     });
   }, [listing]);
 
+  useEffect(() => {
+    if (listing) setComp(linkedEvents?.find((event) => event.id === listing.competition_id) ?? null);
+  }, [listing, linkedEvents]);
+
   const mutation = useMutation({
     mutationFn: () => {
       if (!comp) throw new Error("Pick an event or add a new one.");
-      return updateFn({ data: { id, ...form, competition_id: comp.id, competition: comp.name, event_date: comp.event_date, location: comp.city ?? "", race_day: comp.end_date > comp.event_date ? form.race_day || null : null } });
+      return updateFn({ data: { id, ...form, competition_id: comp.id, competition: comp.name, event_date: form.competition_date, location: comp.city ?? "" } });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["listings"] });
+      qc.invalidateQueries({ queryKey: ["competitions"] });
       toast.success("Listing updated");
       navigate({ to: "/listings/$id", params: { id } });
     },
@@ -122,7 +132,7 @@ function EditListing() {
                 value={form.competition_type}
                 onChange={(e) => {
                   const ct = e.target.value;
-                  setForm((f) => ({ ...f, competition_type: ct, competition: "", race_day: "", ...defaultSportValues(ct) }));
+                  setForm((f) => ({ ...f, competition_type: ct, competition: "", competition_date: "", ...defaultSportValues(ct) }));
                   setComp(null);
                 }}
                 className={inputCls}
@@ -134,18 +144,16 @@ function EditListing() {
               <CompetitionPicker
                 competitionType={form.competition_type}
                 value={comp}
-                onChange={(c) => { setComp(c); setCompErr(null); setForm((f) => ({ ...f, race_day: "" })); }}
+                onChange={(c) => { setComp(c); setCompErr(null); setForm((f) => ({ ...f, competition_date: c?.event_date ?? "" })); }}
                 inputClassName={inputCls}
               />
               {compErr && <p className="mt-1 text-xs font-medium text-destructive">{compErr}</p>}
             </Field>
           </div>
 
-          {comp && eventEnd(comp) > comp.event_date && (
-            <Field label="Race day (optional)">
-              <input aria-label="Race day (optional)" type="date" min={comp.event_date} max={eventEnd(comp)} value={form.race_day} onChange={(e) => setForm((f) => ({ ...f, race_day: e.target.value }))} className={inputCls} />
-            </Field>
-          )}
+          <Field label="Your competition date">
+            <input aria-label="Your competition date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.competition_date} onChange={(e) => setForm((f) => ({ ...f, competition_date: e.target.value }))} className={inputCls} />
+          </Field>
 
           <ListingSportFields sport={form.competition_type} value={form}
             onChange={(values) => setForm((current) => ({ ...current, ...values, gender: values.gender ?? "Open" }))} inputClassName={inputCls} />

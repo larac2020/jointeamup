@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { eventEnd } from "@/lib/event-dates";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
@@ -31,7 +30,7 @@ function NewListing() {
     competition: "",
     competition_type: "HYROX" as string,
     event_date: "",
-    race_day: "",
+    competition_date: "",
     location: "",
     format: "Doubles" as Format,
     skill_level: "Open" as string,
@@ -43,10 +42,11 @@ function NewListing() {
   const mutation = useMutation({
     mutationFn: (data: typeof form) => {
       if (!comp) throw new Error("Pick an event or add a new one.");
-      return createFn({ data: { ...data, competition_id: comp.id, competition: comp.name, event_date: comp.event_date, location: comp.city ?? "", race_day: comp.end_date > comp.event_date ? form.race_day || null : null } });
+      return createFn({ data: { ...data, competition_id: comp.id, competition: comp.name, event_date: form.competition_date, location: comp.city ?? "" } });
     },
     onSuccess: ({ id }) => {
       qc.invalidateQueries({ queryKey: ["listings"] });
+      qc.invalidateQueries({ queryKey: ["competitions"] });
       toast.success("Listing posted");
       navigate({ to: "/listings/$id", params: { id } });
     },
@@ -101,7 +101,7 @@ function NewListing() {
                 value={form.competition_type}
                 onChange={(e) => {
                   const ct = e.target.value;
-                  setForm((f) => ({ ...f, competition_type: ct, competition: "", race_day: "", ...defaultSportValues(ct) }));
+                  setForm((f) => ({ ...f, competition_type: ct, competition: "", competition_date: "", ...defaultSportValues(ct) }));
                   setComp(null);
                 }}
                 className={inputCls}
@@ -113,18 +113,16 @@ function NewListing() {
               <CompetitionPicker
                 competitionType={form.competition_type}
                 value={comp}
-                onChange={(c) => { setComp(c); setCompErr(null); setForm((f) => ({ ...f, race_day: "" })); }}
+                onChange={(c) => { setComp(c); setCompErr(null); setForm((f) => ({ ...f, competition_date: c?.event_date ?? "" })); }}
                 inputClassName={inputCls}
               />
               {compErr && <p className="mt-1 text-xs font-medium text-destructive">{compErr}</p>}
             </Field>
           </div>
 
-          {comp && eventEnd(comp) > comp.event_date && (
-            <Field label="Race day (optional)">
-              <input aria-label="Race day (optional)" type="date" min={comp.event_date} max={eventEnd(comp)} value={form.race_day} onChange={(e) => setForm((f) => ({ ...f, race_day: e.target.value }))} className={inputCls} />
-            </Field>
-          )}
+          <Field label="Your competition date">
+            <input aria-label="Your competition date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.competition_date} onChange={(e) => setForm((f) => ({ ...f, competition_date: e.target.value }))} className={inputCls} />
+          </Field>
 
           <ListingSportFields sport={form.competition_type} value={form}
             onChange={(values) => setForm((current) => ({ ...current, ...values, gender: values.gender ?? "Open" }))} inputClassName={inputCls} />

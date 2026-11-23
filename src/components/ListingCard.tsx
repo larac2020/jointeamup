@@ -1,4 +1,4 @@
-import { eventDateLabel, shortDate, isExpired as listingIsExpired } from "@/lib/event-dates";
+import { competitionDateLabel, isExpired as listingIsExpired } from "@/lib/event-dates";
 import { Link } from "@tanstack/react-router";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { listingTypeMeta, fallbackAvatar, categoryLabel, type ListingWithAuthor } from "@/lib/types";
@@ -28,12 +28,11 @@ export function ListingCard({ listing }: { listing: ListingWithAuthor }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/70 bg-muted/40 px-5 py-3 text-xs font-medium text-foreground/80">
-        <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-primary" /> {eventDateLabel(listing)}</span>
+        <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-primary" /> {competitionDateLabel(listing)}</span>
         <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-primary" /> {listing.location}</span>
         <span className="inline-flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-primary" /> {categoryLabel(listing, listing.competition_type)}</span>
       </div>
 
-      {listing.race_day && <p className="px-5 py-2 text-xs font-medium text-muted-foreground">Race day: {shortDate(listing.race_day)}</p>}
 
       {author && (
         <div className="flex items-center justify-between border-t border-border/70 px-5 py-3">

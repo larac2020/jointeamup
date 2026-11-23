@@ -22,7 +22,8 @@ export type ListingRow = {
   type: ListingType;
   competition: string;
   competition_type: string;
-  event_date: string; // YYYY-MM-DD
+  competition_date: string;
+  event_date: string; // compatibility mirror of competition_date
   end_date: string | null;
   race_day: string | null;
   expires_on?: string;

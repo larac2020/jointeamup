@@ -8,3 +8,6 @@
 - [x] Update listing labels and Competition wording; singular Browse results.
 - [x] Add event date ranges and optional race days with server-side expiry and duplicate suggestions.
 - [x] Correct Winter TurfGames type; test multi-day Post/Edit and clean up only test data.
+
+- [x] Give listings required own dates, derive event ranges, preserve existing dates.
+- [x] Test existing-event date override, new-event duplicate suggestions, range updates and expiry; remove test data.

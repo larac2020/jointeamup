@@ -35,8 +35,7 @@ const newEventSchema = z.object({
   name: z.string().trim().min(2).max(200),
   city: z.string().trim().min(2).max(120),
   event_date: isoDate,
-  end_date: isoDate.optional().nullable(),
-}).refine((data) => !data.end_date || data.end_date >= data.event_date, { message: "End date must be on or after start date." });
+});
 
 /** Likely duplicates: similar name, same city, date within ±7 days. Suggestion only. */
 export const findCompetitionMatches = createServerFn({ method: "POST" })
@@ -48,7 +47,7 @@ export const findCompetitionMatches = createServerFn({ method: "POST" })
       _name: data.name,
       _city: data.city,
       _date: data.event_date,
-      _end_date: data.end_date || data.event_date,
+      _end_date: data.event_date,
     });
     if (error) throw new Error(error.message);
     return (rows ?? []).map((r) => ({
@@ -60,10 +59,10 @@ export const createCompetition = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => newEventSchema.parse(input))
   .handler(async ({ data, context }): Promise<CompetitionOption> => {
-    if ((data.end_date || data.event_date) < today()) throw new Error("The event must end today or later.");
+    if (data.event_date < today()) throw new Error("Choose a date today or later.");
     const { data: row, error } = await context.supabase
       .from("competitions")
-      .insert({ ...data, end_date: data.end_date || data.event_date, created_by: context.userId })
+      .insert({ ...data, end_date: data.event_date, created_by: context.userId })
       .select("id, name, city, event_date, end_date")
       .single();
     if (error) {

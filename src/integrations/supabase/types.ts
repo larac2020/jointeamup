@@ -74,6 +74,7 @@ export type Database = {
           location: string | null
           name: string
           normalized_name: string
+          original_date: string | null
           source_url: string | null
           updated_at: string
           year: number
@@ -89,6 +90,7 @@ export type Database = {
           location?: string | null
           name: string
           normalized_name?: string
+          original_date?: string | null
           source_url?: string | null
           updated_at?: string
           year?: number
@@ -104,6 +106,7 @@ export type Database = {
           location?: string | null
           name?: string
           normalized_name?: string
+          original_date?: string | null
           source_url?: string | null
           updated_at?: string
           year?: number
@@ -163,6 +166,7 @@ export type Database = {
         Row: {
           author_id: string
           competition: string
+          competition_date: string | null
           competition_id: string | null
           competition_type: string
           created_at: string
@@ -183,6 +187,7 @@ export type Database = {
         Insert: {
           author_id: string
           competition: string
+          competition_date?: string | null
           competition_id?: string | null
           competition_type: string
           created_at?: string
@@ -203,6 +208,7 @@ export type Database = {
         Update: {
           author_id?: string
           competition?: string
+          competition_date?: string | null
           competition_id?: string | null
           competition_type?: string
           created_at?: string

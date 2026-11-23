@@ -1,4 +1,4 @@
-import { eventDateLabel, shortDate, isExpired as listingIsExpired } from "@/lib/event-dates";
+import { competitionDateLabel, isExpired as listingIsExpired } from "@/lib/event-dates";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -101,7 +101,7 @@ function ListingDetail() {
             <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur">{meta.label}</span>
             <h1 className="mt-4 font-display text-6xl leading-none tracking-wide">{listing.competition}</h1>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-              <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {eventDateLabel(listing)}</span>
+              <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {competitionDateLabel(listing)}</span>
               <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {listing.location}</span>
               <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {categoryLabel(listing, listing.competition_type)}</span>
             </div>
@@ -112,7 +112,6 @@ function ListingDetail() {
               {sportFields(listing.competition_type, listing.format).map((field) => (
                 <Stat key={field.key} label={field.label} value={field.options.find((option) => option.value === listing[field.key])?.label ?? "—"} />
               ))}
-              {listing.race_day && <Stat label="Race day" value={shortDate(listing.race_day)} />}
               <Stat label={spotsLabel(listing.type)} value={String(listing.spots)} />
             </div>
             <h2 className="mt-8 font-display text-2xl tracking-wide">Details</h2>

@@ -64,6 +64,13 @@
       "when": 1795454764943,
       "tag": "0008_guard_new_conversations_by_listing_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795455893649,
+      "tag": "0009_listing_owned_competition_dates",
+      "breakpoints": true
     }
   ]
 }
