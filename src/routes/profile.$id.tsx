@@ -16,6 +16,7 @@ const profileQO = (id: string) =>
   });
 
 export const Route = createFileRoute("/profile/$id")({
+  head: () => ({ meta: [{ title: "Athlete profile \u2014 TeamUp" }, { name: "description", content: "Explore an athlete\u2019s profile, sports, experience and active competition listings on TeamUp." }, { property: "og:title", content: "Athlete profile \u2014 TeamUp" }, { property: "og:description", content: "Explore an athlete\u2019s profile, sports, experience and active competition listings on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(profileQO(params.id)),
   component: Profile,
 });

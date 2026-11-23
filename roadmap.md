@@ -2,3 +2,6 @@
 - [x] Preserve safe requested destinations after login.
 - [x] Test signed-in refreshes and signed-out redirects.- [x] Remove automatic competition scraping (cron, route, scraper, scraped rows).
 - [x] User-created events with picker, inline create and "Did you mean" duplicate suggestions.
+- [x] Replace listing categories with sport-specific fields and migrate existing listings without deletion.
+- [x] Add matching Browse filters and requested Post/Edit copy.
+- [x] Test Turf Games posting, card, detail and filtering; remove test data.

@@ -6,7 +6,10 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { createListing } from "@/lib/listings.functions";
-import { competitionTypes, type Format, type Gender, getCategories } from "@/lib/types";
+import { competitionTypes, type Format, type Gender } from "@/lib/types";
+import { ListingSportFields } from "@/components/ListingSportFields";
+import { defaultSportValues, spotsLabel } from "@/lib/listing-sports";
+import { Button } from "@/components/ui/button";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 import type { CompetitionOption } from "@/lib/competitions.functions";
 
@@ -36,8 +39,10 @@ function NewListing() {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: typeof form) =>
-      createFn({ data: { ...data, competition_id: comp!.id, competition: comp!.name, event_date: comp!.event_date, location: comp!.city ?? "" } }),
+    mutationFn: (data: typeof form) => {
+      if (!comp) throw new Error("Pick an event or add a new one.");
+      return createFn({ data: { ...data, competition_id: comp.id, competition: comp.name, event_date: comp.event_date, location: comp.city ?? "" } });
+    },
     onSuccess: ({ id }) => {
       qc.invalidateQueries({ queryKey: ["listings"] });
       toast.success("Listing posted");
@@ -71,7 +76,8 @@ function NewListing() {
                 ["need-teammate", "Teammate"],
                 ["join-team", "Join team"],
               ] as const).map(([v, l]) => (
-                <button
+                <Button
+                  variant="outline"
                   key={v}
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, type: v }))}
@@ -80,7 +86,7 @@ function NewListing() {
                   }`}
                 >
                   {l}
-                </button>
+                </Button>
               ))}
             </div>
           </Field>
@@ -91,20 +97,8 @@ function NewListing() {
                 value={form.competition_type}
                 onChange={(e) => {
                   const ct = e.target.value;
-                  const cats = getCategories(ct);
-                  const first = cats[0];
-                  setForm((f) => ({
-                    ...f,
-                    competition_type: ct,
-                    competition: "",
-                  }));
+                  setForm((f) => ({ ...f, competition_type: ct, competition: "", ...defaultSportValues(ct) }));
                   setComp(null);
-                  setForm((f) => ({
-                    ...f,
-                    format: first.format,
-                    gender: first.gender,
-                    skill_level: first.skill_level,
-                  }));
                 }}
                 className={inputCls}
               >
@@ -122,37 +116,23 @@ function NewListing() {
             </Field>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Category">
-              <select
-                value={`${form.format}|${form.gender}|${form.skill_level}`}
-                onChange={(e) => {
-                  const [fmt, gen, lvl] = e.target.value.split("|");
-                  setForm((f) => ({ ...f, format: fmt as any, gender: gen as any, skill_level: lvl }));
-                }}
-                className={inputCls}
-              >
-                {getCategories(form.competition_type).map((c) => (
-                  <option key={c.label} value={`${c.format}|${c.gender}|${c.skill_level}`}>{c.label}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Spots available">
-              <input type="number" min={1} max={20} value={form.spots} onChange={(e) => setForm({ ...form, spots: Number(e.target.value) })} className={inputCls} />
-            </Field>
-          </div>
-
-          <Field label="Description (optional)">
-            <textarea maxLength={2000} rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="A few honest details — level, transfer logistics, what you're looking for." className={inputCls} />
+          <ListingSportFields sport={form.competition_type} value={form}
+            onChange={(values) => setForm((current) => ({ ...current, ...values, gender: values.gender ?? "Open" }))} inputClassName={inputCls} />
+          <Field label={spotsLabel(form.type)}>
+            <input type="number" min={1} max={20} value={form.spots} onChange={(e) => setForm({ ...form, spots: Number(e.target.value) })} className={inputCls} />
           </Field>
 
-          <button
+          <Field label="Other info (optional)">
+            <textarea maxLength={2000} rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="e.g. we train Tuesdays, need a strong runner, team name" className={inputCls} />
+          </Field>
+
+          <Button
             type="submit"
             disabled={mutation.isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground transition hover:opacity-95 disabled:opacity-60"
+            className="h-auto flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground transition hover:opacity-95 disabled:opacity-60"
           >
             {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Post listing
-          </button>
+          </Button>
         </form>
       </main>
     </div>

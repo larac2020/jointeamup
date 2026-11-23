@@ -4,6 +4,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createPublicSupabaseClient } from "@/lib/supabase-public.server";
 import type { AuthorBrief, ListingRow, ListingWithAuthor } from "@/lib/types";
 
+import { validSportValues } from "@/lib/listing-sports";
+
 const LISTING_PUBLIC_COLS =
   "id, author_id, type, competition_id, competition, competition_type, event_date, location, format, gender, skill_level, spots, description, is_active, created_at";
 
@@ -39,7 +41,7 @@ export const listListings = createServerFn({ method: "POST" })
       .limit(data.limit ?? 60);
 
     if (data.type) q = q.eq("type", data.type);
-    if (data.competition_type) q = q.eq("competition_type", data.competition_type);
+    if (data.competition_type) q = q.ilike("competition_type", data.competition_type);
     if (data.format) q = q.eq("format", data.format);
     if (data.skill_level) q = q.eq("skill_level", data.skill_level);
     if (data.gender) q = q.eq("gender", data.gender);
@@ -131,6 +133,7 @@ export const createListing = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => createSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    if (!validSportValues(data.competition_type, { ...data, gender: data.gender ?? null })) throw new Error("Choose valid sport-specific fields.");
     const ev = await resolveCompetition(supabase, data.competition_id, data.competition_type);
     const { data: row, error } = await supabase
       .from("listings")
@@ -161,6 +164,7 @@ export const updateListing = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     await assertNotExpired(context.supabase, id);
+    if (!validSportValues(rest.competition_type, { ...rest, gender: rest.gender ?? null })) throw new Error("Choose valid sport-specific fields.");
     const ev = await resolveCompetition(context.supabase, rest.competition_id, rest.competition_type);
     const { error } = await context.supabase
       .from("listings")

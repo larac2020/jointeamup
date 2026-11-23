@@ -5,10 +5,12 @@ import { ChevronLeft, ChevronRight, Search as SearchIcon, X } from "lucide-react
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
 import { listListings } from "@/lib/listings.functions";
-import { competitionTypes, getCategories } from "@/lib/types";
+import { competitionTypes, type Format, type Gender } from "@/lib/types";
+
+import { sportFields } from "@/lib/listing-sports";
 
 export const Route = createFileRoute("/feed")({
-  head: () => ({ meta: [{ title: "Browse — TeamUp" }] }),
+  head: () => ({ meta: [{ title: "Browse \u2014 TeamUp" }, { name: "description", content: "Browse upcoming competition listings and find athletes by sport, format, division and location." }, { property: "og:title", content: "Browse \u2014 TeamUp" }, { property: "og:description", content: "Browse upcoming competition listings and find athletes by sport, format, division and location." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Feed,
 });
 
@@ -25,7 +27,7 @@ function Feed() {
   const [shortcut, setShortcut] = useState<Shortcut>("all");
   const [query, setQuery] = useState("");
   const [comp, setComp] = useState("");
-  const [category, setCategory] = useState(""); // label from getCategories(comp)
+  const [sportFilters, setSportFilters] = useState({ format: "", gender: "", skill_level: "" });
   const [location, setLocation] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -33,24 +35,19 @@ function Feed() {
 
   const typeFilter = shortcut === "all" ? undefined : shortcut;
 
-  const categoryTuple = useMemo(() => {
-    if (!comp || !category) return null;
-    return getCategories(comp).find((c) => c.label === category) ?? null;
-  }, [comp, category]);
-
   const listingFilters = useMemo(
     () => ({
       query: query || undefined,
       type: typeFilter as any,
       competition_type: comp || undefined,
-      format: (categoryTuple?.format || undefined) as any,
-      skill_level: (categoryTuple?.skill_level || undefined) as any,
-      gender: (categoryTuple?.gender || undefined) as any,
+      format: (sportFilters.format || undefined) as Format | undefined,
+      skill_level: sportFilters.skill_level || undefined,
+      gender: (sportFilters.gender || undefined) as Gender | undefined,
       location: location || undefined,
       date_from: dateFrom || undefined,
       date_to: dateTo || undefined,
     }),
-    [query, typeFilter, comp, categoryTuple, location, dateFrom, dateTo],
+    [query, typeFilter, comp, sportFilters, location, dateFrom, dateTo],
   );
 
   const listingsQ = useQuery({
@@ -59,7 +56,7 @@ function Feed() {
   });
 
   const listings = listingsQ.data ?? [];
-  const activeFilters = [comp, category, location, query, dateFrom, dateTo].filter(Boolean).length;
+  const activeFilters = [comp, ...Object.values(sportFilters), location, query, dateFrom, dateTo].filter(Boolean).length;
 
 
   return (
@@ -130,15 +127,13 @@ function Feed() {
                 />
               </div>
               <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1">
-                <Select label="Competition" value={comp} onChange={(v) => { setComp(v); setCategory(""); }} options={[...competitionTypes]} />
-                {comp && (
-                  <Select
-                    label="Category"
-                    value={category}
-                    onChange={setCategory}
-                    options={getCategories(comp).map((c) => c.label)}
-                  />
-                )}
+                <Select label="Competition" value={comp} onChange={(v) => { setComp(v); setSportFilters({ format: "", gender: "", skill_level: "" }); }} options={[...competitionTypes]} />
+                {comp && sportFields(comp, sportFilters.format).map((field) => (
+                  <Select key={field.key} label={field.label} value={sportFilters[field.key]}
+                    onChange={(value) => setSportFilters((current) => ({ ...current, [field.key]: value,
+                      ...(field.key === "format" && value === "Relay" ? { skill_level: current.skill_level === "Pro" ? "" : current.skill_level } : {}) }))}
+                    options={field.options} />
+                ))}
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Location</label>
                   <input
@@ -173,7 +168,7 @@ function Feed() {
               </div>
               {activeFilters > 0 && (
                 <button
-                  onClick={() => { setQuery(""); setComp(""); setCategory(""); setLocation(""); setDateFrom(""); setDateTo(""); }}
+                  onClick={() => { setQuery(""); setComp(""); setSportFilters({ format: "", gender: "", skill_level: "" }); setLocation(""); setDateFrom(""); setDateTo(""); }}
                   className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                 >
                   <X className="h-3 w-3" /> Clear filters ({activeFilters})
@@ -207,13 +202,13 @@ function EmptyState() {
   );
 }
 
-function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: (string | { value: string; label: string })[] }) {
   return (
     <div>
       <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</label>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40">
+      <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40">
         <option value="">Any</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        {options.map((o) => { const option = typeof o === "string" ? { value: o, label: o } : o; return <option key={option.value} value={option.value}>{option.label}</option>; })}
       </select>
     </div>
   );

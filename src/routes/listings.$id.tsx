@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { getListing, getMyListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
 import { startConversationFromListing } from "@/lib/messages.functions";
 import { listingTypeMeta, fallbackAvatar, categoryLabel } from "@/lib/types";
+import { sportFields, spotsLabel } from "@/lib/listing-sports";
 import { useAuth } from "@/lib/auth";
 
 const detailQO = (id: string) =>
@@ -16,6 +17,7 @@ const detailQO = (id: string) =>
   });
 
 export const Route = createFileRoute("/listings/$id")({
+  head: () => ({ meta: [{ title: "Competition listing \u2014 TeamUp" }, { name: "description", content: "View an athlete\u2019s competition listing, sport choices and team details on TeamUp." }, { property: "og:title", content: "Competition listing \u2014 TeamUp" }, { property: "og:description", content: "View an athlete\u2019s competition listing, sport choices and team details on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(detailQO(params.id)),
   component: ListingDetail,
 });
@@ -104,10 +106,12 @@ function ListingDetail() {
             </div>
           </div>
           <div className="p-8">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Stat label="Sport" value={listing.competition_type} />
-              <Stat label="Category" value={categoryLabel(listing, listing.competition_type)} />
-              <Stat label="Spots" value={String(listing.spots)} />
+              {sportFields(listing.competition_type, listing.format).map((field) => (
+                <Stat key={field.key} label={field.label} value={field.options.find((option) => option.value === listing[field.key])?.label ?? "—"} />
+              ))}
+              <Stat label={spotsLabel(listing.type)} value={String(listing.spots)} />
             </div>
             <h2 className="mt-8 font-display text-2xl tracking-wide">Details</h2>
             {listing.description && <p className="mt-2 text-sm leading-relaxed text-foreground/85">{listing.description}</p>}

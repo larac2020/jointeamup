@@ -7,7 +7,10 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/lib/auth";
 import { getListing, updateListing } from "@/lib/listings.functions";
-import { competitionTypes, type Format, type Gender, getCategories } from "@/lib/types";
+import { competitionTypes, type Format, type Gender } from "@/lib/types";
+import { ListingSportFields } from "@/components/ListingSportFields";
+import { defaultSportValues, spotsLabel } from "@/lib/listing-sports";
+import { Button } from "@/components/ui/button";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 import type { CompetitionOption } from "@/lib/competitions.functions";
 
@@ -61,8 +64,10 @@ function EditListing() {
   }, [listing]);
 
   const mutation = useMutation({
-    mutationFn: () =>
-      updateFn({ data: { id, ...form, competition_id: comp!.id, competition: comp!.name, event_date: comp!.event_date, location: comp!.city ?? "" } }),
+    mutationFn: () => {
+      if (!comp) throw new Error("Pick an event or add a new one.");
+      return updateFn({ data: { id, ...form, competition_id: comp.id, competition: comp.name, event_date: comp.event_date, location: comp.city ?? "" } });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["listings"] });
       toast.success("Listing updated");
@@ -98,10 +103,10 @@ function EditListing() {
                 ["need-teammate", "Teammate"],
                 ["join-team", "Join team"],
               ] as const).map(([v, l]) => (
-                <button key={v} type="button" onClick={() => setForm((f) => ({ ...f, type: v }))}
+                <Button variant="outline" key={v} type="button" onClick={() => setForm((f) => ({ ...f, type: v }))}
                   className={`rounded-xl border px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition ${form.type === v ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:text-foreground"}`}>
                   {l}
-                </button>
+                </Button>
               ))}
             </div>
           </Field>
@@ -112,20 +117,8 @@ function EditListing() {
                 value={form.competition_type}
                 onChange={(e) => {
                   const ct = e.target.value;
-                  const cats = getCategories(ct);
-                  const first = cats[0];
-                  setForm((f) => ({
-                    ...f,
-                    competition_type: ct,
-                    competition: "",
-                  }));
+                  setForm((f) => ({ ...f, competition_type: ct, competition: "", ...defaultSportValues(ct) }));
                   setComp(null);
-                  setForm((f) => ({
-                    ...f,
-                    format: first.format,
-                    gender: first.gender,
-                    skill_level: first.skill_level,
-                  }));
                 }}
                 className={inputCls}
               >
@@ -143,46 +136,19 @@ function EditListing() {
             </Field>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Category">
-              <select
-                value={`${form.format}|${form.gender}|${form.skill_level}`}
-                onChange={(e) => {
-                  const [fmt, gen, lvl] = e.target.value.split("|");
-                  setForm((f) => ({ ...f, format: fmt as any, gender: gen as any, skill_level: lvl }));
-                }}
-                className={inputCls}
-              >
-                {/* Include the current tuple as a fallback so legacy rows preselect cleanly */}
-                {(() => {
-                  const cats = getCategories(form.competition_type);
-                  const currentKey = `${form.format}|${form.gender}|${form.skill_level}`;
-                  const hasCurrent = cats.some((c) => `${c.format}|${c.gender}|${c.skill_level}` === currentKey);
-                  return (
-                    <>
-                      {!hasCurrent && (
-                        <option value={currentKey}>{form.format} · {form.gender} · {form.skill_level} (current)</option>
-                      )}
-                      {cats.map((c) => (
-                        <option key={c.label} value={`${c.format}|${c.gender}|${c.skill_level}`}>{c.label}</option>
-                      ))}
-                    </>
-                  );
-                })()}
-              </select>
-            </Field>
-            <Field label="Spots available">
-              <input type="number" min={1} max={20} value={form.spots} onChange={(e) => setForm({ ...form, spots: Number(e.target.value) })} className={inputCls} />
-            </Field>
-          </div>
-
-          <Field label="Description (optional)">
-            <textarea maxLength={2000} rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inputCls} />
+          <ListingSportFields sport={form.competition_type} value={form}
+            onChange={(values) => setForm((current) => ({ ...current, ...values, gender: values.gender ?? "Open" }))} inputClassName={inputCls} />
+          <Field label={spotsLabel(form.type)}>
+            <input type="number" min={1} max={20} value={form.spots} onChange={(e) => setForm({ ...form, spots: Number(e.target.value) })} className={inputCls} />
           </Field>
 
-          <button type="submit" disabled={mutation.isPending} className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95 disabled:opacity-60">
+          <Field label="Other info (optional)">
+            <textarea placeholder="e.g. we train Tuesdays, need a strong runner, team name" maxLength={2000} rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inputCls} />
+          </Field>
+
+          <Button type="submit" disabled={mutation.isPending} className="h-auto flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-95 disabled:opacity-60">
             {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Save changes
-          </button>
+          </Button>
         </form>
       </main>
     </div>

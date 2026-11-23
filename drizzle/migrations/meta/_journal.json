@@ -36,6 +36,20 @@
       "when": 1794485663550,
       "tag": "0004_allow_empty_listing_description",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795449389768,
+      "tag": "0005_sport_specific_listing_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795449442332,
+      "tag": "0006_validate_sport_specific_listings",
+      "breakpoints": true
     }
   ]
 }

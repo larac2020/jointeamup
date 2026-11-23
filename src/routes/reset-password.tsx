@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Reset password — TeamUp" }] }),
+  head: () => ({ meta: [{ title: "Reset password \u2014 TeamUp" }, { name: "description", content: "Set a new password for your TeamUp athlete account." }, { property: "og:title", content: "Reset password \u2014 TeamUp" }, { property: "og:description", content: "Set a new password for your TeamUp athlete account." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ResetPassword,
 });
 
