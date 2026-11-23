@@ -1,15 +1,25 @@
-import { competitionDateLabel, isExpired as listingIsExpired } from "@/lib/event-dates";
+import { competitionDateLabel, listingExpiry, isExpired as listingIsExpired } from "@/lib/event-dates";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Calendar, MapPin, MessageSquare, Share2, Users, Loader2, Pencil, EyeOff, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
+import { Button } from "@/components/ui/button";
 import { getListing, getMyListing, deactivateListing, reactivateListing } from "@/lib/listings.functions";
 import { startConversationFromListing } from "@/lib/messages.functions";
 import { listingTypeMeta, fallbackAvatar, categoryLabel } from "@/lib/types";
 import { sportFields, spotsLabel } from "@/lib/listing-sports";
 import { useAuth } from "@/lib/auth";
+import type { ListingRow } from "@/lib/types";
+
+const listingPublicUrl = (id: string) => `https://jointeamup.lovable.app/listings/${id}`;
+const listingShareText = (listing: ListingRow) => {
+  const date = new Date(`${listingExpiry(listing)}T00:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric", month: "short", timeZone: "UTC",
+  });
+  return `${listingTypeMeta[listing.type].label} for ${listing.competition}, ${date}${listing.location ? `, ${listing.location}` : ""} on TeamUp`;
+};
 
 const detailQO = (id: string) =>
   queryOptions({
@@ -18,8 +28,22 @@ const detailQO = (id: string) =>
   });
 
 export const Route = createFileRoute("/listings/$id")({
-  head: () => ({ meta: [{ title: "Competition listing \u2014 TeamUp" }, { name: "description", content: "View an athlete\u2019s competition listing, competition choices and team details on TeamUp." }, { property: "og:title", content: "Competition listing \u2014 TeamUp" }, { property: "og:description", content: "View an athlete\u2019s competition listing, competition choices and team details on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(detailQO(params.id)),
+  head: ({ loaderData: listing, params }) => {
+    const title = listing ? `${listing.competition} — ${listingTypeMeta[listing.type].label} — TeamUp` : "Listing not found — TeamUp";
+    const description = listing ? listingShareText(listing) : "This TeamUp listing is no longer available.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:url", content: listingPublicUrl(params.id) },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary" },
+      ],
+    };
+  },
   component: ListingDetail,
 });
 
@@ -81,6 +105,21 @@ function ListingDetail() {
   const isMine = user?.id === listing.author_id;
   const isExpired = listingIsExpired(listing);
 
+  const onShare = async () => {
+    const url = listingPublicUrl(listing.id);
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({ title: listing.competition, text: listingShareText(listing), url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied");
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      toast.error("Couldn't share this listing", { description: "Please try again." });
+    }
+  };
+
   const onMessage = () => {
     if (!session) {
       navigate({ to: "/login" });
@@ -98,7 +137,12 @@ function ListingDetail() {
         </Link>
         <div className="mt-4 overflow-hidden rounded-3xl border border-border bg-card shadow-card">
           <div className="bg-primary p-8 text-primary-foreground">
-            <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur">{meta.label}</span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur">{meta.label}</span>
+              <Button variant="ghost" size="sm" onClick={onShare} className="text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground">
+                <Share2 /> Share
+              </Button>
+            </div>
             <h1 className="mt-4 font-display text-6xl leading-none tracking-wide">{listing.competition}</h1>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
               <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {competitionDateLabel(listing)}</span>
@@ -147,9 +191,6 @@ function ListingDetail() {
                     View full profile →
                   </Link>
                 </div>
-                <button className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-card hover:bg-accent">
-                  <Share2 className="h-4 w-4" />
-                </button>
               </div>
             </div>
           )}
