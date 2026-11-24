@@ -2,12 +2,16 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { Dumbbell, LogOut, MapPin, MessageSquare, Settings, Share2, Skull, Sparkles, Target, Trophy, Zap } from "lucide-react";
 import { useEffect } from "react";
+import { toast } from "sonner";
 import { Header } from "@/components/Header";
+import { Button } from "@/components/ui/button";
 import { ListingCard } from "@/components/ListingCard";
 import { useAuth } from "@/lib/auth";
 import { getProfile } from "@/lib/profiles.functions";
 import { listListingsByAuthor } from "@/lib/listings.functions";
 import { fallbackAvatar } from "@/lib/types";
+
+const profilePublicUrl = (id: string) => `https://jointeamup.lovable.app/profile/${id}`;
 
 const profileQO = (id: string) =>
   queryOptions({
@@ -16,8 +20,24 @@ const profileQO = (id: string) =>
   });
 
 export const Route = createFileRoute("/profile/$id")({
-  head: () => ({ meta: [{ title: "Athlete profile \u2014 TeamUp" }, { name: "description", content: "Explore an athlete\u2019s profile, competitions, experience and active listings on TeamUp." }, { property: "og:title", content: "Athlete profile \u2014 TeamUp" }, { property: "og:description", content: "Explore an athlete\u2019s profile, competitions, experience and active listings on TeamUp." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(profileQO(params.id)),
+  head: ({ loaderData: athlete, params }) => {
+    const title = athlete ? `${athlete.first_name}'s athlete profile — TeamUp` : "Athlete not found — TeamUp";
+    const description = athlete
+      ? `Check out ${athlete.first_name}'s athlete profile on TeamUp${athlete.sports.length ? ` · ${athlete.sports.join(" · ")}` : ""}${athlete.lives_in ? ` · ${athlete.lives_in}` : ""}.`
+      : "This TeamUp athlete profile is no longer available.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:url", content: profilePublicUrl(params.id) },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary" },
+      ],
+    };
+  },
   component: Profile,
 });
 
@@ -52,6 +72,25 @@ function Profile() {
   const avatar = a.avatar_url ?? fallbackAvatar(a.id);
   const myListings = myListingsQ.data ?? [];
   const gallery = [avatar, ...(a.photos ?? [])].slice(0, 5);
+
+  const onShare = async () => {
+    const url = profilePublicUrl(a.id);
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({
+          title: `${a.first_name}${a.nickname ? ` "${a.nickname}"` : ""}`,
+          text: `Check out ${a.first_name}'s athlete profile on TeamUp`,
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied");
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      toast.error("Couldn't share this profile", { description: "Please try again." });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,7 +153,7 @@ function Profile() {
                   </>
                 ) : (
                   <>
-                    <button className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card hover:bg-accent"><Share2 className="h-4 w-4" /></button>
+                    <Button variant="outline" size="icon" onClick={onShare} aria-label="Share profile" title="Share profile" className="h-10 w-10 rounded-full bg-card"><Share2 className="h-4 w-4" /></Button>
                     <Link to="/messages" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
                       <MessageSquare className="h-4 w-4" /> Message
                     </Link>
