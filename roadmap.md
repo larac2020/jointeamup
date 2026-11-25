@@ -12,4 +12,4 @@
 - [x] Give listings required own dates, derive event ranges, preserve existing dates.
 - [x] Test existing-event date override, new-event duplicate suggestions, range updates and expiry; remove test data.
 
-- [ ] Demo videos (motion + generated) as files + hidden unlisted page /demo-video-<token> (noindex)
+- [x] Demo videos (motion + generated) as files + hidden unlisted page /demo-video-<token> (noindex)
