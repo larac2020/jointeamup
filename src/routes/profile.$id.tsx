@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { Dumbbell, LogOut, MapPin, MessageSquare, Settings, Share2, Skull, Sparkles, Target, Trophy, Zap } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ function Profile() {
     enabled: !!a,
   });
   const isMe = user?.id === id;
+  const [activePhoto, setActivePhoto] = useState(0);
 
   useEffect(() => {
     if (!a && isMe) void navigate({ to: "/onboarding", replace: true });
@@ -71,7 +72,8 @@ function Profile() {
 
   const avatar = a.avatar_url ?? fallbackAvatar(a.id);
   const myListings = myListingsQ.data ?? [];
-  const gallery = [avatar, ...(a.photos ?? [])].slice(0, 5);
+  const gallery = [a.avatar_url, ...(a.photos ?? [])].filter((u): u is string => !!u).slice(0, 5);
+  const hasGallery = gallery.length > 0;
 
   const onShare = async () => {
     const url = profilePublicUrl(a.id);
@@ -95,35 +97,53 @@ function Profile() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto max-w-4xl px-4 py-4 md:py-8">
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
           {/* Scrollable photo gallery — main + up to 4 extras */}
-          <div className="relative">
-            <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto p-2 scroll-smooth">
-              {gallery.map((url, i) => (
-                <div key={`${url}-${i}`} className="relative aspect-[4/5] w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl bg-muted sm:w-[48%] md:w-[38%]">
-                  <img src={url} alt={`${a.first_name} photo ${i + 1}`} className="h-full w-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
-                </div>
-              ))}
+          {hasGallery && (
+            <div className="relative">
+              <div
+                className="flex snap-x snap-mandatory gap-2 overflow-x-auto p-2 scroll-smooth"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  const first = el.firstElementChild as HTMLElement | null;
+                  const step = first ? first.offsetWidth + 8 : el.clientWidth;
+                  setActivePhoto(Math.min(gallery.length - 1, Math.round(el.scrollLeft / step)));
+                }}
+              >
+                {gallery.map((url, i) => (
+                  <div key={`${url}-${i}`} className="relative aspect-[4/5] h-[45vh] max-h-[420px] shrink-0 snap-center overflow-hidden rounded-2xl bg-muted">
+                    <img src={url} alt={`${a.first_name} photo ${i + 1}`} className="h-full w-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
+                  </div>
+                ))}
+              </div>
+              {gallery.length > 1 && (
+                <>
+                  <p className="pointer-events-none absolute right-3 top-3 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground backdrop-blur">
+                    Swipe · {gallery.length} photos
+                  </p>
+                  <div className="flex justify-center gap-1.5 pb-1" aria-hidden="true">
+                    {gallery.map((_, i) => (
+                      <span key={i} className={`h-1.5 rounded-full transition-all ${i === activePhoto ? "w-4 bg-foreground" : "w-1.5 bg-muted-foreground/40"}`} />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-            {gallery.length > 1 && (
-              <p className="pointer-events-none absolute right-3 top-3 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground backdrop-blur">
-                Swipe · {gallery.length} photos
-              </p>
-            )}
-          </div>
+          )}
 
           <div className="px-6 pb-6 pt-4 md:px-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex items-start gap-4 md:gap-5">
-                {/* Always-visible account avatar */}
-                <img
-                  src={avatar}
-                  alt={`${a.first_name} avatar`}
-                  className="-mt-16 h-24 w-24 shrink-0 rounded-full object-cover ring-4 ring-background shadow-card md:mt-0 md:h-28 md:w-28"
-                />
+                {!hasGallery && (
+                  <img
+                    src={avatar}
+                    alt={`${a.first_name} avatar`}
+                    className="mt-2 h-24 w-24 shrink-0 rounded-full object-cover ring-4 ring-background shadow-card md:h-28 md:w-28"
+                  />
+                )}
                 <div>
-                  <h1 className="font-display text-5xl leading-none tracking-wide">
+                  <h1 className="font-display text-4xl leading-none tracking-wide md:text-5xl">
                     {a.first_name} {a.age ? <span className="text-muted-foreground">· {a.age}</span> : null}
                   </h1>
                   {a.nickname && <p className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-primary">"{a.nickname}"</p>}
