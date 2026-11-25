@@ -3,7 +3,7 @@ import { ArrowRight, Ticket, Users, Search, HandHeart, Zap, Sparkles } from "luc
 
 
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "TeamUp \u2014 Find Teammates and Pass On Race Spots" }, { name: "description", content: "Connect with athletes for HYROX, Turf Games, DEKA and more. Find teammates or pass on a competition spot." }, { property: "og:title", content: "TeamUp \u2014 Find Teammates and Pass On Race Spots" }, { property: "og:description", content: "Connect with athletes for HYROX, Turf Games, DEKA and more. Find teammates or pass on a competition spot." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "TeamUp \u2014 Find Teammates and Pass On Race Spots" }, { name: "description", content: "Connect with athletes for HYROX, Turf Games, DEKA and more. Find teammates or pass on a competition spot." }, { property: "og:title", content: "TeamUp \u2014 Find Teammates and Pass On Race Spots" }, { property: "og:description", content: "Connect with athletes for HYROX, Turf Games, DEKA and more. Find teammates or pass on a competition spot." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "index, follow" }] }),
   component: Landing,
 });
 

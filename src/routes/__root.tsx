@@ -76,6 +76,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "robots", content: "noindex, follow" },
       { title: "TeamUp | Find Athletes, Replace Teammates & Pass On Race Spots" },
       { name: "description", content: "Find athletes to replace teammates, take over spots, or join competitions like HYROX, Turf Games, and DEKA. Get on the start line even when plans change" },
       { name: "author", content: "TeamUp" },
