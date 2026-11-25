@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import motion from "@/assets/videos/teamup_demo_motion.mp4.asset.json";
+import motion from "@/assets/videos/teamup_demo_motion_v2.mp4.asset.json";
 
 const videos: { title: string; url: string }[] = [
   { title: "Motion graphics", url: motion.url },
