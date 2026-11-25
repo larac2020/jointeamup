@@ -1,4 +1,5 @@
 import { competitionDateLabel, isExpired as listingIsExpired } from "@/lib/event-dates";
+import { postedTime } from "@/lib/posted-time";
 import { Link } from "@tanstack/react-router";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { listingTypeMeta, fallbackAvatar, categoryLabel, type ListingWithAuthor } from "@/lib/types";
@@ -18,7 +19,7 @@ export function ListingCard({ listing }: { listing: ListingWithAuthor }) {
           {meta.label}
         </span>
         <span className="text-xs font-medium text-muted-foreground">
-          {new Date(listing.created_at).toLocaleDateString()}
+          {postedTime(listing.created_at)}
         </span>
       </div>
 

@@ -1,4 +1,5 @@
 import { competitionDateLabel, isExpired as listingIsExpired } from "@/lib/event-dates";
+import { postedTime } from "@/lib/posted-time";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -155,6 +156,7 @@ function Row({ listing, status }: { listing: ListingRow; status: Status }) {
               {meta.label}
             </span>
             {statusChip}
+            <span className="ml-auto text-xs font-medium text-muted-foreground">{postedTime(listing.created_at)}</span>
           </div>
           <h3 className="mt-2 font-display text-2xl leading-tight tracking-wide">{listing.competition}</h3>
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">

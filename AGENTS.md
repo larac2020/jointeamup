@@ -6,3 +6,4 @@
 - Define sport-specific listing choices in the browser-safe listing-sports module for forms, labels, filters, and server validation; store Singles/Individual as Individual and Doubles/Pairs as Doubles to preserve the existing enum and live data compatibility.
 
 - Keep listing-owned competition dates and expiry in event-dates, mirrored by database constraints/triggers and expires_on; derive event ranges from original_date plus all linked listing dates so individual dates never inherit a shared schedule.
+- Keep posting-time formatting in the browser-safe posted-time module so listing cards, owner rows and detail use the same calendar-day thresholds.

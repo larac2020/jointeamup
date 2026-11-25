@@ -1,4 +1,5 @@
 import { competitionDateLabel, listingExpiry, isExpired as listingIsExpired } from "@/lib/event-dates";
+import { postedTime } from "@/lib/posted-time";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -143,6 +144,7 @@ function ListingDetail() {
                 <Share2 /> Share
               </Button>
             </div>
+            <p className="mt-2 text-right text-xs font-medium text-primary-foreground/70">{postedTime(listing.created_at)}</p>
             <h1 className="mt-4 font-display text-6xl leading-none tracking-wide">{listing.competition}</h1>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
               <span className="inline-flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {competitionDateLabel(listing)}</span>
