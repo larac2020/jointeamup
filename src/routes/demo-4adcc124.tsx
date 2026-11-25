@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import motion from "@/assets/videos/teamup_demo_motion.mp4.asset.json";
-import scenes from "@/assets/videos/teamup_demo_scenes.mp4.asset.json";
 
 const videos: { title: string; url: string }[] = [
   { title: "Motion graphics", url: motion.url },
-  { title: "Generated scenes", url: scenes.url },
 ];
 
 export const Route = createFileRoute("/demo-4adcc124")({
