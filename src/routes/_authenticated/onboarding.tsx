@@ -6,6 +6,7 @@ import { Check, MessageSquare, Bell, Mail, Sparkles, ShieldCheck, Zap } from "lu
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { safeLoginReturnPath } from "@/lib/auth-redirect";
+import { DirectoryPrompt } from "@/components/DirectoryPrompt";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   validateSearch: z.object({ redirect: z.unknown().optional().transform(safeLoginReturnPath) }),
@@ -34,6 +35,8 @@ function Onboarding() {
   const { session, profile, consents, refresh, loading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [askDirectory, setAskDirectory] = useState(false);
+  const finish = () => void navigate({ href: returnPath === "/onboarding" ? "/feed" : returnPath ?? "/feed", replace: true });
 
   // Step 1: consents
   const [terms, setTerms] = useState(false);
@@ -139,8 +142,14 @@ function Onboarding() {
     if (error) { toast.error(error.message); return; }
     await refresh();
     toast.success("Welcome to TeamUp 🔥");
-    void navigate({ href: returnPath === "/onboarding" ? "/feed" : returnPath ?? "/feed", replace: true });
+    if (profile?.directory_prompted) finish(); else setAskDirectory(true);
   };
+
+  if (askDirectory) return (
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-md px-4 py-16"><DirectoryPrompt onDone={finish} /></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">

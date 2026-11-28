@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AthletesRouteImport } from './routes/athletes'
 import { Route as Demo4adcc124RouteImport } from './routes/demo-4adcc124'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as LoginRouteImport } from './routes/login'
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AthletesRoute = AthletesRouteImport.update({
+  id: '/athletes',
+  path: '/athletes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Demo4adcc124Route = Demo4adcc124RouteImport.update({
@@ -125,6 +131,7 @@ const AuthenticatedListingsIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/athletes': typeof AthletesRoute
   '/demo-4adcc124': typeof Demo4adcc124Route
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/athletes': typeof AthletesRoute
   '/demo-4adcc124': typeof Demo4adcc124Route
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/athletes': typeof AthletesRoute
   '/demo-4adcc124': typeof Demo4adcc124Route
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/athletes'
     | '/demo-4adcc124'
     | '/feed'
     | '/login'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/athletes'
     | '/demo-4adcc124'
     | '/feed'
     | '/login'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/athletes'
     | '/demo-4adcc124'
     | '/feed'
     | '/login'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AthletesRoute: typeof AthletesRoute
   Demo4adcc124Route: typeof Demo4adcc124Route
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
@@ -270,6 +283,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/athletes': {
+      id: '/athletes'
+      path: '/athletes'
+      fullPath: '/athletes'
+      preLoaderRoute: typeof AthletesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo-4adcc124': {
@@ -415,6 +435,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AthletesRoute: AthletesRoute,
   Demo4adcc124Route: Demo4adcc124Route,
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,

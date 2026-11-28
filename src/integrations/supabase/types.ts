@@ -339,10 +339,14 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          available_for: string | null
           avatar_url: string | null
           bio: string | null
+          compete_category: string | null
           competitions: string[]
           created_at: string
+          directory_prompted: boolean
+          divisions: string[]
           experience: string | null
           first_name: string
           from_location: string | null
@@ -353,18 +357,26 @@ export type Database = {
           looking_for: string | null
           nickname: string | null
           onboarded: boolean
+          open_formats: string[]
           photos: string[]
           prs: Json
+          show_in_directory: boolean
           sports: string[]
+          strengths: string[]
           superpower: string | null
+          travel: string | null
           updated_at: string
         }
         Insert: {
           age?: number | null
+          available_for?: string | null
           avatar_url?: string | null
           bio?: string | null
+          compete_category?: string | null
           competitions?: string[]
           created_at?: string
+          directory_prompted?: boolean
+          divisions?: string[]
           experience?: string | null
           first_name: string
           from_location?: string | null
@@ -375,18 +387,26 @@ export type Database = {
           looking_for?: string | null
           nickname?: string | null
           onboarded?: boolean
+          open_formats?: string[]
           photos?: string[]
           prs?: Json
+          show_in_directory?: boolean
           sports?: string[]
+          strengths?: string[]
           superpower?: string | null
+          travel?: string | null
           updated_at?: string
         }
         Update: {
           age?: number | null
+          available_for?: string | null
           avatar_url?: string | null
           bio?: string | null
+          compete_category?: string | null
           competitions?: string[]
           created_at?: string
+          directory_prompted?: boolean
+          divisions?: string[]
           experience?: string | null
           first_name?: string
           from_location?: string | null
@@ -397,10 +417,14 @@ export type Database = {
           looking_for?: string | null
           nickname?: string | null
           onboarded?: boolean
+          open_formats?: string[]
           photos?: string[]
           prs?: Json
+          show_in_directory?: boolean
           sports?: string[]
+          strengths?: string[]
           superpower?: string | null
+          travel?: string | null
           updated_at?: string
         }
         Relationships: []

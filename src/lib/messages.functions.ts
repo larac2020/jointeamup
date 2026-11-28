@@ -167,6 +167,26 @@ export const startConversationFromListing = createServerFn({ method: "POST" })
     return { conversation_id: inserted.id as string };
   });
 
+/** Message an athlete directly from their profile or the directory (no listing attached). */
+export const startDirectConversation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ other_id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (data.other_id === userId) throw new Error("You can't message yourself.");
+    const { data: other } = await supabase.from("profiles").select("id").eq("id", data.other_id).maybeSingle();
+    if (!other) throw new Error("Athlete not found");
+    const a = userId < data.other_id ? userId : data.other_id;
+    const b = userId < data.other_id ? data.other_id : userId;
+    const { data: existing } = await supabase.from("conversations").select("id")
+      .eq("user_a", a).eq("user_b", b).is("listing_id", null).limit(1).maybeSingle();
+    if (existing) return { conversation_id: existing.id as string };
+    const { data: inserted, error } = await supabase.from("conversations")
+      .insert({ user_a: a, user_b: b, listing_id: null }).select("id").single();
+    if (error) throw new Error(error.message);
+    return { conversation_id: inserted.id as string };
+  });
+
 export const unreadMessageCount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<number> => {

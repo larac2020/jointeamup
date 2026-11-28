@@ -71,6 +71,13 @@
       "when": 1795455893649,
       "tag": "0009_listing_owned_competition_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795881046825,
+      "tag": "0010_athlete_directory",
+      "breakpoints": true
     }
   ]
 }

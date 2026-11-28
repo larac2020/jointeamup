@@ -35,6 +35,14 @@ export type Profile = {
   looking_for: string | null;
   photos: string[];
   onboarded: boolean;
+  show_in_directory: boolean;
+  directory_prompted: boolean;
+  open_formats: string[];
+  compete_category: string | null;
+  divisions: string[];
+  travel: string | null;
+  strengths: string[];
+  available_for: string | null;
 };
 
 type AuthCtx = {

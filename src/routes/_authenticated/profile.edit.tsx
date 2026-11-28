@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { updateProfile } from "@/lib/profiles.functions";
 import { experienceLevels, prPresets } from "@/lib/types";
+import { ALL_DIVISIONS, AVAILABLE_FOR_MAX, COMPETE_CATEGORIES, OPEN_FORMATS, STRENGTHS, TRAVEL_OPTIONS } from "@/lib/athlete-directory";
 import { ImageCropperModal } from "@/components/ImageCropperModal";
 import { fileToDataUrl } from "@/lib/image-utils";
 
@@ -52,6 +53,13 @@ function EditProfile() {
   const [experience, setExperience] = useState("");
   const [lookingFor, setLookingFor] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [showInDirectory, setShowInDirectory] = useState(false);
+  const [openFormats, setOpenFormats] = useState<string[]>([]);
+  const [category, setCategory] = useState("");
+  const [divisions, setDivisions] = useState<string[]>([]);
+  const [travel, setTravel] = useState("");
+  const [strengths, setStrengths] = useState<string[]>([]);
+  const [availableFor, setAvailableFor] = useState("");
 
   const pickFile = async (file: File, target: "avatar" | "photo") => {
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image"); return; }
@@ -103,6 +111,13 @@ function EditProfile() {
     setExperience(profile.experience ?? "");
     setLookingFor(profile.looking_for ?? "");
     setPhotos(profile.photos ?? []);
+    setShowInDirectory(!!profile.show_in_directory);
+    setOpenFormats(profile.open_formats ?? []);
+    setCategory(profile.compete_category ?? "");
+    setDivisions(profile.divisions ?? []);
+    setTravel(profile.travel ?? "");
+    setStrengths(profile.strengths ?? []);
+    setAvailableFor(profile.available_for ?? "");
   }, [profile]);
 
   const mutation = useMutation({
@@ -125,6 +140,13 @@ function EditProfile() {
           experience: experience.trim() || null,
           looking_for: lookingFor.trim() || null,
           photos,
+          show_in_directory: showInDirectory,
+          open_formats: openFormats as (typeof OPEN_FORMATS)[number][],
+          compete_category: (category || null) as "Men" | "Women" | null,
+          divisions: divisions as (typeof ALL_DIVISIONS)[number][],
+          travel: (travel || null) as (typeof TRAVEL_OPTIONS)[number] | null,
+          strengths: strengths as (typeof STRENGTHS)[number][],
+          available_for: availableFor.trim() || null,
           onboarded: true,
         },
       }),
@@ -291,6 +313,29 @@ function EditProfile() {
             </div>
           </Group>
 
+          <div className="space-y-5 rounded-2xl border border-border bg-background p-4">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input type="checkbox" checked={showInDirectory} onChange={(e) => setShowInDirectory(e.target.checked)} className="mt-1 h-4 w-4 accent-primary" aria-label="Show me in Find athletes" />
+              <span>
+                <span className="block text-sm font-bold">Show me in Find athletes</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">Teams looking for teammates can find you and message you.</span>
+              </span>
+            </label>
+            <Group label="Formats I'm open to"><Chips options={[...OPEN_FORMATS]} value={openFormats} onChange={setOpenFormats} /></Group>
+            <Group label="Category I compete in">
+              <Chips options={COMPETE_CATEGORIES.map((c) => c.value)} labels={{ Men: "Men's", Women: "Women's" }} value={category ? [category] : []} onChange={(v) => setCategory(v.filter((x) => x !== category)[0] ?? "")} />
+            </Group>
+            <Group label="Level / division">
+              <p className="mb-1.5 text-[10px] text-muted-foreground">Turf Games: Everyday, Intermediate, Elite · HYROX: Open, Pro</p>
+              <Chips options={[...ALL_DIVISIONS]} value={divisions} onChange={setDivisions} />
+            </Group>
+            <Group label="Willing to travel">
+              <Chips options={[...TRAVEL_OPTIONS]} value={travel ? [travel] : []} onChange={(v) => setTravel(v.filter((x) => x !== travel)[0] ?? "")} />
+            </Group>
+            <Group label="Strengths"><Chips options={[...STRENGTHS]} value={strengths} onChange={setStrengths} /></Group>
+            <Field label={`Available for (${availableFor.length}/${AVAILABLE_FOR_MAX})`} value={availableFor} onChange={(v) => setAvailableFor(v.slice(0, AVAILABLE_FOR_MAX))} placeholder="Spring 2027, weekends only…" />
+          </div>
+
           <Group label="Gyms">
             <TagList items={gyms} onRemove={(i) => setGyms(gyms.filter((_, idx) => idx !== i))} />
             <AddRow
@@ -391,6 +436,22 @@ function Field({ label, value, onChange, placeholder, type = "text" }: { label: 
         placeholder={placeholder}
         className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 ring-ring/40"
       />
+    </div>
+  );
+}
+
+function Chips({ options, value, onChange, labels }: { options: string[]; value: string[]; onChange: (v: string[]) => void; labels?: Record<string, string> }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const on = value.includes(o);
+        return (
+          <button key={o} type="button" aria-pressed={on} onClick={() => onChange(on ? value.filter((x) => x !== o) : [...value, o])}
+            className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${on ? "bg-cool text-primary-foreground shadow-sm" : "border border-border bg-background text-muted-foreground hover:text-foreground"}`}>
+            {labels?.[o] ?? o}
+          </button>
+        );
+      })}
     </div>
   );
 }

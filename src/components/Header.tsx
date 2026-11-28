@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,14 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { unreadMessageCount } from "@/lib/messages.functions";
 import { unreadNotificationCount } from "@/lib/notifications.functions";
 
-const navItems = [
-  { to: "/feed", label: "Browse" },
-] as const;
 
 
 export function Header() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchActive = pathname === "/feed" || pathname === "/athletes";
   const qc = useQueryClient();
   const unreadMsgFn = useServerFn(unreadMessageCount);
   const unreadNotifFn = useServerFn(unreadNotificationCount);
@@ -74,16 +73,12 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((n) => (
-            <Link
-              key={n.to}
-              to={n.to}
-              className="rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground transition hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "bg-accent text-foreground" }}
-            >
-              {n.label}
-            </Link>
-          ))}
+          <Link
+            to="/feed"
+            className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-wider transition hover:bg-accent hover:text-foreground ${searchActive ? "bg-accent text-foreground" : "text-muted-foreground"}`}
+          >
+            Search
+          </Link>
           {user && (
             <Link
               to="/listings/mine"

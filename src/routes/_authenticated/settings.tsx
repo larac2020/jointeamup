@@ -2,10 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ShieldCheck, Bell, Mail, Trash2, Download, FileText } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Bell, Mail, Trash2, Download, FileText, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { exportMyData, deleteMyAccount } from "@/lib/gdpr.functions";
+import { setDirectoryVisibility } from "@/lib/profiles.functions";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — TeamUp" }, { name: "description", content: "Manage your TeamUp account and privacy preferences." }, { property: "og:title", content: "Settings — TeamUp" }, { property: "og:description", content: "Manage your TeamUp account and privacy preferences." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -13,7 +15,19 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 function Settings() {
-  const { session, consents, refresh, signOut } = useAuth();
+  const { session, consents, profile, refresh, signOut } = useAuth();
+  const qc = useQueryClient();
+  const setDirFn = useServerFn(setDirectoryVisibility);
+  const toggleDirectory = async (visible: boolean) => {
+    try {
+      await setDirFn({ data: { visible } });
+      await refresh();
+      qc.invalidateQueries({ queryKey: ["athletes"] });
+      toast.success(visible ? "You're now in Find athletes" : "Hidden from Find athletes");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't save");
+    }
+  };
   const navigate = useNavigate();
   const runExport = useServerFn(exportMyData);
   const runDelete = useServerFn(deleteMyAccount);
@@ -77,6 +91,13 @@ function Settings() {
         </Link>
 
         <h1 className="mt-3 font-display text-5xl tracking-wide">Settings</h1>
+
+        <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-card">
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">Find athletes</p>
+          <div className="mt-3">
+            <Toggle icon={Users} title="Show me in Find athletes" body="Teams looking for teammates can find you and message you." checked={!!profile?.show_in_directory} onChange={toggleDirectory} />
+          </div>
+        </section>
 
         <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-card">
           <div className="flex items-center gap-2 text-magenta">

@@ -4,13 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Search as SearchIcon, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ListingCard } from "@/components/ListingCard";
+import { SearchTabs } from "@/components/SearchTabs";
 import { listListings } from "@/lib/listings.functions";
 import { competitionTypes, type Format, type Gender } from "@/lib/types";
 
 import { sportFields } from "@/lib/listing-sports";
 
 export const Route = createFileRoute("/feed")({
-  head: () => ({ meta: [{ title: "Browse \u2014 TeamUp" }, { name: "description", content: "Browse upcoming competition listings and find athletes by competition, format, division and location." }, { property: "og:title", content: "Browse \u2014 TeamUp" }, { property: "og:description", content: "Browse upcoming competition listings and find athletes by competition, format, division and location." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Search competitions \u2014 TeamUp" }, { name: "description", content: "Browse upcoming competition listings and find athletes by competition, format, division and location." }, { property: "og:title", content: "Search competitions \u2014 TeamUp" }, { property: "og:description", content: "Browse upcoming competition listings and find athletes by competition, format, division and location." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Feed,
 });
 
@@ -65,8 +66,9 @@ function Feed() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-primary">Browse</p>
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-primary">Search</p>
             <h1 className="mt-1 font-display text-5xl tracking-wide">What's open</h1>
+            <div className="mt-5"><SearchTabs active="competitions" /></div>
           </div>
         </div>
 

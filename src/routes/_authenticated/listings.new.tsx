@@ -10,6 +10,8 @@ import { competitionTypes, type Format, type Gender } from "@/lib/types";
 import { ListingSportFields } from "@/components/ListingSportFields";
 import { defaultSportValues, spotsLabel } from "@/lib/listing-sports";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+import { DirectoryPromptOverlay } from "@/components/DirectoryPrompt";
 import { CompetitionPicker } from "@/components/CompetitionPicker";
 import type { CompetitionOption } from "@/lib/competitions.functions";
 
@@ -22,6 +24,8 @@ function NewListing() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const createFn = useServerFn(createListing);
+  const { profile } = useAuth();
+  const [promptFor, setPromptFor] = useState<string | null>(null);
 
   const [comp, setComp] = useState<CompetitionOption | null>(null);
   const [compErr, setCompErr] = useState<string | null>(null);
@@ -48,13 +52,15 @@ function NewListing() {
       qc.invalidateQueries({ queryKey: ["listings"] });
       qc.invalidateQueries({ queryKey: ["competitions"] });
       toast.success("Listing posted");
-      navigate({ to: "/listings/$id", params: { id } });
+      if (form.type === "join-team" && profile && !profile.directory_prompted && !profile.show_in_directory) setPromptFor(id);
+      else navigate({ to: "/listings/$id", params: { id } });
     },
     onError: (e: any) => toast.error("Couldn't post listing", { description: e?.message }),
   });
 
   return (
     <div className="min-h-screen bg-background">
+      {promptFor && <DirectoryPromptOverlay onDone={() => navigate({ to: "/listings/$id", params: { id: promptFor } })} />}
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-8">
         <Link to="/feed" className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">

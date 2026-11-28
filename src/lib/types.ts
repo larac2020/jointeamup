@@ -51,6 +51,13 @@ export type ProfilePublic = AuthorBrief & {
   experience: string | null;
   looking_for: string | null;
   photos: string[];
+  show_in_directory: boolean;
+  open_formats: string[];
+  compete_category: string | null;
+  divisions: string[];
+  travel: string | null;
+  strengths: string[];
+  available_for: string | null;
 };
 
 export const experienceLevels = ["Beginner", "Intermediate", "Advanced", "Elite", "Pro"] as const;

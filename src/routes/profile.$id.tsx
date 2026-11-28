@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth";
 import { getProfile } from "@/lib/profiles.functions";
 import { listListingsByAuthor } from "@/lib/listings.functions";
 import { fallbackAvatar } from "@/lib/types";
+import { categoryText } from "@/lib/athlete-directory";
+import { useMessageAthlete } from "@/hooks/use-message-athlete";
 
 const profilePublicUrl = (id: string) => `https://jointeamup.lovable.app/profile/${id}`;
 
@@ -53,6 +55,7 @@ function Profile() {
   });
   const isMe = user?.id === id;
   const [activePhoto, setActivePhoto] = useState(0);
+  const { message, pending: messagePending } = useMessageAthlete();
 
   useEffect(() => {
     if (!a && isMe) void navigate({ to: "/onboarding", replace: true });
@@ -174,9 +177,9 @@ function Profile() {
                 ) : (
                   <>
                     <Button variant="outline" size="icon" onClick={onShare} aria-label="Share profile" title="Share profile" className="h-10 w-10 rounded-full bg-card"><Share2 className="h-4 w-4" /></Button>
-                    <Link to="/messages" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
+                    <button onClick={() => message(a.id)} disabled={messagePending} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-primary-foreground disabled:opacity-60">
                       <MessageSquare className="h-4 w-4" /> Message
-                    </Link>
+                    </button>
                   </>
                 )}
               </div>
@@ -200,6 +203,22 @@ function Profile() {
                   <Target className="h-3.5 w-3.5" /> Looking for
                 </p>
                 <p className="mt-1 text-sm">{a.looking_for}</p>
+              </div>
+            )}
+
+            {a.show_in_directory && (a.open_formats.length > 0 || a.compete_category || a.divisions.length > 0 || a.travel || a.strengths.length > 0 || a.available_for) && (
+              <div className="mt-6 rounded-2xl border border-primary/30 bg-accent/40 p-4">
+                <p className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  <Target className="h-3.5 w-3.5" /> Looking to team up
+                </p>
+                <dl className="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                  {a.open_formats.length > 0 && <TeamUpRow label="Formats" value={a.open_formats.join(", ")} />}
+                  {a.compete_category && <TeamUpRow label="Category" value={categoryText(a.compete_category) ?? ""} />}
+                  {a.divisions.length > 0 && <TeamUpRow label="Level / division" value={a.divisions.join(", ")} />}
+                  {a.travel && <TeamUpRow label="Willing to travel" value={a.travel} />}
+                  {a.strengths.length > 0 && <TeamUpRow label="Strengths" value={a.strengths.join(", ")} />}
+                  {a.available_for && <TeamUpRow label="Available for" value={a.available_for} />}
+                </dl>
               </div>
             )}
 
@@ -265,6 +284,15 @@ function Profile() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function TeamUpRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</dt>
+      <dd className="font-semibold">{value}</dd>
     </div>
   );
 }
