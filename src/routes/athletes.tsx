@@ -1,4 +1,4 @@
-import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -22,11 +22,9 @@ const searchSchema = z.object({
   strengths: fallback(z.string().array(), []).default([]),
 });
 type Filters = z.infer<typeof searchSchema>;
-const EMPTY: Filters = { q: "", competition: "", format: "", category: "", division: "", location: "", travel: "", strengths: [] };
 
 export const Route = createFileRoute("/athletes")({
   validateSearch: zodValidator(searchSchema),
-  search: { middlewares: [stripSearchParams(EMPTY)] },
   head: () => ({ meta: [{ title: "Find athletes — TeamUp" }, { name: "description", content: "Find athletes open to teaming up for HYROX, Turf Games, DEKA, CrossFit and more." }, { property: "og:title", content: "Find athletes — TeamUp" }, { property: "og:description", content: "Find athletes open to teaming up for HYROX, Turf Games, DEKA, CrossFit and more." }, { property: "og:url", content: "https://jointeamup.lovable.app/athletes" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Athletes,
 });
@@ -38,7 +36,11 @@ function Athletes() {
   const navigate = useNavigate({ from: "/athletes" });
   const { user } = useAuth();
   const { message, pending } = useMessageAthlete();
-  const set = (patch: Partial<Filters>) => void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
+  // Keep shareable URLs short: drop filters left on "Any".
+  const set = (patch: Partial<Filters>) => void navigate({
+    search: (prev) => Object.fromEntries(Object.entries({ ...prev, ...patch }).filter(([, v]) => Array.isArray(v) ? v.length > 0 : !!v)) as Partial<Filters>,
+    replace: true,
+  });
 
   const div = divisionOptions(s.competition);
   const filters = {
@@ -93,7 +95,7 @@ function Athletes() {
               </div>
             </div>
             {active > 0 && (
-              <button onClick={() => void navigate({ search: EMPTY, replace: true })} className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+              <button onClick={() => void navigate({ search: {}, replace: true })} className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                 <X className="h-3 w-3" /> Clear filters ({active})
               </button>
             )}

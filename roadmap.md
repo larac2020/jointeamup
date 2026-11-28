@@ -13,3 +13,5 @@
 - [x] Test existing-event date override, new-event duplicate suggestions, range updates and expiry; remove test data.
 
 - [x] Demo videos (motion + generated) as files + hidden unlisted page /demo-video-<token> (noindex)
+
+- [x] Find athletes: opt-in toggle, team-up profile fields, Search tabs (/feed, /athletes), direct messaging, one-time prompts; tested and test data removed.

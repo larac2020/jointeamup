@@ -8,3 +8,4 @@
 - Keep listing-owned competition dates and expiry in event-dates, mirrored by database constraints/triggers and expires_on; derive event ranges from original_date plus all linked listing dates so individual dates never inherit a shared schedule.
 - Keep posting-time formatting in the browser-safe posted-time module so listing cards, owner rows and detail use the same calendar-day thresholds.
 - Search indexing: only the home route sets robots "index, follow"; __root defaults every other route to "noindex, follow" so new pages stay out of search by default.
+- Athlete directory choices and division rules live in the browser-safe athlete-directory module; the directory server function always filters to onboarded, opted-in profiles and getProfile blanks team-up fields when opted out, so visibility is enforced server-side.
